@@ -1,4 +1,4 @@
-package de.westranger.optimization.common.optimization;
+package de.westranger.optimization.common.algorithm;
 
 import java.util.Random;
 

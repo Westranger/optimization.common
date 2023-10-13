@@ -1,4 +1,4 @@
-package de.westranger.optimization.common.optimization.evolutionary;
+package de.westranger.optimization.common.algorithm.evolutionary;
 
 public class GeneticAlgorithm {
     // TODO, einmal für Sequenz Optimierung und einmal normal mit den ganzen Standard crossover Algorithmen

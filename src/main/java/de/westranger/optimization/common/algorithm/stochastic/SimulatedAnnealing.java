@@ -1,7 +1,7 @@
-package de.westranger.optimization.common.optimization.stochastic;
+package de.westranger.optimization.common.algorithm.stochastic;
 
-import de.westranger.optimization.common.optimization.Function;
-import de.westranger.optimization.common.optimization.Solution;
+import de.westranger.optimization.common.algorithm.Function;
+import de.westranger.optimization.common.algorithm.Solution;
 
 import java.util.Random;
 

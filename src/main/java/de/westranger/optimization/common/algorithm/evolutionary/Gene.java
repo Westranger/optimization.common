@@ -1,4 +1,4 @@
-package de.westranger.optimization.common.optimization.evolutionary;
+package de.westranger.optimization.common.algorithm.evolutionary;
 
 import java.util.LinkedList;
 
