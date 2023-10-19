@@ -1,0 +1,41 @@
+package test.de.westranger.optimization.common.algorithm.action.planning.solver.dfs.tsp;
+
+import de.westranger.geometry.common.simple.Point2D;
+import java.util.Optional;
+
+public final class Order {
+  private final int id;
+  private final Point2D to;
+  private final Optional<Point2D> from;
+
+  public Order(final int id, final Point2D to) {
+    this(id, to, null);
+  }
+
+  public Order(final int id, final Point2D to, final Point2D from) {
+    this.id = id;
+    this.to = to;
+    if (from == null) {
+      this.from = Optional.empty();
+    } else {
+      this.from = Optional.of(from);
+    }
+  }
+
+  public int getId() {
+    return id;
+  }
+
+  public Point2D getTo() {
+    return to;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (!(o instanceof Order order)) {
+      return false;
+    }
+    return id == order.getId();
+  }
+
+}
