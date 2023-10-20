@@ -39,15 +39,15 @@ class DepthFirstSearchSolverTest {
         vehiclePositions.put(3, new Point2D(5.0, 1.0));
 
         State initialState = new State(orderList, orderMapping, vehiclePositions);
-        ActionPlanningSolver<StateRepresentation, Long> aps = new DepthFirstSearchSolver<>(true);
+        ActionPlanningSolver<Long> aps = new DepthFirstSearchSolver<>(true);
         aps.setInitialState(initialState);
 
-        Optional<List<ActionPlanningSolution<StateRepresentation, Long>>> solve = aps.solve();
+        Optional<List<ActionPlanningSolution<Long>>> solve = aps.solve();
 
         assertTrue(solve.isPresent());
         assertEquals(20, solve.get().size());
 
-        for (ActionPlanningSolution<StateRepresentation, Long> solution : solve.get()) {
+        for (ActionPlanningSolution<Long> solution : solve.get()) {
             assertEquals(6000L, solution.getScore());
             assertEquals(6, solution.getActions().size());
 

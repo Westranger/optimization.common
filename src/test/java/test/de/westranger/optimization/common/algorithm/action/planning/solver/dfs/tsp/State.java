@@ -6,7 +6,7 @@ import de.westranger.optimization.common.algorithm.action.planning.SearchSpaceSt
 
 import java.util.*;
 
-public class State extends SearchSpaceState<StateRepresentation, Long> {
+public class State extends SearchSpaceState<Long> {
 
     private final List<Order> orderList;
     private final Map<Integer, List<Order>> orderMapping;
@@ -26,11 +26,6 @@ public class State extends SearchSpaceState<StateRepresentation, Long> {
                   final Map<Integer, Point2D> vehiclePositions, final Long score) {
         this(orderList, orderMapping, vehiclePositions);
         this.score = score;
-    }
-
-    @Override
-    public StateRepresentation getStateRepresentation() {
-        return null;
     }
 
     @Override

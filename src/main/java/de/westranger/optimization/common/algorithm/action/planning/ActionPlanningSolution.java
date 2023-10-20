@@ -4,14 +4,14 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-public final class ActionPlanningSolution<T extends Comparable<T>, G extends Comparable<G>> {
+public final class ActionPlanningSolution<S extends Comparable<S>> {
 
-    private final SearchSpaceState<T, G> solutionState;
+    private final SearchSpaceState<S> solutionState;
     private final List<Action> actions;
-    private final G score;
+    private final S score;
 
-    public ActionPlanningSolution(final SearchSpaceState<T, G> solutionState,
-                                  final List<Action> actions, final G score) {
+    public ActionPlanningSolution(final SearchSpaceState<S> solutionState,
+                                  final List<Action> actions, final S score) {
         this.solutionState = solutionState;
         this.actions = new LinkedList<>(actions);
         this.score = score;
@@ -21,11 +21,11 @@ public final class ActionPlanningSolution<T extends Comparable<T>, G extends Com
         return Collections.unmodifiableList(this.actions);
     }
 
-    public SearchSpaceState<T, G> getState() {
+    public SearchSpaceState<S> getState() {
         return this.solutionState;
     }
 
-    public G getScore() {
+    public S getScore() {
         return this.score;
     }
 

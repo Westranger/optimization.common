@@ -7,12 +7,12 @@ import de.westranger.optimization.common.algorithm.action.planning.SearchSpaceSt
 
 import java.util.*;
 
-public class DepthFirstSearchSolver<T extends Comparable<T>, G extends Comparable<G>>
-        implements ActionPlanningSolver<T, G> {
+public final class DepthFirstSearchSolver<S extends Comparable<S>>
+        implements ActionPlanningSolver<S> {
 
-    private SearchSpaceState<T, G> initialState;
+    private SearchSpaceState<S> initialState;
     private final boolean useBranchAndBound;
-    private final Map<Integer, G> uppperBounds;
+    private final Map<Integer, S> uppperBounds;
 
     public DepthFirstSearchSolver(final boolean useBranchAndBound) {
         this.useBranchAndBound = useBranchAndBound;
@@ -20,16 +20,16 @@ public class DepthFirstSearchSolver<T extends Comparable<T>, G extends Comparabl
     }
 
     @Override
-    public void setInitialState(final SearchSpaceState<T, G> sss) {
+    public void setInitialState(final SearchSpaceState<S> sss) {
         this.initialState = sss;
     }
 
     @Override
-    public Optional<List<ActionPlanningSolution<T, G>>> solve() {
-        TreeNode<T, G> currentNode = new TreeNode<>(this.initialState, 0);
-        Optional<TreeNode<T, G>> child;
+    public Optional<List<ActionPlanningSolution<S>>> solve() {
+        TreeNode<S> currentNode = new TreeNode<>(this.initialState, 0);
+        Optional<TreeNode<S>> child;
 
-        List<ActionPlanningSolution<T, G>> result = new LinkedList<>();
+        List<ActionPlanningSolution<S>> result = new LinkedList<>();
 
         //int depthCounter = 0;
         boolean expanded;
@@ -38,7 +38,7 @@ public class DepthFirstSearchSolver<T extends Comparable<T>, G extends Comparabl
             child = currentNode.expandNext();
             expanded = child.isPresent();
 
-            final G currentScore = currentNode.getState().getScore();
+            final S currentScore = currentNode.getState().getScore();
 
             if (!expanded) {
                 if (currentNode.getState().isGoalState()) {
@@ -53,14 +53,14 @@ public class DepthFirstSearchSolver<T extends Comparable<T>, G extends Comparabl
                         }
 
                         if (scoreDiff <= 0) { // we want to store the better or equal scored solution
-                            final ActionPlanningSolution<T, G> solution =
+                            final ActionPlanningSolution<S> solution =
                                     new ActionPlanningSolution<>(currentNode.getState(),
                                             computeActionList(currentNode), currentScore);
                             result.add(solution);
                         }
                     } else {
                         this.updateUpperBounds(currentNode);
-                        final ActionPlanningSolution<T, G> solution =
+                        final ActionPlanningSolution<S> solution =
                                 new ActionPlanningSolution<>(currentNode.getState(),
                                         computeActionList(currentNode), currentScore);
                         result.add(solution);
@@ -89,9 +89,9 @@ public class DepthFirstSearchSolver<T extends Comparable<T>, G extends Comparabl
         return Optional.of(Collections.unmodifiableList(result));
     }
 
-    private List<Action> computeActionList(final TreeNode<T, G> node) {
+    private List<Action> computeActionList(final TreeNode<S> node) {
         final LinkedList<Action> result = new LinkedList<>();
-        Optional<TreeNode<T, G>> currentNode = Optional.of(node);
+        Optional<TreeNode<S>> currentNode = Optional.of(node);
         while (currentNode.isPresent()) {
             if (currentNode.get().getCurrentAction().isEmpty()) {
                 if (!result.isEmpty()) {
@@ -107,8 +107,8 @@ public class DepthFirstSearchSolver<T extends Comparable<T>, G extends Comparabl
         return Collections.unmodifiableList(result);
     }
 
-    private void updateUpperBounds(final TreeNode<T, G> node) {
-        Optional<TreeNode<T, G>> currentNode = Optional.of(node);
+    private void updateUpperBounds(final TreeNode<S> node) {
+        Optional<TreeNode<S>> currentNode = Optional.of(node);
         while (currentNode.isPresent()) {
             this.uppperBounds.put(currentNode.get().getLevel(), currentNode.get().getState().getScore());
             currentNode = currentNode.get().getParent();

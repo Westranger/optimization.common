@@ -6,17 +6,17 @@ import de.westranger.optimization.common.algorithm.action.planning.SearchSpaceSt
 import java.util.List;
 import java.util.Optional;
 
-public final class TreeNode<T extends Comparable<T>, G extends Comparable<G>> {
-    private final SearchSpaceState<T, G> state;
-    private Optional<TreeNode<T, G>> parent;
+public final class TreeNode<S extends Comparable<S>> {
+    private final SearchSpaceState<S> state;
+    private Optional<TreeNode<S>> parent;
     private final List<Action> actions;
-    private Optional<TreeNode<T, G>> child;
+    private Optional<TreeNode<S>> child;
     private int currentIdx;
     private Optional<Action> currentAction;
     private int level;
 
 
-    public TreeNode(final TreeNode<T, G> parent, final SearchSpaceState<T, G> state, final int level) {
+    public TreeNode(final TreeNode<S> parent, final SearchSpaceState<S> state, final int level) {
         if (parent == null) {
             this.parent = Optional.empty();
         } else {
@@ -30,14 +30,14 @@ public final class TreeNode<T extends Comparable<T>, G extends Comparable<G>> {
         this.level = level;
     }
 
-    public TreeNode(final SearchSpaceState<T, G> state, final int level) {
+    public TreeNode(final SearchSpaceState<S> state, final int level) {
         this(null, state, level);
     }
 
-    public Optional<TreeNode<T, G>> expandNext() {
+    public Optional<TreeNode<S>> expandNext() {
         if (this.currentIdx < this.actions.size()) {
 
-            SearchSpaceState<T, G> nextState = this.state.clone();
+            SearchSpaceState<S> nextState = this.state.clone();
             boolean actionPossible = nextState.perform(this.actions.get(this.currentIdx));
 
             if (actionPossible) {
@@ -54,7 +54,7 @@ public final class TreeNode<T extends Comparable<T>, G extends Comparable<G>> {
         return this.currentAction;
     }
 
-    public Optional<TreeNode<T, G>> getParent() {
+    public Optional<TreeNode<S>> getParent() {
         return this.parent;
     }
 
@@ -62,7 +62,7 @@ public final class TreeNode<T extends Comparable<T>, G extends Comparable<G>> {
         this.parent = Optional.empty();
     }
 
-    public SearchSpaceState<T, G> getState() {
+    public SearchSpaceState<S> getState() {
         return this.state;
     }
 

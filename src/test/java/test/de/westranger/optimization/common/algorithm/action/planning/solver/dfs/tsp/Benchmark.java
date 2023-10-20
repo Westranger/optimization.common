@@ -31,7 +31,7 @@ public class Benchmark {
             System.out.print(
                     "orders=" + orderList.size());
 
-            ActionPlanningSolver<StateRepresentation, Long> aps = new DepthFirstSearchSolver<>(true);
+            ActionPlanningSolver<Long> aps = new DepthFirstSearchSolver<>(true);
             aps.setInitialState(new State(orderList, orderMapping, vehiclePositions));
             final long startSmart = System.currentTimeMillis();
             aps.solve();
