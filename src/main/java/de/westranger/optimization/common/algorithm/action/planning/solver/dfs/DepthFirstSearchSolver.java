@@ -26,17 +26,19 @@ public final class DepthFirstSearchSolver<S extends Comparable<S>>
 
     @Override
     public Optional<List<ActionPlanningSolution<S>>> solve() {
-        TreeNode<S> currentNode = new TreeNode<>(this.initialState, 0);
-        Optional<TreeNode<S>> child;
-
         List<ActionPlanningSolution<S>> result = new LinkedList<>();
+        PriorityQueue<TreeNode<S>> candidates = new PriorityQueue<>(new TreeNodeComparator<>());
+        candidates.offer(new TreeNode<>(this.initialState, 0));
 
-        //int depthCounter = 0;
-        boolean expanded;
-        do {
+        while (!candidates.isEmpty()) {
+            final TreeNode<S> currentNode = candidates.poll();
 
-            child = currentNode.expandNext();
-            expanded = child.isPresent();
+            boolean expanded = false;
+            final Optional<TreeNode<S>> child = currentNode.expandNext();
+            if (child.isPresent()) {
+                expanded = child.isPresent();
+                candidates.offer(child.get());
+            }
 
             final S currentScore = currentNode.getState().getScore();
 
@@ -52,14 +54,16 @@ public final class DepthFirstSearchSolver<S extends Comparable<S>>
                             this.updateUpperBounds(currentNode);
                         }
 
-                        if (scoreDiff <= 0) { // we want to store the better or equal scored solution
+                        if (scoreDiff < 0) { // we want to store the better or equal scored solution
                             final ActionPlanningSolution<S> solution =
                                     new ActionPlanningSolution<>(currentNode.getState(),
                                             computeActionList(currentNode), currentScore);
+                            System.out.println("found a besser solution " + currentNode.getState().getScore());
                             result.add(solution);
                         }
                     } else {
                         this.updateUpperBounds(currentNode);
+                        System.out.println("found a besser solution " + currentNode.getState().getScore());
                         final ActionPlanningSolution<S> solution =
                                 new ActionPlanningSolution<>(currentNode.getState(),
                                         computeActionList(currentNode), currentScore);
@@ -71,20 +75,24 @@ public final class DepthFirstSearchSolver<S extends Comparable<S>>
                     continue;
                 }
 
-                child = currentNode.getParent();
+                if(currentNode.getParent().isPresent()){
+                    candidates.offer(currentNode.getParent().get());
+                }
+
                 currentNode.clearParent();
                 expanded = true;
             } else {
                 if (useBranchAndBound && !this.uppperBounds.isEmpty()) {
                     final long scoreDiff = currentScore.compareTo(this.uppperBounds.get(currentNode.getLevel()));
                     if (scoreDiff > 0 && currentNode.getParent().isPresent()) {
-                        child = currentNode.getParent();
+                        if(currentNode.getParent().isPresent()){
+                            candidates.offer(currentNode.getParent().get());
+                        }
                         currentNode.clearParent(); // unlink parent to enabled cleanup for GC
                     }
                 }
             }
-            currentNode = child.get();
-        } while (expanded);
+        }
 
         return Optional.of(Collections.unmodifiableList(result));
     }
