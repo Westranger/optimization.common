@@ -12,7 +12,6 @@ public final class TreeNode<S extends Comparable<S>> {
     private final List<Action> actions;
     private Optional<TreeNode<S>> child;
     private int currentIdx;
-    private Optional<Action> currentAction;
     private int level;
 
 
@@ -26,7 +25,6 @@ public final class TreeNode<S extends Comparable<S>> {
         this.child = Optional.empty();
         this.actions = state.getPossibleActions();
         this.currentIdx = 0;
-        this.currentAction = Optional.empty();
         this.level = level;
     }
 
@@ -41,17 +39,12 @@ public final class TreeNode<S extends Comparable<S>> {
             boolean actionPossible = nextState.perform(this.actions.get(this.currentIdx));
 
             if (actionPossible) {
-                this.currentAction = Optional.of(this.actions.get(this.currentIdx));
                 this.currentIdx++;
                 this.child = Optional.of(new TreeNode<>(this, nextState, this.level + 1));
                 return this.child;
             }
         }
         return Optional.empty();
-    }
-
-    public Optional<Action> getCurrentAction() {
-        return this.currentAction;
     }
 
     public Optional<TreeNode<S>> getParent() {

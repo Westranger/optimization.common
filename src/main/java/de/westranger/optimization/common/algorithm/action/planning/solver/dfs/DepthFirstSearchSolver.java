@@ -27,69 +27,57 @@ public final class DepthFirstSearchSolver<S extends Comparable<S>>
     @Override
     public Optional<List<ActionPlanningSolution<S>>> solve() {
         List<ActionPlanningSolution<S>> result = new LinkedList<>();
-        PriorityQueue<TreeNode<S>> candidates = new PriorityQueue<>(new TreeNodeComparator<>());
+        LinkedList<TreeNode<S>> candidates = new LinkedList<>();
         candidates.offer(new TreeNode<>(this.initialState, 0));
 
         while (!candidates.isEmpty()) {
             final TreeNode<S> currentNode = candidates.poll();
-
-            boolean expanded = false;
-            final Optional<TreeNode<S>> child = currentNode.expandNext();
-            if (child.isPresent()) {
-                expanded = child.isPresent();
-                candidates.offer(child.get());
-            }
-
             final S currentScore = currentNode.getState().getScore();
 
-            if (!expanded) {
-                if (currentNode.getState().isGoalState()) {
-                    // we have a goal state
+            if (useBranchAndBound && !this.uppperBounds.isEmpty()) {
+                final long scoreDiff = currentScore.compareTo(this.uppperBounds.get(currentNode.getLevel()));
+                if (scoreDiff >= 0) {
+                    currentNode.clearParent(); // unlink parent to enabled cleanup for GC
+                    continue;
+                }
+            }
 
-                    if (!this.uppperBounds.isEmpty()) {
-                        final long scoreDiff = currentScore.compareTo(this.uppperBounds.get(currentNode.getLevel()));
+            boolean expanded = true;
+            while (expanded) {
+                final Optional<TreeNode<S>> child = currentNode.expandNext();
+                expanded = child.isPresent();
+                if (expanded) {
+                    candidates.offer(child.get());
+                }
+            }
 
-                        if (scoreDiff < 0) { // we found a better solution
-                            result.clear();
-                            this.updateUpperBounds(currentNode);
-                        }
+            Collections.sort(candidates, new TreeNodeComparator<S>());
 
-                        if (scoreDiff < 0) { // we want to store the better or equal scored solution
-                            final ActionPlanningSolution<S> solution =
-                                    new ActionPlanningSolution<>(currentNode.getState(),
-                                            computeActionList(currentNode), currentScore);
-                            System.out.println("found a besser solution " + currentNode.getState().getScore());
-                            result.add(solution);
-                        }
-                    } else {
+            if (currentNode.getState().isGoalState()) {
+                // we have a goal state
+
+                if (!this.uppperBounds.isEmpty()) {
+                    final long scoreDiff = currentScore.compareTo(this.uppperBounds.get(currentNode.getLevel()));
+
+                    if (scoreDiff < 0) { // we found a better solution
+                        result.clear();
                         this.updateUpperBounds(currentNode);
-                        System.out.println("found a besser solution " + currentNode.getState().getScore());
+                    }
+
+                    if (scoreDiff < 0) { // we want to store the better or equal scored solution
                         final ActionPlanningSolution<S> solution =
                                 new ActionPlanningSolution<>(currentNode.getState(),
                                         computeActionList(currentNode), currentScore);
+                        System.out.println("found a besser solution " + currentNode.getState().getScore());
                         result.add(solution);
                     }
-                }
-                // we still did not expand, so we need to find a parent node which can be expanded
-                if (currentNode.getParent().isEmpty()) {
-                    continue;
-                }
-
-                if(currentNode.getParent().isPresent()){
-                    candidates.offer(currentNode.getParent().get());
-                }
-
-                currentNode.clearParent();
-                expanded = true;
-            } else {
-                if (useBranchAndBound && !this.uppperBounds.isEmpty()) {
-                    final long scoreDiff = currentScore.compareTo(this.uppperBounds.get(currentNode.getLevel()));
-                    if (scoreDiff > 0 && currentNode.getParent().isPresent()) {
-                        if(currentNode.getParent().isPresent()){
-                            candidates.offer(currentNode.getParent().get());
-                        }
-                        currentNode.clearParent(); // unlink parent to enabled cleanup for GC
-                    }
+                } else {
+                    this.updateUpperBounds(currentNode);
+                    System.out.println("found a initial solution " + currentNode.getState().getScore());
+                    final ActionPlanningSolution<S> solution =
+                            new ActionPlanningSolution<>(currentNode.getState(),
+                                    computeActionList(currentNode), currentScore);
+                    result.add(solution);
                 }
             }
         }
@@ -101,13 +89,13 @@ public final class DepthFirstSearchSolver<S extends Comparable<S>>
         final LinkedList<Action> result = new LinkedList<>();
         Optional<TreeNode<S>> currentNode = Optional.of(node);
         while (currentNode.isPresent()) {
-            if (currentNode.get().getCurrentAction().isEmpty()) {
-                if (!result.isEmpty()) {
+            if (currentNode.get().getState().getLastPerformedAction().isEmpty()) {
+                if (!result.isEmpty() && currentNode.get().getParent().isPresent()) {
                     throw new IllegalStateException(
                             "there is no action available in the current state, this should not be possible");
                 }
             } else {
-                result.addFirst(currentNode.get().getCurrentAction().get());
+                result.addFirst(currentNode.get().getState().getLastPerformedAction().get());
             }
             currentNode = currentNode.get().getParent();
         }

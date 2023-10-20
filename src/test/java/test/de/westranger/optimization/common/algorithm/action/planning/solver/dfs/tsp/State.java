@@ -14,12 +14,15 @@ public class State extends SearchSpaceState<Long> {
 
     private Long score;
 
+    private Optional<Action> lastPerformedAction;
+
     public State(final List<Order> orderList, final Map<Integer, List<Order>> orderMapping,
                  final Map<Integer, Point2D> vehiclePositions) {
         this.orderList = new LinkedList<>(orderList);
         this.orderMapping = new TreeMap<>(orderMapping);
         this.vehiclePositions = new TreeMap<>(vehiclePositions);
         this.score = 0L;
+        this.lastPerformedAction = Optional.empty();
     }
 
     private State(final List<Order> orderList, final Map<Integer, List<Order>> orderMapping,
@@ -60,6 +63,8 @@ public class State extends SearchSpaceState<Long> {
             list.add(act.getOrder());
         }
 
+        this.lastPerformedAction = Optional.of(act);
+
         return result;
     }
 
@@ -88,6 +93,11 @@ public class State extends SearchSpaceState<Long> {
         final Map<Integer, Point2D> vehiclePositions = new TreeMap<>(this.vehiclePositions);
 
         return new State(orderList, orderMapping, vehiclePositions, score);
+    }
+
+    @Override
+    public Optional<Action> getLastPerformedAction() {
+        return this.lastPerformedAction;
     }
 
     @Override
