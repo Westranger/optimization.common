@@ -62,4 +62,9 @@ public final class TreeNode<S extends Comparable<S>> {
     public int getLevel() {
         return level;
     }
+
+    @Override
+    public String toString() {
+        return this.level + " " + this.state.getScore();
+    }
 }

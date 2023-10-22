@@ -2,8 +2,8 @@ package test.de.westranger.optimization.common.algorithm;
 
 import de.westranger.optimization.common.algorithm.util.Function;
 import de.westranger.optimization.common.algorithm.util.Solution;
-import de.westranger.optimization.common.algorithm.stochastic.NeighbourSelector;
-import de.westranger.optimization.common.algorithm.stochastic.SimulatedAnnealing;
+import de.westranger.optimization.common.algorithm.action.planning.solver.stochastic.NeighbourSelector;
+import de.westranger.optimization.common.algorithm.action.planning.solver.stochastic.SimulatedAnnealing;
 import org.junit.jupiter.api.Test;
 
 import java.util.Random;

@@ -1,5 +1,6 @@
-package de.westranger.optimization.common.algorithm.stochastic;
+package de.westranger.optimization.common.algorithm.action.planning.solver.stochastic;
 
+import de.westranger.optimization.common.algorithm.action.planning.SearchSpaceState;
 import de.westranger.optimization.common.algorithm.util.Function;
 import de.westranger.optimization.common.algorithm.util.Solution;
 
@@ -11,15 +12,15 @@ import java.util.Random;
 
 // TODO Warnung einfügen, wenn Verhältnis E_max - E_min / T initial kleiner als 0,8 ist
 
-public final class SimulatedAnnealing {
+public final class SimulatedAnnealing<S extends Comparable<S>> {
 
-    private final Solution initialSolution;
+    private final SearchSpaceState<S> initialSolution;
     private final NeighbourSelector ns;
     private final Function func;
     private final int maxTemperature;
     private final Random rng;
 
-    public SimulatedAnnealing(final Solution initialSolution, final NeighbourSelector ns, final Function func, final int maxTemperature) {
+    public SimulatedAnnealing(final SearchSpaceState<S> initialSolution, final NeighbourSelector ns, final Function func, final int maxTemperature) {
         this.initialSolution = initialSolution;
         this.ns = ns;
         this.func = func;
@@ -27,9 +28,9 @@ public final class SimulatedAnnealing {
         this.rng = new Random(0x05025b0e2a3df1cel);
     }
 
-    public Solution optimize(final double solutionAccuracy) {
+    public SearchSpaceState<S> optimize(final double solutionAccuracy) {
 
-        Solution approxSolution = this.initialSolution;
+        SearchSpaceState<S> approxSolution = this.initialSolution;
         double resultApproxSolution = this.func.evaluate(approxSolution);
 
         for (int k = 0; k <= this.maxTemperature; k++) {

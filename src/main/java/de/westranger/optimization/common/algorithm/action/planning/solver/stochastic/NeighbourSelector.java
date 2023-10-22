@@ -1,4 +1,4 @@
-package de.westranger.optimization.common.algorithm.stochastic;
+package de.westranger.optimization.common.algorithm.action.planning.solver.stochastic;
 
 import de.westranger.optimization.common.algorithm.util.Solution;
 
