@@ -6,9 +6,7 @@ public final class TreeNodeComparator<S extends Comparable<S>> implements Compar
     @Override
     public int compare(final TreeNode<S> o1, final TreeNode<S> o2) {
         final int lvlDiff = o2.getLevel() - o1.getLevel();
-        if (lvlDiff == 0) {
-            return o1.getState().getScore().compareTo(o2.getState().getScore());
-        }
-        return lvlDiff;
+        final int scoreDiff = o1.getState().getScore().compareTo(o2.getState().getScore());
+        return lvlDiff * 10 + scoreDiff;
     }
 }

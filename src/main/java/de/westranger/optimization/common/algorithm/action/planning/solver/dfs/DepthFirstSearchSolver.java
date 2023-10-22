@@ -12,11 +12,11 @@ public final class DepthFirstSearchSolver<S extends Comparable<S>>
 
     private SearchSpaceState<S> initialState;
     private final boolean useBranchAndBound;
-    private final Map<Integer, S> uppperBounds;
+    private Optional<S> uppperBound;
 
     public DepthFirstSearchSolver(final boolean useBranchAndBound) {
         this.useBranchAndBound = useBranchAndBound;
-        this.uppperBounds = new TreeMap<>();
+        this.uppperBound = Optional.empty();
     }
 
     @Override
@@ -34,34 +34,23 @@ public final class DepthFirstSearchSolver<S extends Comparable<S>>
             final TreeNode<S> currentNode = candidates.poll();
             final S currentScore = currentNode.getState().getScore();
 
-            if (useBranchAndBound && !this.uppperBounds.isEmpty()) {
-                final long scoreDiff = currentScore.compareTo(this.uppperBounds.get(currentNode.getLevel()));
+            if (useBranchAndBound && this.uppperBound.isPresent()) {
+                final long scoreDiff = currentScore.compareTo(this.uppperBound.get());
                 if (scoreDiff >= 0) {
                     currentNode.clearParent(); // unlink parent to enabled cleanup for GC
                     continue;
                 }
             }
 
-            boolean expanded = true;
-            while (expanded) {
-                final Optional<TreeNode<S>> child = currentNode.expandNext();
-                expanded = child.isPresent();
-                if (expanded) {
-                    candidates.offer(child.get());
-                }
-            }
-
-            Collections.sort(candidates, new TreeNodeComparator<S>());
-
             if (currentNode.getState().isGoalState()) {
                 // we have a goal state
 
-                if (!this.uppperBounds.isEmpty()) {
-                    final long scoreDiff = currentScore.compareTo(this.uppperBounds.get(currentNode.getLevel()));
+                if (!this.uppperBound.isEmpty()) {
+                    final long scoreDiff = currentScore.compareTo(this.uppperBound.get());
 
                     if (scoreDiff < 0) { // we found a better solution
                         result.clear();
-                        this.updateUpperBounds(currentNode);
+                        this.uppperBound = Optional.of(currentNode.getState().getScore());
                     }
 
                     if (scoreDiff < 0) { // we want to store the better or equal scored solution
@@ -72,13 +61,24 @@ public final class DepthFirstSearchSolver<S extends Comparable<S>>
                         result.add(solution);
                     }
                 } else {
-                    this.updateUpperBounds(currentNode);
+                    this.uppperBound = Optional.of(currentNode.getState().getScore());
                     System.out.println("found a initial solution " + currentNode.getState().getScore());
                     final ActionPlanningSolution<S> solution =
                             new ActionPlanningSolution<>(currentNode.getState(),
                                     computeActionList(currentNode), currentScore);
                     result.add(solution);
                 }
+            }else{
+                boolean expanded = true;
+                while (expanded) {
+                    final Optional<TreeNode<S>> child = currentNode.expandNext();
+                    expanded = child.isPresent();
+                    if (expanded) {
+                        candidates.offer(child.get());
+                    }
+                }
+
+                Collections.sort(candidates, new TreeNodeComparator<S>());
             }
         }
 
@@ -101,14 +101,6 @@ public final class DepthFirstSearchSolver<S extends Comparable<S>>
         }
 
         return Collections.unmodifiableList(result);
-    }
-
-    private void updateUpperBounds(final TreeNode<S> node) {
-        Optional<TreeNode<S>> currentNode = Optional.of(node);
-        while (currentNode.isPresent()) {
-            this.uppperBounds.put(currentNode.get().getLevel(), currentNode.get().getState().getScore());
-            currentNode = currentNode.get().getParent();
-        }
     }
 
 }
