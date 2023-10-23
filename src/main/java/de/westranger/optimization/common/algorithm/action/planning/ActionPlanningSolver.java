@@ -3,10 +3,10 @@ package de.westranger.optimization.common.algorithm.action.planning;
 import java.util.List;
 import java.util.Optional;
 
-public interface ActionPlanningSolver<S extends Comparable<S>> {
+public interface ActionPlanningSolver {
 
-  void setInitialState(SearchSpaceState<S> sss);
+  void setInitialState(SearchSpaceState sss);
 
-  Optional<List<ActionPlanningSolution<S>>> solve();
+  Optional<List<ActionPlanningSolution>> solve();
 
 }

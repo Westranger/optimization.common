@@ -18,90 +18,91 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class DepthFirstSearchSolverTest {
 
-    @Test
-    void solveTSP6Locations() {
-        final List<Order> orderList = new LinkedList<>();
-        orderList.add(new Order(1, new Point2D(3.0, 2.0)));
-        orderList.add(new Order(2, new Point2D(3.0, 3.0)));
-        orderList.add(new Order(3, new Point2D(3.0, 4.0)));
+  @Test
+  void solveTSP6Locations() {
+    final List<Order> orderList = new LinkedList<>();
+    orderList.add(new Order(1, new Point2D(3.0, 2.0)));
+    orderList.add(new Order(2, new Point2D(3.0, 3.0)));
+    orderList.add(new Order(3, new Point2D(3.0, 4.0)));
 
-        orderList.add(new Order(4, new Point2D(1.0, 2.0)));
-        orderList.add(new Order(5, new Point2D(1.0, 3.0)));
-        orderList.add(new Order(6, new Point2D(1.0, 4.0)));
+    orderList.add(new Order(4, new Point2D(1.0, 2.0)));
+    orderList.add(new Order(5, new Point2D(1.0, 3.0)));
+    orderList.add(new Order(6, new Point2D(1.0, 4.0)));
 
-        final Map<Integer, List<Order>> orderMapping = new TreeMap<>();
-        orderMapping.put(1, new ArrayList<>());
-        orderMapping.put(2, new ArrayList<>());
-        orderMapping.put(3, new ArrayList<>());
+    final Map<Integer, List<Order>> orderMapping = new TreeMap<>();
+    orderMapping.put(1, new ArrayList<>());
+    orderMapping.put(2, new ArrayList<>());
+    orderMapping.put(3, new ArrayList<>());
 
-        final Map<Integer, Point2D> vehiclePositions = new TreeMap<>();
-        vehiclePositions.put(1, new Point2D(1.0, 1.0));
-        vehiclePositions.put(2, new Point2D(3.0, 1.0));
-        vehiclePositions.put(3, new Point2D(5.0, 1.0));
+    final Map<Integer, Point2D> vehiclePositions = new TreeMap<>();
+    vehiclePositions.put(1, new Point2D(1.0, 1.0));
+    vehiclePositions.put(2, new Point2D(3.0, 1.0));
+    vehiclePositions.put(3, new Point2D(5.0, 1.0));
 
-        State initialState = new State(orderList, orderMapping, vehiclePositions);
-        ActionPlanningSolver<Long> aps = new DepthFirstSearchSolver<>(true);
-        aps.setInitialState(initialState);
+    State initialState = new State(orderList, orderMapping, vehiclePositions);
+    ActionPlanningSolver aps = new DepthFirstSearchSolver(true);
+    aps.setInitialState(initialState);
 
-        Optional<List<ActionPlanningSolution<Long>>> solve = aps.solve();
+    Optional<List<ActionPlanningSolution>> solve = aps.solve();
 
-        assertTrue(solve.isPresent());
-        assertEquals(1, solve.get().size());
+    assertTrue(solve.isPresent());
+    assertEquals(1, solve.get().size());
 
-        for (ActionPlanningSolution<Long> solution : solve.get()) {
-            assertEquals(6000L, solution.getScore());
-            assertEquals(6, solution.getActions().size());
+    for (ActionPlanningSolution solution : solve.get()) {
+      assertEquals(6.0, solution.getScore().getAbsoluteScore(), 1e-6);
+      assertEquals(6, solution.getActions().size());
 
-            Map<Integer, Integer> map = new TreeMap<>();
-            for (Action a : solution.getActions()) {
-                assertTrue(a instanceof TSPAction);
-                TSPAction act = (TSPAction) a;
+      Map<Integer, Integer> map = new TreeMap<>();
+      for (Action a : solution.getActions()) {
+        assertTrue(a instanceof TSPAction);
+        TSPAction act = (TSPAction) a;
 
-                if (map.containsKey(act.getVehicleID())) {
-                    map.put(act.getVehicleID(), map.get(act.getVehicleID()) + 1);
-                } else {
-                    map.put(act.getVehicleID(), +1);
-                }
-            }
-
-            assertEquals(3, map.get(1));
-            assertEquals(3, map.get(2));
-            assertNull(map.get(3));
+        if (map.containsKey(act.getVehicleID())) {
+          map.put(act.getVehicleID(), map.get(act.getVehicleID()) + 1);
+        } else {
+          map.put(act.getVehicleID(), +1);
         }
+      }
+
+      assertEquals(3, map.get(1));
+      assertEquals(3, map.get(2));
+      assertNull(map.get(3));
     }
+  }
 
-    @Test
-    public void testGSON() {
-        Gson gson = new Gson();
+  @Test
+  public void testGSON() {
+    Gson gson = new Gson();
 
-        final List<Order> orderList = new LinkedList<>();
-        Order o1 = new Order(1, new Point2D(3.0, 2.0));
-        Order o2 = new Order(2, new Point2D(3.0, 3.0));
-        Order o3 = new Order(3, new Point2D(3.0, 4.0));
-        Order o4 = new Order(4, new Point2D(1.0, 2.0));
-        Order o5 = new Order(5, new Point2D(1.0, 3.0));
-        Order o6 = new Order(6, new Point2D(1.0, 4.0));
+    final List<Order> orderList = new LinkedList<>();
+    Order o1 = new Order(1, new Point2D(3.0, 2.0));
+    Order o2 = new Order(2, new Point2D(3.0, 3.0));
+    Order o3 = new Order(3, new Point2D(3.0, 4.0));
+    Order o4 = new Order(4, new Point2D(1.0, 2.0));
+    Order o5 = new Order(5, new Point2D(1.0, 3.0));
+    Order o6 = new Order(6, new Point2D(1.0, 4.0));
 
-        orderList.add(o1);
-        orderList.add(o2);
-        orderList.add(o3);
-        orderList.add(o4);
-        orderList.add(o5);
-        orderList.add(o6);
+    orderList.add(o1);
+    orderList.add(o2);
+    orderList.add(o3);
+    orderList.add(o4);
+    orderList.add(o5);
+    orderList.add(o6);
 
-        final Map<Integer, Point2D> vehiclePositions = new TreeMap<>();
-        vehiclePositions.put(1, new Point2D(1.0, 1.0));
-        vehiclePositions.put(2, new Point2D(3.0, 1.0));
-        vehiclePositions.put(3, new Point2D(5.0, 1.0));
+    final Map<Integer, Point2D> vehiclePositions = new TreeMap<>();
+    vehiclePositions.put(1, new Point2D(1.0, 1.0));
+    vehiclePositions.put(2, new Point2D(3.0, 1.0));
+    vehiclePositions.put(3, new Point2D(5.0, 1.0));
 
-        final Map<Integer, List<Order>> orderMapping = new TreeMap<>();
-        orderMapping.put(1, List.of(o1, o2, o3));
-        orderMapping.put(2, new ArrayList<>());
-        orderMapping.put(3, List.of(o4, o5, o6));
+    final Map<Integer, List<Order>> orderMapping = new TreeMap<>();
+    orderMapping.put(1, List.of(o1, o2, o3));
+    orderMapping.put(2, new ArrayList<>());
+    orderMapping.put(3, List.of(o4, o5, o6));
 
 
-        // Konvertieren Sie die Person-Instanz in JSON
-        String json = gson.toJson(new ProblemFormulation(orderList, vehiclePositions, orderMapping,6000));
-        System.out.println(json);
-    }
+    // Konvertieren Sie die Person-Instanz in JSON
+    String json =
+        gson.toJson(new ProblemFormulation(orderList, vehiclePositions, orderMapping, 6000));
+    System.out.println(json);
+  }
 }

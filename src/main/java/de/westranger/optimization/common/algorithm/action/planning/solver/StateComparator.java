@@ -5,9 +5,9 @@ import de.westranger.optimization.common.algorithm.action.planning.SearchSpaceSt
 import java.io.Serializable;
 import java.util.Comparator;
 
-public final class StateComparator<S extends Comparable<S>> implements Comparator<SearchSpaceState<S>>, Serializable {
-    @Override
-    public int compare(SearchSpaceState<S> o1, SearchSpaceState<S> o2) {
-        return o1.compareTo(o2);
-    }
+public final class StateComparator implements Comparator<SearchSpaceState>, Serializable {
+  @Override
+  public int compare(SearchSpaceState o1, SearchSpaceState o2) {
+    return o1.compareTo(o2);
+  }
 }
