@@ -1,80 +1,73 @@
-package test.de.westranger.optimization.common.algorithm;
+package test.de.westranger.optimization.common.algorithm.sa;
 
 import de.westranger.optimization.common.algorithm.action.planning.Action;
 import de.westranger.optimization.common.algorithm.action.planning.SearchSpaceState;
-import de.westranger.optimization.common.algorithm.util.Function;
-import de.westranger.optimization.common.algorithm.util.Solution;
 import de.westranger.optimization.common.algorithm.action.planning.solver.stochastic.NeighbourSelector;
 import de.westranger.optimization.common.algorithm.action.planning.solver.stochastic.SimulatedAnnealing;
+import de.westranger.optimization.common.algorithm.action.planning.solver.stochastic.SimulatedAnnealingParameter;
+import java.util.LinkedList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import java.util.Random;
+import test.de.westranger.optimization.common.algorithm.sa.function.fitting.DataPoint;
+import test.de.westranger.optimization.common.algorithm.sa.function.fitting.NormalDistributionSelector;
+import test.de.westranger.optimization.common.algorithm.sa.function.fitting.QubicFittingAction;
+import test.de.westranger.optimization.common.algorithm.sa.function.fitting.QubicFunktion;
+import test.de.westranger.optimization.common.algorithm.sa.function.fitting.QubicFunktionFitter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SimulatedAnnealingTest {
 
-
-  class NormalDistributionSelector implements NeighbourSelector {
-    private final double sigma;
-    private final Random rng;
-
-    public NormalDistributionSelector(final double sigma, final Random rng) {
-      this.sigma = sigma;
-      this.rng = rng;
-    }
-
-    @Override
-    public SearchSpaceState select(SearchSpaceState intermediateSolution,
-                                   double currentTemperature) {
-      final List<Action> actions = intermediateSolution.getPossibleActions();
-      final Action selectedAction = actions.get(this.rng.nextInt(actions.size()));
-      final SearchSpaceState result = intermediateSolution.clone();
-      result.perform(selectedAction);
-      return result;
-    }
-  }
-
-  class QubicFunction implements Function {
-
-    private double qubic(final double x, final double a1, final double a2, final double a3,
-                         final double c) {
-      return a1 * Math.pow(x, 3.0) + a2 * Math.pow(x, 2.0) + a3 * x + c;
-    }
-
-    @Override
-    public double evaluate(Solution solution) {
-      final DoubleSolution ds = (DoubleSolution) solution;
-      final double a1 = ds.get()[0];
-      final double a2 = ds.get()[0];
-      final double a3 = ds.get()[0];
-      final double c = ds.get()[0];
-
-      double err = 0.0;
-      int cnt = 0;
-      for (int x = -10; x <= 10; x++) {
-        err += Math.pow(qubic(x, 3.0, 1.5, 9.0, 0.25) - qubic(x, a1, a2, a3, c), 2.0);
-        cnt++;
-      }
-
-      err *= 1.0 / (double) cnt;
-
-      return err;
-    }
-  }
-
   @Test
-  void optimizeFunction() {
-    final DoubleSolution initial = new DoubleSolution(new double[] {0.0, 0.0, 0.0, 0.0});
-    final NeighbourSelector ns = new NormalDistributionSelector(2.0);
-    final Function func = new QubicFunction();
-    final SimulatedAnnealing sa = new SimulatedAnnealing(initial, ns, func, 2000);
-    final DoubleSolution finalSolution = (DoubleSolution) sa.optimize(1e-10);
-    //assertEquals(3.0, finalSolution.get()[0], 1e-1);
-    //assertEquals(1.5, finalSolution.get()[1], 1e-2);
-    //assertEquals(9.0, finalSolution.get()[2], 1e-1);
-    //assertEquals(0.25, finalSolution.get()[3], 1e-3);
+  void learnQubicFunction() {
+    QubicFunktion qf = new QubicFunktion(3.0, 1.5, 9.0, 0.25);
+    List<DataPoint> data = new LinkedList<>();
+    for (int x = -10; x <= 10; x++) {
+      data.add(new DataPoint(x, qf.evaluate(x)));
+    }
+
+    final SimulatedAnnealingParameter sap =
+        new SimulatedAnnealingParameter(10000.0, 0.01, 0.97, 150);
+    final Random rng = new Random(47110815);
+    final QubicFunktion tbf = new QubicFunktion(10000.0, 10000.0, 10000.0, 10000.0);
+    final QubicFunktionFitter initial = new QubicFunktionFitter(tbf, data);
+    final NeighbourSelector ns = new NormalDistributionSelector(rng);
+
+    final SimulatedAnnealing sa = new SimulatedAnnealing(initial, ns, rng, sap);
+    final SearchSpaceState optimizedResult = sa.optimize(1e-3);
+
+    assertNotNull(optimizedResult);
+    assertTrue(optimizedResult instanceof QubicFunktionFitter);
+    final QubicFunktionFitter qff = (QubicFunktionFitter) optimizedResult;
+    final List<Action> actions = qff.getPossibleActions();
+    assertEquals(4, actions.size());
+    for (int i = 0; i < 4; i++) {
+      assertTrue(actions.get(i) instanceof QubicFittingAction);
+    }
+
+    assertEquals(6.363217904078274E-4, qff.getScore().getAbsoluteScore(), 1e-3);
+
+    QubicFittingAction qfa = (QubicFittingAction) actions.get(0);
+    assertEquals(QubicFittingAction.FunctionParameter.ParamA1, qfa.getFp());
+    assertEquals(qf.getA1(), qfa.getValue(), 1e-3);
+
+    qfa = (QubicFittingAction) actions.get(1);
+    assertEquals(QubicFittingAction.FunctionParameter.ParamA2, qfa.getFp());
+    assertEquals(qf.getA2(), qfa.getValue(), 1e-3);
+
+    qfa = (QubicFittingAction) actions.get(2);
+    assertEquals(QubicFittingAction.FunctionParameter.ParamA3, qfa.getFp());
+    assertEquals(qf.getA3(), qfa.getValue(), 1e-2);
+
+    qfa = (QubicFittingAction) actions.get(3);
+    assertEquals(QubicFittingAction.FunctionParameter.ParamConstant, qfa.getFp());
+    assertEquals(qf.getConstant(), qfa.getValue(), 1e-3);
+
+    assertEquals(90051, sa.getTotalIterationCounter());
   }
 
 }

@@ -1,8 +1,7 @@
 package de.westranger.optimization.common.algorithm.action.planning.solver.stochastic;
 
 import de.westranger.optimization.common.algorithm.action.planning.SearchSpaceState;
-import de.westranger.optimization.common.algorithm.util.Function;
-import de.westranger.optimization.common.algorithm.util.Solution;
+import de.westranger.optimization.common.algorithm.action.planning.solver.Score;
 
 import java.util.Random;
 
@@ -12,46 +11,74 @@ import java.util.Random;
 
 // TODO Warnung einfügen, wenn Verhältnis E_max - E_min / T initial kleiner als 0,8 ist
 
-public final class SimulatedAnnealing<S extends Comparable<S>> {
+public final class SimulatedAnnealing {
 
-    private final SearchSpaceState<S> initialSolution;
-    private final NeighbourSelector ns;
-    private final Function func;
-    private final int maxTemperature;
-    private final Random rng;
+  private final SearchSpaceState initialSolution;
+  private final NeighbourSelector ns;
+  private final Random rng;
+  private final SimulatedAnnealingParameter sap;
 
-    public SimulatedAnnealing(final SearchSpaceState<S> initialSolution, final NeighbourSelector ns, final Function func, final int maxTemperature) {
-        this.initialSolution = initialSolution;
-        this.ns = ns;
-        this.func = func;
-        this.maxTemperature = maxTemperature;
-        this.rng = new Random(0x05025b0e2a3df1cel);
-    }
+  private long totalIterationCounter;
 
-    public SearchSpaceState<S> optimize(final double solutionAccuracy) {
+  public SimulatedAnnealing(final SearchSpaceState initialSolution, final NeighbourSelector ns,
+                            final Random rng, final SimulatedAnnealingParameter sap) {
+    this.initialSolution = initialSolution;
+    this.ns = ns;
+    this.rng = rng;
+    this.totalIterationCounter = 0L;
+    this.sap = sap;
+  }
 
-        SearchSpaceState<S> approxSolution = this.initialSolution;
-        double resultApproxSolution = this.func.evaluate(approxSolution);
+  public SearchSpaceState optimize(final double solutionAccuracy) {
 
-        for (int k = 0; k <= this.maxTemperature; k++) {
-            final double T = (k + 1.0) / (double) this.maxTemperature;
-            final Solution solution = this.ns.computeNeighbour(approxSolution, k, this.maxTemperature);
-            final double resultSolution = this.func.evaluate(solution);
-            System.out.println("result = " + resultSolution + " " + resultApproxSolution);
-            if (resultSolution < resultApproxSolution) {
-                approxSolution = solution;
-                resultApproxSolution = resultSolution;
-            } else if (Math.exp(-(resultSolution - resultApproxSolution) / T) > this.rng.nextDouble()) {
-                approxSolution = solution;
-                resultApproxSolution = resultSolution;
-            }
-            if (resultApproxSolution < solutionAccuracy) {
-                break;
-            }
+    SearchSpaceState currentBestSolution = this.initialSolution;
+    double currentTemp = this.sap.getGamma() * this.sap.getTMax();
+    //System.out.println("start optimization with score " + currentBestSolution.getScore());
+    while (currentTemp > this.sap.getTMin()) {
+      Score currentBestScore = currentBestSolution.getScore();
+      //System.out.println(this.totalIterationCounter + ";" +currentTemp + ";"+ currentBestScore );
+      int notImproved = 0;
+      while (notImproved < this.sap.getOmegaMax()) {
+        this.totalIterationCounter++;
+        final SearchSpaceState solutionCandidate =
+            this.ns.select(currentBestSolution, currentTemp);
+        final Score candidateScore = solutionCandidate.getScore();
+
+        if (candidateScore.compareTo(currentBestScore) < 0) {
+          currentBestScore = candidateScore;
+          currentBestSolution = solutionCandidate;
+          notImproved = 0;
+          //System.out.println(this.totalIterationCounter + ";" +currentTemp + ";"+ currentBestScore );
+        } else if (candidateScore.compareTo(currentBestScore) > 0) {
+          final double probability = Math.exp(-(currentBestSolution.getScore().getAbsoluteScore() -
+              solutionCandidate.getScore().getAbsoluteScore()) / currentTemp);
+
+          if (probability <= 1.0 && probability >
+              this.rng.nextDouble()) {
+            currentBestScore = candidateScore;
+            currentBestSolution = solutionCandidate;
+          }
+          notImproved++;
+        } else {
+          notImproved++;
         }
 
-        return approxSolution;
+        if (currentBestScore.getAbsoluteScore() < solutionAccuracy) {
+          return currentBestSolution;
+        }
+      }
+
+      currentTemp = calculateTemp(currentTemp);
     }
 
+    return currentBestSolution;
+  }
 
+  private double calculateTemp(final double temperature) {
+    return this.sap.getGamma() * temperature;
+  }
+
+  public long getTotalIterationCounter() {
+    return totalIterationCounter;
+  }
 }
