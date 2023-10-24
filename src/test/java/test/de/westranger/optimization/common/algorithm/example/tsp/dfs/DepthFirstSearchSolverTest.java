@@ -1,4 +1,4 @@
-package test.de.westranger.optimization.common.algorithm.action.planning.solver.dfs;
+package test.de.westranger.optimization.common.algorithm.example.tsp.dfs;
 
 import com.google.gson.Gson;
 import de.westranger.geometry.common.simple.Point2D;
@@ -7,10 +7,10 @@ import de.westranger.optimization.common.algorithm.action.planning.ActionPlannin
 import de.westranger.optimization.common.algorithm.action.planning.ActionPlanningSolver;
 import de.westranger.optimization.common.algorithm.action.planning.solver.dfs.DepthFirstSearchSolver;
 import org.junit.jupiter.api.Test;
-import test.de.westranger.optimization.common.algorithm.action.planning.solver.dfs.tsp.Order;
-import test.de.westranger.optimization.common.algorithm.action.planning.solver.dfs.tsp.ProblemFormulation;
-import test.de.westranger.optimization.common.algorithm.action.planning.solver.dfs.tsp.State;
-import test.de.westranger.optimization.common.algorithm.action.planning.solver.dfs.tsp.TSPAction;
+import test.de.westranger.optimization.common.algorithm.example.tsp.dfs.aux.Order;
+import test.de.westranger.optimization.common.algorithm.example.tsp.dfs.aux.ProblemFormulation;
+import test.de.westranger.optimization.common.algorithm.example.tsp.dfs.aux.State;
+import test.de.westranger.optimization.common.algorithm.example.tsp.dfs.aux.TSPAction;
 
 import java.util.*;
 

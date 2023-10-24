@@ -1,12 +1,12 @@
-package test.de.westranger.optimization.common.algorithm.sa.function.fitting;
+package test.de.westranger.optimization.common.algorithm.example.tsp.dfs.aux;
 
 import de.westranger.optimization.common.algorithm.action.planning.solver.Score;
 
-public final class DoubleScore extends Score {
+public final class TSPScore extends Score {
 
   private final double value;
 
-  public DoubleScore(final double value) {
+  public TSPScore(final double value) {
     this.value = value;
   }
 
@@ -16,13 +16,7 @@ public final class DoubleScore extends Score {
   }
 
   @Override
-  public int compareTo(final Score score) {
+  public int compareTo(Score score) {
     return Double.compare(this.value, score.getAbsoluteScore());
   }
-
-  @Override
-  public String toString() {
-    return Double.toString(this.value);
-  }
-
 }

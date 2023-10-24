@@ -1,6 +1,6 @@
 package de.westranger.optimization.common.algorithm.action.planning.solver.stochastic;
 
-public class SimulatedAnnealingParameter {
+public final class SimulatedAnnealingParameter {
   private final double tMax;// = 100000.0;
   private final double tMin;// = 0.1;
   private final double gamma;// = 0.95;

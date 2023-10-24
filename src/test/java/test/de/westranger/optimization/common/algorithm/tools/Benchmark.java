@@ -1,4 +1,4 @@
-package test.de.westranger.optimization.common.algorithm.action.planning.solver.dfs.tsp;
+package test.de.westranger.optimization.common.algorithm.tools;
 
 import de.westranger.geometry.common.simple.Point2D;
 import de.westranger.optimization.common.algorithm.action.planning.ActionPlanningSolution;
@@ -6,6 +6,8 @@ import de.westranger.optimization.common.algorithm.action.planning.ActionPlannin
 import de.westranger.optimization.common.algorithm.action.planning.solver.dfs.DepthFirstSearchSolver;
 
 import java.util.*;
+import test.de.westranger.optimization.common.algorithm.example.tsp.dfs.aux.Order;
+import test.de.westranger.optimization.common.algorithm.example.tsp.dfs.aux.State;
 
 public class Benchmark {
   public static void main(String[] args) {

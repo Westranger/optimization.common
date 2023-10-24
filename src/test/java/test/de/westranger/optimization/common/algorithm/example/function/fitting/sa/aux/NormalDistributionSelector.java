@@ -1,4 +1,4 @@
-package test.de.westranger.optimization.common.algorithm.sa.function.fitting;
+package test.de.westranger.optimization.common.algorithm.example.function.fitting.sa.aux;
 
 import de.westranger.optimization.common.algorithm.action.planning.Action;
 import de.westranger.optimization.common.algorithm.action.planning.SearchSpaceState;
@@ -18,13 +18,12 @@ public final class NormalDistributionSelector implements NeighbourSelector {
                                  double currentTemperature) {
     final List<Action> actions = intermediateSolution.getPossibleActions();
     final Action selectedAction = actions.get(this.rng.nextInt(actions.size()));
-    if (!(selectedAction instanceof QubicFittingAction)) {
-      throw new IllegalArgumentException("Action must be of type QubicFittingAction");
+    if (!(selectedAction instanceof final CubicFittingAction qfa)) {
+      throw new IllegalArgumentException("Action must be of type CubicFittingAction");
     }
-    final QubicFittingAction qfa = (QubicFittingAction) selectedAction;
-    final double newValue = this.rng.nextGaussian() * currentTemperature + qfa.getValue();
+    final double newValue = this.rng.nextGaussian() * currentTemperature + qfa.value();
     final SearchSpaceState result = intermediateSolution.clone();
-    result.perform((Action) new QubicFittingAction(newValue, qfa.getFp()));
+    result.perform(new CubicFittingAction(newValue, qfa.fp()));
     return result;
   }
 }

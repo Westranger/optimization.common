@@ -13,11 +13,11 @@ public final class DepthFirstSearchSolver
 
   private SearchSpaceState initialState;
   private final boolean useBranchAndBound;
-  private Optional<Score> uppperBound;
+  private Score uppperBound;
 
   public DepthFirstSearchSolver(final boolean useBranchAndBound) {
     this.useBranchAndBound = useBranchAndBound;
-    this.uppperBound = Optional.empty();
+    this.uppperBound = null;
   }
 
   @Override
@@ -35,8 +35,8 @@ public final class DepthFirstSearchSolver
       final TreeNode currentNode = candidates.poll();
       final Score currentScore = currentNode.getState().getScore();
 
-      if (useBranchAndBound && this.uppperBound.isPresent()) {
-        final long scoreDiff = currentScore.compareTo(this.uppperBound.get());
+      if (useBranchAndBound && this.uppperBound != null) {
+        final long scoreDiff = currentScore.compareTo(this.uppperBound);
         if (scoreDiff >= 0) {
           currentNode.clearParent(); // unlink parent to enabled cleanup for GC
           continue;
@@ -46,12 +46,12 @@ public final class DepthFirstSearchSolver
       if (currentNode.getState().isGoalState()) {
         // we have a goal state
 
-        if (!this.uppperBound.isEmpty()) {
-          final long scoreDiff = currentScore.compareTo(this.uppperBound.get());
+        if (this.uppperBound != null) {
+          final long scoreDiff = currentScore.compareTo(this.uppperBound);
 
           if (scoreDiff < 0) { // we found a better solution
             result.clear();
-            this.uppperBound = Optional.of(currentNode.getState().getScore());
+            this.uppperBound = currentNode.getState().getScore();
           }
 
           if (scoreDiff < 0) { // we want to store the better or equal scored solution
@@ -62,7 +62,7 @@ public final class DepthFirstSearchSolver
             result.add(solution);
           }
         } else {
-          this.uppperBound = Optional.of(currentNode.getState().getScore());
+          this.uppperBound = currentNode.getState().getScore();
           System.out.println("found a initial solution " + currentNode.getState().getScore());
           final ActionPlanningSolution solution =
               new ActionPlanningSolution(currentNode.getState(),
@@ -79,7 +79,7 @@ public final class DepthFirstSearchSolver
           }
         }
 
-        Collections.sort(candidates, new TreeNodeComparator());
+        candidates.sort(new TreeNodeComparator());
       }
     }
 

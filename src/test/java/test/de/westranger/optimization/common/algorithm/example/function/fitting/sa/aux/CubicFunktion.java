@@ -1,12 +1,12 @@
-package test.de.westranger.optimization.common.algorithm.sa.function.fitting;
+package test.de.westranger.optimization.common.algorithm.example.function.fitting.sa.aux;
 
-public class QubicFunktion {
+public class CubicFunktion {
   private double a1;
   private double a2;
   private double a3;
   private double constant;
 
-  public QubicFunktion(final double a1, final double a2, final double a3, final double constant) {
+  public CubicFunktion(final double a1, final double a2, final double a3, final double constant) {
     this.a1 = a1;
     this.a2 = a2;
     this.a3 = a3;

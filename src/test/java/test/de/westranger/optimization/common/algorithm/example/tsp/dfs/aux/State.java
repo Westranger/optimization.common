@@ -1,4 +1,4 @@
-package test.de.westranger.optimization.common.algorithm.action.planning.solver.dfs.tsp;
+package test.de.westranger.optimization.common.algorithm.example.tsp.dfs.aux;
 
 import de.westranger.geometry.common.simple.Point2D;
 import de.westranger.optimization.common.algorithm.action.planning.Action;
