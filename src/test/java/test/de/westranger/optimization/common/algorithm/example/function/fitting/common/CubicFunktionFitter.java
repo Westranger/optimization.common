@@ -1,4 +1,4 @@
-package test.de.westranger.optimization.common.algorithm.example.function.fitting.sa.aux;
+package test.de.westranger.optimization.common.algorithm.example.function.fitting.common;
 
 import de.westranger.optimization.common.algorithm.action.planning.Action;
 import de.westranger.optimization.common.algorithm.action.planning.SearchSpaceState;
@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import test.de.westranger.optimization.common.algorithm.example.function.fitting.sa.aux.CubicFunktion;
+import test.de.westranger.optimization.common.algorithm.example.function.fitting.sa.aux.DataPoint;
 
 public final class CubicFunktionFitter extends SearchSpaceState {
 

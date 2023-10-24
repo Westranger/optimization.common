@@ -1,4 +1,4 @@
-package test.de.westranger.optimization.common.algorithm.example.tsp.dfs.aux;
+package test.de.westranger.optimization.common.algorithm.example.tsp.common;
 
 import de.westranger.geometry.common.simple.Point2D;
 import de.westranger.optimization.common.algorithm.action.planning.Action;
@@ -22,8 +22,18 @@ public class State extends SearchSpaceState {
     this.orderList = new LinkedList<>(orderList);
     this.orderMapping = new TreeMap<>(orderMapping);
     this.vehiclePositions = new TreeMap<>(vehiclePositions);
-    this.score = new TSPScore(0.0);
     this.lastPerformedAction = Optional.empty();
+
+    double score = 0.0;
+    for (Map.Entry<Integer, Point2D> entry : vehiclePositions.entrySet()) {
+      Point2D prevPt = entry.getValue();
+
+      for (Order order : orderMapping.get(entry.getKey())) {
+        score += prevPt.distance(order.getTo());
+        prevPt = order.getTo();
+      }
+    }
+    this.score = new TSPScore(score);
   }
 
   private State(final List<Order> orderList, final Map<Integer, List<Order>> orderMapping,
@@ -52,14 +62,13 @@ public class State extends SearchSpaceState {
     final boolean result = this.orderList.remove(act.getOrder());
     if (result) {
       List<Order> list = this.orderMapping.get(act.getVehicleID());
+      final double dist;
       if (list.isEmpty()) {
-        final double dist =
-            this.vehiclePositions.get(act.getVehicleID()).distance(act.getOrder().getTo());
-        score = new TSPScore(this.score.getAbsoluteScore() + dist);
+        dist = this.vehiclePositions.get(act.getVehicleID()).distance(act.getOrder().getTo());
       } else {
-        final double dist = list.get(list.size() - 1).getTo().distance(act.getOrder().getTo());
-        score = new TSPScore(this.score.getAbsoluteScore() + dist);
+        dist = list.get(list.size() - 1).getTo().distance(act.getOrder().getTo());
       }
+      score = new TSPScore(this.score.getAbsoluteScore() + dist);
       list.add(act.getOrder());
     }
 
@@ -105,4 +114,15 @@ public class State extends SearchSpaceState {
     return this.orderList.isEmpty();
   }
 
+  public List<Order> getOrderList() {
+    return orderList;
+  }
+
+  public Map<Integer, List<Order>> getOrderMapping() {
+    return orderMapping;
+  }
+
+  public Map<Integer, Point2D> getVehiclePositions() {
+    return vehiclePositions;
+  }
 }

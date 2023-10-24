@@ -1,4 +1,4 @@
-package test.de.westranger.optimization.common.algorithm.example.tsp.dfs.aux;
+package test.de.westranger.optimization.common.algorithm.example.tsp.common;
 
 
 import de.westranger.optimization.common.algorithm.action.planning.Action;

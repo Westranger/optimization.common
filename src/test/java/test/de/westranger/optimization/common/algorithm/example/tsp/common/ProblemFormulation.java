@@ -1,9 +1,10 @@
-package test.de.westranger.optimization.common.algorithm.example.tsp.dfs.aux;
+package test.de.westranger.optimization.common.algorithm.example.tsp.common;
 
 import de.westranger.geometry.common.simple.Point2D;
 
 import java.util.List;
 import java.util.Map;
+import test.de.westranger.optimization.common.algorithm.example.tsp.common.Order;
 
 public final class ProblemFormulation {
     private List<Order> orders;

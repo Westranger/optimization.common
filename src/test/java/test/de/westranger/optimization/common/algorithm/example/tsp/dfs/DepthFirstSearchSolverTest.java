@@ -7,10 +7,10 @@ import de.westranger.optimization.common.algorithm.action.planning.ActionPlannin
 import de.westranger.optimization.common.algorithm.action.planning.ActionPlanningSolver;
 import de.westranger.optimization.common.algorithm.action.planning.solver.dfs.DepthFirstSearchSolver;
 import org.junit.jupiter.api.Test;
-import test.de.westranger.optimization.common.algorithm.example.tsp.dfs.aux.Order;
-import test.de.westranger.optimization.common.algorithm.example.tsp.dfs.aux.ProblemFormulation;
-import test.de.westranger.optimization.common.algorithm.example.tsp.dfs.aux.State;
-import test.de.westranger.optimization.common.algorithm.example.tsp.dfs.aux.TSPAction;
+import test.de.westranger.optimization.common.algorithm.example.tsp.common.Order;
+import test.de.westranger.optimization.common.algorithm.example.tsp.common.ProblemFormulation;
+import test.de.westranger.optimization.common.algorithm.example.tsp.common.State;
+import test.de.westranger.optimization.common.algorithm.example.tsp.common.TSPAction;
 
 import java.util.*;
 

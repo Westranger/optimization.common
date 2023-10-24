@@ -1,4 +1,4 @@
-package test.de.westranger.optimization.common.algorithm.example.function.fitting.sa.aux;
+package test.de.westranger.optimization.common.algorithm.example.function.fitting.common;
 
 import de.westranger.optimization.common.algorithm.action.planning.solver.Score;
 
