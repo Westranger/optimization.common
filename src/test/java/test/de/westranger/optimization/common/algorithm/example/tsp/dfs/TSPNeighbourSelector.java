@@ -1,4 +1,4 @@
-package test.de.westranger.optimization.common.algorithm.example.tsp.dfs.aux;
+package test.de.westranger.optimization.common.algorithm.example.tsp.dfs;
 
 import de.westranger.optimization.common.algorithm.action.planning.SearchSpaceState;
 import de.westranger.optimization.common.algorithm.action.planning.solver.stochastic.NeighbourSelector;
@@ -45,21 +45,12 @@ public final class TSPNeighbourSelector implements NeighbourSelector {
     List<Order> orders = state.getOrderMapping().get(1);
 
     final double ratio = (currentTemperature - minTemperature) / maxTemperature;
-    switch (rng.nextInt(2)) {
+    switch (rng.nextInt(4)) {
       case 0 -> {
         // insert move
         final int removeIdx = this.rng.nextInt(orders.size());
         final Order order = orders.remove(removeIdx);
-        final int stddev = (int) ((orders.size() / 2) * ratio);
-        final double nexD = this.rng.nextDouble();
-        int insertIdx =
-            (int) triangularDistribution(stddev - removeIdx, removeIdx, stddev + removeIdx);
-
-        if (insertIdx < 0) {
-          insertIdx = 0;
-        } else if (insertIdx >= orders.size()) {
-          insertIdx = orders.size() - 1;
-        }
+        final int insertIdx = this.rng.nextInt(orders.size());
 
         orders.add(insertIdx, order);
       }
@@ -67,31 +58,50 @@ public final class TSPNeighbourSelector implements NeighbourSelector {
         // swap move
         final int removeIdxA = this.rng.nextInt(orders.size());
         final Order orderA = orders.remove(removeIdxA);
-        final int stddev = (int) ((orders.size() / 2) * ratio);
-        int removeIdxB =
-            (int) triangularDistribution(stddev - removeIdxA, removeIdxA, stddev + removeIdxA);
-
-        if (removeIdxB < 0) {
-          removeIdxB = 0;
-        } else if (removeIdxB >= orders.size()) {
-          removeIdxB = orders.size() - 1;
-        }
-
+        final int removeIdxB = this.rng.nextInt(orders.size());
         final Order orderB = orders.remove(removeIdxB);
+
         orders.add(removeIdxB, orderA);
         orders.add(removeIdxA, orderB);
       }
-      /*
-      case 2 -> {
-        // 2-opt move
 
+      case 2 -> {
+        // reverse Move / 2-opt move
+        final int idxA = this.rng.nextInt(orders.size());
+        final int idxB = this.rng.nextInt(orders.size());
+
+        final int min = Math.min(idxA, idxB);
+        final int max = Math.max(idxA, idxB);
+        final int deltaHalf = (max - min) / 2;
+
+        for (int i = min; i <= min + deltaHalf; i++) {
+          Order swap = orders.get(i);
+          orders.set(i, orders.get(max - i));
+          orders.set(max - i, swap);
+        }
       }
       case 3 -> {
-        // reverse move
+        // insert subroute
+        final int idxA = this.rng.nextInt(orders.size());
+        final int idxB = this.rng.nextInt(orders.size());
 
+        final int min = Math.min(idxA, idxB);
+        final int max = Math.max(idxA, idxB);
+
+        List<Order> subroute = new LinkedList<>();
+        for (int i = min; i <= max; i++) {
+          subroute.add(orders.remove(min));
+        }
+
+        if (orders.isEmpty()) {
+          orders.addAll(subroute);
+        } else {
+          final int idxC = this.rng.nextInt(orders.size());
+          for (int i = 0; i < subroute.size(); i++) {
+            orders.add(idxC + i, subroute.get(i));
+          }
+        }
       }
-      */
-
     }
 
     final List<Order> newOrders = new ArrayList<>(orders.size());
@@ -101,15 +111,5 @@ public final class TSPNeighbourSelector implements NeighbourSelector {
     newMapping.put(1, newOrders);
 
     return new State(new ArrayList<>(), newMapping, state.getVehiclePositions());
-  }
-
-  public double triangularDistribution(double a, double b, double c) {
-    double F = (c - a) / (b - a);
-    double rand = this.rng.nextDouble();
-    if (rand < F) {
-      return a + Math.sqrt(rand * (b - a) * (c - a));
-    } else {
-      return b - Math.sqrt((1 - rand) * (b - a) * (b - c));
-    }
   }
 }

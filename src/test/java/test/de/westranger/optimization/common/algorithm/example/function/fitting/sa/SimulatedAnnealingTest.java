@@ -10,10 +10,10 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import java.util.Random;
-import test.de.westranger.optimization.common.algorithm.example.function.fitting.sa.aux.DataPoint;
-import test.de.westranger.optimization.common.algorithm.example.function.fitting.sa.aux.NormalDistributionSelector;
+import test.de.westranger.optimization.common.algorithm.example.function.fitting.common.DataPoint;
+import test.de.westranger.optimization.common.algorithm.example.function.fitting.common.NormalDistributionSelector;
 import test.de.westranger.optimization.common.algorithm.example.function.fitting.common.CubicFittingAction;
-import test.de.westranger.optimization.common.algorithm.example.function.fitting.sa.aux.CubicFunktion;
+import test.de.westranger.optimization.common.algorithm.example.function.fitting.common.CubicFunktion;
 import test.de.westranger.optimization.common.algorithm.example.function.fitting.common.CubicFunktionFitter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

@@ -1,27 +1,18 @@
 package test.de.westranger.optimization.common.algorithm.tools;
 
-import com.google.gson.Gson;
-import de.westranger.geometry.common.simple.Point2D;
 import de.westranger.optimization.common.algorithm.action.planning.SearchSpaceState;
 import de.westranger.optimization.common.algorithm.action.planning.solver.stochastic.NeighbourSelector;
 import de.westranger.optimization.common.algorithm.action.planning.solver.stochastic.SimulatedAnnealing;
 import de.westranger.optimization.common.algorithm.action.planning.solver.stochastic.SimulatedAnnealingParameter;
-import java.io.InputStreamReader;
-import java.util.Collections;
+
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
-import java.util.TreeMap;
-import test.de.westranger.optimization.common.algorithm.example.function.fitting.sa.aux.DataPoint;
-import test.de.westranger.optimization.common.algorithm.example.function.fitting.sa.aux.NormalDistributionSelector;
-import test.de.westranger.optimization.common.algorithm.example.function.fitting.sa.aux.CubicFunktion;
+
+import test.de.westranger.optimization.common.algorithm.example.function.fitting.common.DataPoint;
+import test.de.westranger.optimization.common.algorithm.example.function.fitting.common.NormalDistributionSelector;
+import test.de.westranger.optimization.common.algorithm.example.function.fitting.common.CubicFunktion;
 import test.de.westranger.optimization.common.algorithm.example.function.fitting.common.CubicFunktionFitter;
-import test.de.westranger.optimization.common.algorithm.example.tsp.common.Order;
-import test.de.westranger.optimization.common.algorithm.example.tsp.common.ProblemFormulation;
-import test.de.westranger.optimization.common.algorithm.example.tsp.common.State;
-import test.de.westranger.optimization.common.algorithm.example.tsp.dfs.aux.TSPNeighbourSelector;
-import test.de.westranger.optimization.common.algorithm.example.tsp.sa.SimulatedAnnealingTest;
 
 public class OptimizeParameter {
 

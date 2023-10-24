@@ -1,4 +1,4 @@
-package test.de.westranger.optimization.common.algorithm.example.function.fitting.sa.aux;
+package test.de.westranger.optimization.common.algorithm.example.function.fitting.common;
 
 public record DataPoint(double x, double y) {
 
