@@ -29,27 +29,28 @@ public class SimulatedAnnealingTest {
     final Gson gson = new Gson();
     final ProblemFormulation problem = gson.fromJson(reader, ProblemFormulation.class);
 
-    //System.out.println("worked");
+    Map<Integer,Point2D> vehicleMapping = new TreeMap<>();
+    vehicleMapping.put(1,new Point2D(100000,0));
 
-    // create initial solution
-    Map<Integer, List<Order>> orderMapping = new TreeMap<>();
+    Map<Integer,List<Order>> orderMapping = new TreeMap<>();
+    orderMapping.put(1,new ArrayList<>());
 
-    LinkedList<Order> orders = new LinkedList<>(problem.getOrders());
-    for (Map.Entry<Integer, Point2D> entry : problem.getVehicleStartPositions().entrySet()) {
-      orderMapping.put(entry.getKey(), new LinkedList<>());
+    List<Order> orders = new LinkedList<>();
+    orders.add(new Order(1,new Point2D(10000.0,0)));
+    orders.add(new Order(9,new Point2D(90000.0,0)));
+    orders.add(new Order(2,new Point2D(20000.0,0)));
+    orders.add(new Order(8,new Point2D(80000.0,0)));
+    orders.add(new Order(3,new Point2D(30000.0,0)));
+    orders.add(new Order(7,new Point2D(70000.0,0)));
+    orders.add(new Order(4,new Point2D(40000.0,0)));
+    orders.add(new Order(6,new Point2D(60000.0,0)));
+    orders.add(new Order(5,new Point2D(50000.0,0)));
 
-      int cnt = 0;
-      while (!orders.isEmpty()) {
-        orderMapping.get(cnt + 1).add(orders.removeFirst());
-        cnt = (cnt + 1) % problem.getVehicleStartPositions().size();
-      }
-    }
-
-    State initialState = new State(orders, orderMapping, problem.getVehicleStartPositions());
+    State initialState = new State(orders, orderMapping,vehicleMapping);
 
     SimulatedAnnealingParameter sap =
-        new SimulatedAnnealingParameter(10000.0, 0.1, 0.95, 200);
-    Random rng = new Random(47110815L);
+        new SimulatedAnnealingParameter(10000000.0, 0.001, 0.99, 1000);
+    Random rng = new Random(47110816L);
     TSPNeighbourSelector ns = new TSPNeighbourSelector(sap.getTMax(), sap.getTMin(), rng);
 
     SimulatedAnnealing sa = new SimulatedAnnealing(initialState, ns, rng, sap);

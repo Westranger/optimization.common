@@ -34,7 +34,7 @@ public class OptimizeParameter {
       for (double tmin : new double[] {100, 10, 1, 0.1, 0.01,0.001}) {
         for (double gamma : new double[] {0.8, 0.85, 0.9, 0.95, 0.96, 0.97, 0.98,
             0.99}) {
-          for (double omega : new double[] {100, 125, 150, 175, 200}) {
+          for (double omega : new double[] {100, 200, 300, 400, 500}) {
             if (tmin >= tmax) {
               continue;
             }
@@ -47,42 +47,23 @@ public class OptimizeParameter {
 
               final SimulatedAnnealingParameter sap =
                   new SimulatedAnnealingParameter(tmax, tmin, gamma, omega);
-              final InputStreamReader reader = new InputStreamReader(
-                  SimulatedAnnealingTest.class.getResourceAsStream("/tsp/1_vehicle_29_cities.json"));
 
-              final Gson gson = new Gson();
-              final ProblemFormulation problem = gson.fromJson(reader, ProblemFormulation.class);
-
-              //System.out.println("worked");
-
-              // create initial solution
-              Map<Integer, List<Order>> orderMapping = new TreeMap<>();
-              Random rng = new Random(47110815L);
-
-              LinkedList<Order> orders = new LinkedList<>(problem.getOrders());
-              for (Map.Entry<Integer, Point2D> entry : problem.getVehicleStartPositions().entrySet()) {
-                orderMapping.put(entry.getKey(), new LinkedList<>());
-
-                int cnt = 0;
-                while (!orders.isEmpty()) {
-                  orderMapping.get(cnt + 1).add(orders.removeFirst());
-                  cnt = (cnt + 1) % problem.getVehicleStartPositions().size();
-                }
-
-                Collections.shuffle(orderMapping.get(entry.getKey()),rng);
+              CubicFunktion qf = new CubicFunktion(3.0, 1.5, 9.0, 0.25);
+              List<DataPoint> data = new LinkedList<>();
+              for (int x = -10; x <= 10; x++) {
+                data.add(new DataPoint(x, qf.evaluate(x)));
               }
 
-              State initialState = new State(orders, orderMapping, problem.getVehicleStartPositions());
+              final Random rng = new Random(47110815);
+              final CubicFunktion tbf = new CubicFunktion(10000.0, 10000.0, 10000.0, 10000.0);
+              final CubicFunktionFitter initial = new CubicFunktionFitter(tbf, data);
+              final NeighbourSelector ns = new NormalDistributionSelector(rng);
 
-
-              TSPNeighbourSelector ns = new TSPNeighbourSelector(sap.getTMax(), sap.getTMin(), rng);
-
-              SimulatedAnnealing sa = new SimulatedAnnealing(initialState, ns, rng, sap);
-
-              SearchSpaceState optimizedState = sa.optimize(1e3);
+              final SimulatedAnnealing sa = new SimulatedAnnealing(initial, ns, rng, sap);
+              final SearchSpaceState optimizedResult = sa.optimize(1e-6);
 
               iter += sa.getTotalIterationCounter();
-              sum += optimizedState.getScore().getAbsoluteScore();
+              sum += optimizedResult.getScore().getAbsoluteScore();
             }
 
             sum /= 10.0;
@@ -95,7 +76,7 @@ public class OptimizeParameter {
                       sum + " param: " + tmax + " " +
                       tmin + " " + gamma + " " + omega + " " + sum * iter
               );
-              bestScore = sum * iter;
+              bestScore = sum *  iter;
             }
           }
         }

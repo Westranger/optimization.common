@@ -36,9 +36,9 @@ public final class SimulatedAnnealing {
     System.out.println("start optimization with score " + currentBestSolution.getScore().getAbsoluteScore());
     while (currentTemp > this.sap.getTMin()) {
       Score currentBestScore = currentBestSolution.getScore();
-      //System.out.println(this.totalIterationCounter + ";" +currentTemp + ";"+ currentBestScore.getAbsoluteScore() );
+      System.out.println(this.totalIterationCounter + ";" +currentTemp + ";"+ currentBestScore.getAbsoluteScore() );
       int notImproved = 0;
-      while (notImproved < this.sap.getOmegaMax()) {
+      for(int i=0;i< this.sap.getOmegaMax();i++) {
         this.totalIterationCounter++;
         final SearchSpaceState solutionCandidate =
             this.ns.select(currentBestSolution, currentTemp);
@@ -50,17 +50,17 @@ public final class SimulatedAnnealing {
           notImproved = 0;
           System.out.println("BEST " + this.totalIterationCounter + ";" +currentTemp + ";"+ currentBestScore.getAbsoluteScore());
         } else if (candidateScore.compareTo(currentBestScore) > 0) {
-          final double ex = -((solutionCandidate.getScore().getAbsoluteScore() -
+          final double ex = -(Math.abs(solutionCandidate.getScore().getAbsoluteScore() -
               currentBestSolution.getScore().getAbsoluteScore()) / currentTemp);
           final double probability = Math.exp(ex);
 
-          System.out.println("prob " + probability);
+          //System.out.println("prob " + probability);
 
           if (probability <= 1.0 && probability >
               this.rng.nextDouble()) {
             //System.out.println("WORSE " + this.totalIterationCounter + ";" +currentTemp + ";"+ currentBestScore.getAbsoluteScore() + " " + ex);
-            currentBestScore = candidateScore;
-            currentBestSolution = solutionCandidate;
+            //currentBestScore = candidateScore;
+            //currentBestSolution = solutionCandidate;
           }else {
             notImproved++;
           }
@@ -71,7 +71,7 @@ public final class SimulatedAnnealing {
         if (currentBestScore.getAbsoluteScore() < solutionAccuracy) {
           return currentBestSolution;
         }
-        System.out.println("not improved " + notImproved);
+        //System.out.println("not improved " + notImproved);
       }
 
       currentTemp = calculateTemp(currentTemp);

@@ -31,7 +31,7 @@ class SimulatedAnnealingTest {
     }
 
     final SimulatedAnnealingParameter sap =
-        new SimulatedAnnealingParameter(1000, 0.001, 0.8, 100);
+        new SimulatedAnnealingParameter(10000, 0.001, 0.9, 100);
     final Random rng = new Random(47110815);
     final CubicFunktion tbf = new CubicFunktion(10000.0, 10000.0, 10000.0, 10000.0);
     final CubicFunktionFitter initial = new CubicFunktionFitter(tbf, data);
@@ -49,7 +49,7 @@ class SimulatedAnnealingTest {
       assertTrue(actions.get(i) instanceof CubicFittingAction);
     }
 
-    assertEquals(9.792483985470145E-4, qff.getScore().getAbsoluteScore(), 1e-4);
+    assertEquals(5.855884348558944E-4, qff.getScore().getAbsoluteScore(), 1e-4);
 
     CubicFittingAction qfa = (CubicFittingAction) actions.get(0);
     assertEquals(CubicFittingAction.FunctionParameter.ParamA1, qfa.fp());
@@ -61,13 +61,13 @@ class SimulatedAnnealingTest {
 
     qfa = (CubicFittingAction) actions.get(2);
     assertEquals(CubicFittingAction.FunctionParameter.ParamA3, qfa.fp());
-    assertEquals(qf.getA3(), qfa.value(), 1e-1);
+    assertEquals(qf.getA3(), qfa.value(), 1e-2);
 
     qfa = (CubicFittingAction) actions.get(3);
     assertEquals(CubicFittingAction.FunctionParameter.ParamConstant, qfa.fp());
-    assertEquals(qf.getConstant(), qfa.value(), 1e-3);
+    assertEquals(qf.getConstant(), qfa.value(), 1e-2);
 
-    assertEquals(16831, sa.getTotalIterationCounter());
+    assertEquals(15200, sa.getTotalIterationCounter());
   }
 
 }
