@@ -42,7 +42,7 @@ public final class TSPNeighbourSelector implements NeighbourSelector {
       throw new IllegalArgumentException("current implementation can only handle a single vehicle");
     }
 
-    List<Order> orders = state.getOrderMapping().get(1);
+    List<Order> orders = new ArrayList<>(state.getOrderMapping().get(1));
 
     final double ratio = (currentTemperature - minTemperature) / maxTemperature;
     switch (rng.nextInt(4)) {
@@ -64,7 +64,6 @@ public final class TSPNeighbourSelector implements NeighbourSelector {
         orders.add(removeIdxB, orderA);
         orders.add(removeIdxA, orderB);
       }
-
       case 2 -> {
         // reverse Move / 2-opt move
         final int idxA = this.rng.nextInt(orders.size());
@@ -104,11 +103,9 @@ public final class TSPNeighbourSelector implements NeighbourSelector {
       }
     }
 
-    final List<Order> newOrders = new ArrayList<>(orders.size());
-    newOrders.addAll(orders);
 
     final Map<Integer, List<Order>> newMapping = new TreeMap<>();
-    newMapping.put(1, newOrders);
+    newMapping.put(1, orders);
 
     return new State(new ArrayList<>(), newMapping, state.getVehiclePositions());
   }

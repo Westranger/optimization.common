@@ -33,48 +33,71 @@ public final class SimulatedAnnealing {
 
     SearchSpaceState currentBestSolution = this.initialSolution;
     double currentTemp = this.sap.getGamma() * this.sap.getTMax();
-    System.out.println("start optimization with score " + currentBestSolution.getScore().getAbsoluteScore());
-    while (currentTemp > this.sap.getTMin()) {
+
+    int outerImproved = 0;
+    while (currentTemp >= this.sap.getTMin() && outerImproved < 50) {
       Score currentBestScore = currentBestSolution.getScore();
-      System.out.println(this.totalIterationCounter + ";" +currentTemp + ";"+ currentBestScore.getAbsoluteScore() );
-      int notImproved = 0;
-      for(int i=0;i< this.sap.getOmegaMax();i++) {
+
+      boolean improved = false;
+      double attempted = 0;
+
+      int iterSinceLastBestFound = 0;
+
+      Score temperatureBestScore = currentBestSolution.getScore();
+      SearchSpaceState temperatureBestSolution = currentBestSolution;
+      while (iterSinceLastBestFound < sap.getOmegaMax()) {
         this.totalIterationCounter++;
         final SearchSpaceState solutionCandidate =
-            this.ns.select(currentBestSolution, currentTemp);
+            this.ns.select(temperatureBestSolution, currentTemp);
         final Score candidateScore = solutionCandidate.getScore();
+
+        attempted++;
 
         if (candidateScore.compareTo(currentBestScore) < 0) {
           currentBestScore = candidateScore;
           currentBestSolution = solutionCandidate;
-          notImproved = 0;
-          System.out.println("BEST " + this.totalIterationCounter + ";" +currentTemp + ";"+ currentBestScore.getAbsoluteScore());
-        } else if (candidateScore.compareTo(currentBestScore) > 0) {
-          final double ex = -(Math.abs(solutionCandidate.getScore().getAbsoluteScore() -
-              currentBestSolution.getScore().getAbsoluteScore()) / currentTemp);
-          final double probability = Math.exp(ex);
+          iterSinceLastBestFound = 0;
+          improved = true;
+        }
 
-          //System.out.println("prob " + probability);
+        if (candidateScore.compareTo(temperatureBestScore) < 0) {
+          temperatureBestScore = candidateScore;
+          temperatureBestSolution = solutionCandidate;
+
+        } else if (candidateScore.compareTo(temperatureBestScore) > 0) {
+          final double ex = -(Math.abs(solutionCandidate.getScore().getAbsoluteScore() -
+              temperatureBestSolution.getScore().getAbsoluteScore()) / currentTemp);
+          final double probability = Math.exp(ex);
 
           if (probability <= 1.0 && probability >
               this.rng.nextDouble()) {
-            //System.out.println("WORSE " + this.totalIterationCounter + ";" +currentTemp + ";"+ currentBestScore.getAbsoluteScore() + " " + ex);
-            //currentBestScore = candidateScore;
-            //currentBestSolution = solutionCandidate;
-          }else {
-            notImproved++;
+            temperatureBestScore = candidateScore;
+            temperatureBestSolution = solutionCandidate;
           }
-        } else {
-          notImproved++;
         }
 
-        if (currentBestScore.getAbsoluteScore() < solutionAccuracy) {
-          return currentBestSolution;
+        if (temperatureBestScore.getAbsoluteScore() < solutionAccuracy) {
+          return temperatureBestSolution;
         }
-        //System.out.println("not improved " + notImproved);
+        iterSinceLastBestFound++;
       }
 
-      currentTemp = calculateTemp(currentTemp);
+      if(!improved){
+        outerImproved++;
+      }else{
+        outerImproved = 0;
+      }
+
+      //System.out.println(this.totalIterationCounter + ";" + currentTemp + ";" +
+      //    currentBestScore.getAbsoluteScore() + ";" + temperatureBestScore.getAbsoluteScore() +
+      //    ";" + attempted + ";" + outerImproved);
+
+      if(attempted > sap.getOmegaMax()){
+        currentTemp = 0.99 * currentTemp;
+      }else{
+        currentTemp = calculateTemp(currentTemp);
+      }
+      currentTemp = Math.max(this.sap.getTMin(),currentTemp);
     }
 
     return currentBestSolution;

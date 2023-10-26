@@ -23,17 +23,7 @@ public class State extends SearchSpaceState {
     this.orderMapping = new TreeMap<>(orderMapping);
     this.vehiclePositions = new TreeMap<>(vehiclePositions);
     this.lastPerformedAction = Optional.empty();
-
-    double score = 0.0;
-    for (Map.Entry<Integer, Point2D> entry : vehiclePositions.entrySet()) {
-      Point2D prevPt = entry.getValue();
-
-      for (Order order : orderMapping.get(entry.getKey())) {
-        score += prevPt.distance(order.getTo());
-        prevPt = order.getTo();
-      }
-    }
-    this.score = new TSPScore(score);
+    this.score = new TSPScore(computeFullScore());
   }
 
   private State(final List<Order> orderList, final Map<Integer, List<Order>> orderMapping,
@@ -84,7 +74,7 @@ public class State extends SearchSpaceState {
 
   @Override
   public int compareTo(SearchSpaceState o) {
-    return 0;
+    return this.score.compareTo(o.getScore());
   }
 
   @Override
@@ -125,4 +115,41 @@ public class State extends SearchSpaceState {
   public Map<Integer, Point2D> getVehiclePositions() {
     return vehiclePositions;
   }
+
+  private double computeScore(final Point2D vehicleStart, final List<Order> orders) {
+    double sum = 0.0;
+    Point2D prev = vehicleStart;
+    for (int i = 0; i < orders.size(); i++) {
+      final Point2D current = orders.get(i).getTo();
+      sum += prev.distance(current);
+      prev = current;
+    }
+
+    return sum;
+  }
+
+  private double computeFullScore() {
+    double score = 0.0;
+    for (Map.Entry<Integer, Point2D> entry : vehiclePositions.entrySet()) {
+      score += computeScore(entry.getValue(), orderMapping.get(entry.getKey()));
+    }
+    return score;
+  }
+
+  @Override
+  public String toString() {
+    final StringBuilder sb = new StringBuilder();
+    sb.append("(state score=");
+    sb.append(computeFullScore());
+    sb.append(' ');
+    if (this.score != null) {
+      sb.append(this.score.getAbsoluteScore());
+    } else {
+      sb.append('x');
+    }
+    sb.append(')');
+
+    return sb.toString();
+  }
+
 }
