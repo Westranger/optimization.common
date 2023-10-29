@@ -36,7 +36,7 @@ public class OptimizeParameter {
         1000, 100}) {
       for (double tmin : new double[] {1000, 100, 10, 1, 0.1, 0.01, 0.001}) {
         for (double gamma : new double[] {0.7, 0.8, 0.85, 0.9, 0.95, 0.96, 0.97, 0.98,
-            0.99}) {
+            0.99,999}) {
           for (double omega : new double[] {50, 100, 150, 200, 300, 400, 500}) {
             if (tmin >= tmax) {
               continue;
@@ -105,7 +105,7 @@ public class OptimizeParameter {
   private static SimulatedAnnealing szenarioB(final SimulatedAnnealingParameter sap,
                                              final Random rng) {
     final InputStreamReader reader = new InputStreamReader(
-        SimulatedAnnealingTest.class.getResourceAsStream("/1_vehicle_980_orders.json"));
+        SimulatedAnnealingTest.class.getResourceAsStream("/1_vehicle_194_orders.json"));
     final Gson gson = new Gson();
     final ProblemFormulation problem = gson.fromJson(reader, ProblemFormulation.class);
 

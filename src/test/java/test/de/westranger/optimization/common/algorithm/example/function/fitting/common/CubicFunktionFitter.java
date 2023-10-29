@@ -97,4 +97,9 @@ public final class CubicFunktionFitter extends SearchSpaceState {
   public int compareTo(SearchSpaceState searchSpaceState) {
     return (new DoubleScore(this.score)).compareTo(searchSpaceState.getScore());
   }
+
+  @Override
+  public String toSVG() {
+    return null;
+  }
 }
