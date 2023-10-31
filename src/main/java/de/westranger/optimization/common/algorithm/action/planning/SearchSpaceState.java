@@ -7,19 +7,19 @@ import java.util.List;
 import java.util.Optional;
 
 public abstract class SearchSpaceState
-        implements Comparable<SearchSpaceState>, Cloneable, Visualizable {
+    implements Comparable<SearchSpaceState>, Cloneable, Visualizable {
 
-    public abstract List<Action> getPossibleActions();
+  public abstract List<Action> getPossibleActions();
 
-    public abstract boolean perform(Action action);
+  public abstract boolean perform(Action action);
 
-    public abstract Score getScore();
+  public abstract Score getScore();
 
-    @Override
-    public abstract SearchSpaceState clone();
+  @Override
+  public abstract SearchSpaceState clone();
 
-    public abstract Optional<Action> getLastPerformedAction();
+  public abstract Optional<Action> getLastPerformedAction();
 
-    public abstract boolean isGoalState();
+  public abstract boolean isGoalState();
 
 }

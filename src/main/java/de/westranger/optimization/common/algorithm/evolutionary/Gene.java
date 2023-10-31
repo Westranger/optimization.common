@@ -4,15 +4,14 @@ import java.util.LinkedList;
 
 public final class Gene<T> extends LinkedList<T> {
 
-    public double getScore() {
-        return score;
-    }
+  public double getScore() {
+    return score;
+  }
 
-    public void setScore(final double score) {
-        this.score = score;
-    }
+  public void setScore(final double score) {
+    this.score = score;
+  }
 
-    private double score;
-
-
+  private double score;
+  
 }

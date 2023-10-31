@@ -5,7 +5,6 @@ import de.westranger.optimization.common.algorithm.action.planning.SearchSpaceSt
 import de.westranger.optimization.common.algorithm.action.planning.solver.stochastic.NeighbourSelector;
 import java.util.List;
 import java.util.Random;
-import test.de.westranger.optimization.common.algorithm.example.function.fitting.common.CubicFittingAction;
 
 public final class NormalDistributionSelector implements NeighbourSelector {
   private final Random rng;

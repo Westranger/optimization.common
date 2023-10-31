@@ -7,49 +7,52 @@ import java.util.Map;
 import test.de.westranger.optimization.common.algorithm.example.tsp.common.Order;
 
 public final class ProblemFormulation {
-    private List<Order> orders;
-    private Map<Integer, Point2D> vehicleStartPositions;
+  private List<Order> orders;
+  private Map<Integer, Point2D> vehicleStartPositions;
 
-    private Map<Integer, List<Order>> finalOrderMapping;
+  private Map<Integer, List<Order>> finalOrderMapping;
 
-    private double expectedScore;
+  private double expectedScore;
 
-    public ProblemFormulation(final List<Order> orders, final Map<Integer, Point2D> vehicleStartPositions, final Map<Integer, List<Order>> finalOrderMapping, final double expectedScore) {
-        this.orders = orders;
-        this.vehicleStartPositions = vehicleStartPositions;
-        this.finalOrderMapping = finalOrderMapping;
-        this.expectedScore = expectedScore;
-    }
+  public ProblemFormulation(final List<Order> orders,
+                            final Map<Integer, Point2D> vehicleStartPositions,
+                            final Map<Integer, List<Order>> finalOrderMapping,
+                            final double expectedScore) {
+    this.orders = orders;
+    this.vehicleStartPositions = vehicleStartPositions;
+    this.finalOrderMapping = finalOrderMapping;
+    this.expectedScore = expectedScore;
+  }
 
-    public List<Order> getOrders() {
-        return orders;
-    }
+  public List<Order> getOrders() {
+    return orders;
+  }
 
-    public void setOrders(List<Order> orders) {
-        this.orders = orders;
-    }
+  public void setOrders(List<Order> orders) {
+    this.orders = orders;
+  }
 
-    public Map<Integer, Point2D> getVehicleStartPositions() {
-        return vehicleStartPositions;
-    }
+  public Map<Integer, Point2D> getVehicleStartPositions() {
+    return vehicleStartPositions;
+  }
 
-    public void setVehicleStartPositions(Map<Integer, Point2D> vehicleStartPositions) {
-        this.vehicleStartPositions = vehicleStartPositions;
-    }
+  public void setVehicleStartPositions(Map<Integer, Point2D> vehicleStartPositions) {
+    this.vehicleStartPositions = vehicleStartPositions;
+  }
 
-    public Map<Integer, List<Order>> getFinalOrderMapping() {
-        return finalOrderMapping;
-    }
+  public Map<Integer, List<Order>> getFinalOrderMapping() {
+    return finalOrderMapping;
+  }
 
-    public void setFinalOrderMapping(Map<Integer, List<Order>> finalOrderMapping) {
-        this.finalOrderMapping = finalOrderMapping;
-    }
+  public void setFinalOrderMapping(Map<Integer, List<Order>> finalOrderMapping) {
+    this.finalOrderMapping = finalOrderMapping;
+  }
 
-    public double getExpectedScore() {
-        return expectedScore;
-    }
+  public double getExpectedScore() {
+    return expectedScore;
+  }
 
-    public void setExpectedScore(double expectedScore) {
-        this.expectedScore = expectedScore;
-    }
+  public void setExpectedScore(double expectedScore) {
+    this.expectedScore = expectedScore;
+  }
 }

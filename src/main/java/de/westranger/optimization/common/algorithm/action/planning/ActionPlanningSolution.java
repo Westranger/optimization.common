@@ -7,27 +7,27 @@ import java.util.List;
 
 public final class ActionPlanningSolution {
 
-    private final SearchSpaceState solutionState;
-    private final List<Action> actions;
-    private final Score score;
+  private final SearchSpaceState solutionState;
+  private final List<Action> actions;
+  private final Score score;
 
-    public ActionPlanningSolution(final SearchSpaceState solutionState,
-                                  final List<Action> actions, final Score score) {
-        this.solutionState = solutionState;
-        this.actions = new LinkedList<>(actions);
-        this.score = score;
-    }
+  public ActionPlanningSolution(final SearchSpaceState solutionState,
+                                final List<Action> actions, final Score score) {
+    this.solutionState = solutionState;
+    this.actions = new LinkedList<>(actions);
+    this.score = score;
+  }
 
-    public List<Action> getActions() {
-        return Collections.unmodifiableList(this.actions);
-    }
+  public List<Action> getActions() {
+    return Collections.unmodifiableList(this.actions);
+  }
 
-    public SearchSpaceState getState() {
-        return this.solutionState;
-    }
+  public SearchSpaceState getState() {
+    return this.solutionState;
+  }
 
-    public Score getScore() {
-        return this.score;
-    }
+  public Score getScore() {
+    return this.score;
+  }
 
 }

@@ -4,5 +4,5 @@ import de.westranger.optimization.common.algorithm.action.planning.SearchSpaceSt
 
 public interface NeighbourSelector {
   SearchSpaceState select(final SearchSpaceState intermediateSolution,
-                             final double currentTemperature);
+                          final double currentTemperature);
 }
