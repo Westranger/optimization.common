@@ -36,7 +36,7 @@ public class OptimizeParameter {
         1000, 100}) {
       for (double tmin : new double[] {1000, 100, 10, 1, 0.1, 0.01, 0.001}) {
         for (double gamma : new double[] {0.7, 0.8, 0.85, 0.9, 0.95, 0.96, 0.97, 0.98,
-            0.99,999}) {
+            0.99, 999}) {
           for (double omega : new double[] {50, 100, 150, 200, 300, 400, 500}) {
             if (tmin >= tmax) {
               continue;
@@ -68,7 +68,7 @@ public class OptimizeParameter {
                       sum + " param: " + tmax + " " +
                       tmin + " " + gamma + " " + omega + " " + sum * iter
               );
-              bestScore = sum *iter;
+              bestScore = sum * iter;
             }
           }
         }
@@ -79,7 +79,7 @@ public class OptimizeParameter {
   }
 
   private static SimulatedAnnealing szenarioA(final SimulatedAnnealingParameter sap,
-                                             final Random rng) {
+                                              final Random rng) {
     Map<Integer, Point2D> vehicleMapping = new TreeMap<>();
     vehicleMapping.put(1, new Point2D(100000, 0));
 
@@ -103,23 +103,24 @@ public class OptimizeParameter {
   }
 
   private static SimulatedAnnealing szenarioB(final SimulatedAnnealingParameter sap,
-                                             final Random rng) {
+                                              final Random rng) {
     final InputStreamReader reader = new InputStreamReader(
         SimulatedAnnealingTest.class.getResourceAsStream("/1_vehicle_194_orders.json"));
     final Gson gson = new Gson();
     final ProblemFormulation problem = gson.fromJson(reader, ProblemFormulation.class);
 
     List<Order> orders = new LinkedList<>();
-    for(Order o:problem.getOrders()){
+    for (Order o : problem.getOrders()) {
       orders.add(o);
     }
 
-    Collections.shuffle(orders,rng);
+    Collections.shuffle(orders, rng);
 
-    Map<Integer,List<Order>> orderMapping = new TreeMap<>();
-    orderMapping.put(1,orders);
+    Map<Integer, List<Order>> orderMapping = new TreeMap<>();
+    orderMapping.put(1, orders);
 
-    State initialState = new State(new ArrayList<>(), orderMapping,problem.getVehicleStartPositions());
+    State initialState =
+        new State(new ArrayList<>(), orderMapping, problem.getVehicleStartPositions());
     TSPNeighbourSelector ns = new TSPNeighbourSelector(sap.getTMax(), sap.getTMin(), rng);
 
     return new SimulatedAnnealing(initialState, ns, rng, sap);
