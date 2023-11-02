@@ -5,15 +5,23 @@ import de.westranger.geometry.common.simple.Point2D;
 import de.westranger.optimization.common.algorithm.action.planning.SearchSpaceState;
 import de.westranger.optimization.common.algorithm.action.planning.solver.stochastic.SimulatedAnnealing;
 import de.westranger.optimization.common.algorithm.action.planning.solver.stochastic.SimulatedAnnealingParameter;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.TreeMap;
 import org.junit.jupiter.api.Test;
 import test.de.westranger.optimization.common.algorithm.example.tsp.common.Order;
 import test.de.westranger.optimization.common.algorithm.example.tsp.common.ProblemFormulation;
 import test.de.westranger.optimization.common.algorithm.example.tsp.common.State;
 import test.de.westranger.optimization.common.algorithm.example.tsp.dfs.TSPNeighbourSelector;
-
-import java.io.File;
-import java.io.InputStreamReader;
-import java.util.*;
 
 public class SimulatedAnnealingTest {
 
@@ -27,10 +35,7 @@ public class SimulatedAnnealingTest {
 
     Random rng = new Random(47110816L);
 
-    List<Order> orders = new LinkedList<>();
-    for (Order o : problem.getOrders()) {
-      orders.add(o);
-    }
+    List<Order> orders = new LinkedList<>(problem.getOrders());
 
     Collections.shuffle(orders, rng);
 
@@ -64,10 +69,7 @@ public class SimulatedAnnealingTest {
 
     Random rng = new Random(47110816L);
 
-    List<Order> orders = new LinkedList<>();
-    for (Order o : problem.getOrders()) {
-      orders.add(o);
-    }
+    List<Order> orders = new LinkedList<>(problem.getOrders());
 
     Collections.shuffle(orders, rng);
 
@@ -218,5 +220,81 @@ public class SimulatedAnnealingTest {
     System.out.println("done");
   }
 
+
+  @Test
+  void evaluateTemperature() {
+    final InputStreamReader reader = new InputStreamReader(
+        SimulatedAnnealingTest.class.getResourceAsStream("/1_vehicle_980_orders.json"));
+    final Gson gson = new Gson();
+    final ProblemFormulation problem = gson.fromJson(reader, ProblemFormulation.class);
+
+    Random rng = new Random(47110816L);
+
+    List<Order> orders = new LinkedList<>(problem.getOrders());
+
+    Collections.shuffle(orders, rng);
+
+    Map<Integer, List<Order>> orderMapping = new TreeMap<>();
+    orderMapping.put(1, orders);
+
+    State initialState =
+        new State(new ArrayList<>(), orderMapping, problem.getVehicleStartPositions());
+
+    SimulatedAnnealingParameter sap =
+        new SimulatedAnnealingParameter(100000, .001, 0.99, 2000);
+
+    TSPNeighbourSelector ns = new TSPNeighbourSelector(sap.getTMax(), sap.getTMin(), rng);
+
+
+    SearchSpaceState best = initialState;
+    SearchSpaceState previous = initialState;
+    SearchSpaceState current = initialState;
+
+    try {
+      BufferedWriter bw = new BufferedWriter(new FileWriter(
+          "C:\\Users\\Marius\\IdeaProjects\\optimization.common\\src\\test\\resources\\eval_temp.csv"));
+      bw.append("score;acceptance_rate;delta;best;counter\n");
+
+      int bestCounter = 0;
+      double temperatur = 6300;//8741.73813071313;
+      for (int i = 0; i < 200000; i++) {
+        SearchSpaceState tmp = ns.select(current, temperatur);
+
+        final StringBuilder sb = new StringBuilder();
+
+        final double score = tmp.getScore().getAbsoluteScore();
+        final double acceptanceRate =
+            Math.exp(-Math.abs(
+                previous.getScore().getAbsoluteScore() - tmp.getScore().getAbsoluteScore()) /
+                temperatur);
+
+        sb.append(score);
+        sb.append(';');
+        sb.append(acceptanceRate);
+        sb.append(';');
+        sb.append(Math.abs(
+            previous.getScore().getAbsoluteScore() - tmp.getScore().getAbsoluteScore()));
+        sb.append(';');
+        sb.append(best.getScore());
+        sb.append(';');
+        sb.append(bestCounter);
+        sb.append('\n');
+        bw.append(sb.toString());
+
+        if(rng.nextDouble() < acceptanceRate){
+          previous = tmp;
+        }
+        if (tmp.getScore().getAbsoluteScore() < best.getScore().getAbsoluteScore()) {
+          best = tmp;
+          bestCounter++;
+        }
+      }
+      bw.close();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+
+
+  }
 
 }

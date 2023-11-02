@@ -135,10 +135,6 @@ public final class TSPNeighbourSelector implements NeighbourSelector {
       }
     }
 
-    if (count != 70) {
-      throw new IllegalArgumentException("WTF");
-    }
-
     return new State(new ArrayList<>(), newMapping, state.getVehiclePositions());
   }
 }

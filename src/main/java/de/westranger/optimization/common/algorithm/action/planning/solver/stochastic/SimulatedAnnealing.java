@@ -2,7 +2,6 @@ package de.westranger.optimization.common.algorithm.action.planning.solver.stoch
 
 import de.westranger.optimization.common.algorithm.action.planning.SearchSpaceState;
 import de.westranger.optimization.common.algorithm.action.planning.solver.Score;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -10,7 +9,7 @@ import java.io.IOException;
 import java.util.Random;
 
 /**
- * @ see https://machinelearningmastery.com/simulated-annealing-from-scratch-in-python/
+ * @ see <a href="https://machinelearningmastery.com/simulated-annealing-from-scratch-in-python/">...</a>
  */
 
 // TODO Warnung einfügen, wenn Verhältnis E_max - E_min / T initial kleiner als 0,8 ist
@@ -67,7 +66,7 @@ public final class SimulatedAnnealing {
 
       Score temperatureBestScore = currentBestSolution.getScore();
       SearchSpaceState temperatureBestSolution = currentBestSolution;
-      double bestScoreValue = currentBestScore.getAbsoluteScore();
+      final double bestScoreValue = currentBestScore.getAbsoluteScore();
 
       while (iterSinceLastBestFound < sap.getOmegaMax()) {
         this.totalIterationCounter++;
@@ -86,8 +85,8 @@ public final class SimulatedAnnealing {
           if (this.telemetryFolder != null) {
             try {
               BufferedWriter bwImage = new BufferedWriter(new FileWriter(
-                  this.telemetryFolder.getAbsolutePath() + "/img_" + this.totalIterationCounter +
-                      ".svg"));
+                  this.telemetryFolder.getAbsolutePath() + "/img_" + this.totalIterationCounter
+                      + ".svg"));
               bwImage.write(currentBestSolution.toSVG());
               bwImage.close();
             } catch (IOException e) {
@@ -100,12 +99,12 @@ public final class SimulatedAnnealing {
           temperatureBestScore = candidateScore;
           temperatureBestSolution = solutionCandidate;
         } else if (candidateScore.compareTo(temperatureBestScore) > 0) {
-          final double ex = -(Math.abs(solutionCandidate.getScore().getAbsoluteScore() -
-              temperatureBestSolution.getScore().getAbsoluteScore()) / currentTemp);
+          final double ex = -(Math.abs(solutionCandidate.getScore().getAbsoluteScore()
+              - temperatureBestSolution.getScore().getAbsoluteScore()) / currentTemp);
           final double probability = Math.exp(ex);
 
-          if (probability <= 1.0 && probability >
-              this.rng.nextDouble()) {
+          if (probability <= 1.0 && probability
+              > this.rng.nextDouble()) {
             temperatureBestScore = candidateScore;
             temperatureBestSolution = solutionCandidate;
           }
@@ -140,9 +139,9 @@ public final class SimulatedAnnealing {
         outerImproved++;
       }
 
-      System.out.println(this.totalIterationCounter + ";" + currentTemp + ";" +
-          currentBestScore.getAbsoluteScore() + ";" + temperatureBestScore.getAbsoluteScore() +
-          ";" + attempted + ";" + outerImproved + ";" + gamma + ";" + improved);
+      System.out.println(this.totalIterationCounter + ";" + currentTemp + ";"
+          + currentBestScore.getAbsoluteScore() + ";" + temperatureBestScore.getAbsoluteScore()
+          + ";" + attempted + ";" + outerImproved + ";" + gamma + ";" + improved);
 
       if ((bestScoreValue - currentBestScore.getAbsoluteScore()) / bestScoreValue > 0.005) {
         gamma = 0.999;
