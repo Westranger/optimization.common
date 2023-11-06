@@ -1,30 +1,22 @@
 package test.de.westranger.optimization.common.algorithm.tools;
 
 import com.google.gson.Gson;
-import de.westranger.geometry.common.simple.Point2D;
-import de.westranger.optimization.common.algorithm.action.planning.SearchSpaceState;
-import de.westranger.optimization.common.algorithm.action.planning.solver.stochastic.NeighbourSelector;
-import de.westranger.optimization.common.algorithm.action.planning.solver.stochastic.SimulatedAnnealing;
-import de.westranger.optimization.common.algorithm.action.planning.solver.stochastic.SimulatedAnnealingParameter;
-
+import de.westranger.optimization.common.util.PermutationIterator;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
-
-import java.util.TreeMap;
-import test.de.westranger.optimization.common.algorithm.example.function.fitting.common.DataPoint;
-import test.de.westranger.optimization.common.algorithm.example.function.fitting.common.NormalDistributionSelector;
-import test.de.westranger.optimization.common.algorithm.example.function.fitting.common.CubicFunktion;
-import test.de.westranger.optimization.common.algorithm.example.function.fitting.common.CubicFunktionFitter;
-import test.de.westranger.optimization.common.algorithm.example.tsp.common.Order;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import test.de.westranger.optimization.common.algorithm.example.tsp.common.ProblemFormulation;
-import test.de.westranger.optimization.common.algorithm.example.tsp.common.State;
-import test.de.westranger.optimization.common.algorithm.example.tsp.dfs.TSPNeighbourSelector;
 import test.de.westranger.optimization.common.algorithm.example.tsp.sa.SimulatedAnnealingTest;
+import test.de.westranger.optimization.common.algorithm.tools.util.TSPCallable;
 
 public class OptimizeParameter {
 
@@ -32,98 +24,65 @@ public class OptimizeParameter {
 
     double bestScore = Double.POSITIVE_INFINITY;
 
-    for (double tmax : new double[] {100000, 50000, 30000, 20000, 15000, 10000, 7500, 5000, 2500,
-        1000, 100}) {
-      for (double tmin : new double[] {1000, 100, 10, 1, 0.1, 0.01, 0.001}) {
-        for (double gamma : new double[] {0.7, 0.8, 0.85, 0.9, 0.95, 0.96, 0.97, 0.98,
-            0.99, 999}) {
-          for (double omega : new double[] {50, 100, 150, 200, 300, 400, 500}) {
-            if (tmin >= tmax) {
-              continue;
-            }
+    final LinkedHashMap<String, List<Double>> input = new LinkedHashMap<>();
 
-            double sum = 0.0;
-            double iter = 0.0;
+    input.put("tMax", Arrays.asList(0.0));
+    input.put("initialAcceptanceRatio", Arrays.asList(0.9, 0.8, 0.7));
+    input.put("gamma", Arrays.asList(0.999, 0.99, 0.98, 0.97, 0.96, 0.95, 0.9, 0.8, 0.7));
+    input.put("tMin", Arrays.asList(0.001, 0.01, 0.1, 1.0, 10.0, 100.0));
+    input.put("omegaMax",
+        Arrays.asList(100.0, 250.0, 500.0, 1000.0, 2500.0, 5000.0, 10000.0, 25000.0));
+    input.put("maxImprovementPerTemperature",
+        Arrays.asList(2.0, 5.0, 10.0, 25.0, 50.0, 100.0, 250.0, 500.0));
 
-            for (long i = 0; i < 10; i++) {
-              final long seed = 47110815 + i * 10000;
-
-              final SimulatedAnnealingParameter sap =
-                  new SimulatedAnnealingParameter(tmax, tmin, gamma, omega);
-              final Random rng = new Random(seed);
-              final SimulatedAnnealing sa = szenarioB(sap, rng);
-              final SearchSpaceState optimizedResult = sa.optimize(1e-3);
-
-              iter += sa.getTotalIterationCounter();
-              sum += optimizedResult.getScore().getAbsoluteScore();
-            }
-
-            sum /= 10.0;
-            iter /= 10.0;
-
-            if (
-                bestScore > sum * iter) {
-              System.out.println(
-                  "found a better solution " + iter + " with a score of " +
-                      sum + " param: " + tmax + " " +
-                      tmin + " " + gamma + " " + omega + " " + sum * iter
-              );
-              bestScore = sum * iter;
-            }
-          }
-        }
-      }
-    }
-
-    System.out.println("done");
-  }
-
-  private static SimulatedAnnealing szenarioA(final SimulatedAnnealingParameter sap,
-                                              final Random rng) {
-    Map<Integer, Point2D> vehicleMapping = new TreeMap<>();
-    vehicleMapping.put(1, new Point2D(100000, 0));
-
-    List<Order> orders = new LinkedList<>();
-    orders.add(new Order(1, new Point2D(10000.0, 0)));
-    orders.add(new Order(9, new Point2D(90000.0, 0)));
-    orders.add(new Order(2, new Point2D(20000.0, 0)));
-    orders.add(new Order(8, new Point2D(80000.0, 0)));
-    orders.add(new Order(3, new Point2D(30000.0, 0)));
-    orders.add(new Order(7, new Point2D(70000.0, 0)));
-    orders.add(new Order(4, new Point2D(40000.0, 0)));
-    orders.add(new Order(6, new Point2D(60000.0, 0)));
-    orders.add(new Order(5, new Point2D(50000.0, 0)));
-
-    Map<Integer, List<Order>> orderMapping = new TreeMap<>();
-    orderMapping.put(1, orders);
-
-    State initialState = new State(new ArrayList<>(), orderMapping, vehicleMapping);
-    TSPNeighbourSelector ns = new TSPNeighbourSelector(sap.getTMax(), sap.getTMin(), rng);
-    return new SimulatedAnnealing(initialState, ns, rng, sap);
-  }
-
-  private static SimulatedAnnealing szenarioB(final SimulatedAnnealingParameter sap,
-                                              final Random rng) {
+// {avg_score=1.1714766111E12, gamma=0.999, initialAcceptanceRatio=0.9, iter=1.511582724E8, maxImprovementPerTemperature=5.0, omegaMax=10000.0, score=7750.0, tMax=0.0, tMin=0.001}
+// {avg_score=1.2468726692028261E11, gamma=0.999, initialAcceptanceRatio=0.9, iter=7014834.1, maxImprovementPerTemperature=2.0, omegaMax=500.0, score=17774.79911039986, tMax=0.0, tMin=0.001}
     final InputStreamReader reader = new InputStreamReader(
-        SimulatedAnnealingTest.class.getResourceAsStream("/1_vehicle_194_orders.json"));
+        SimulatedAnnealingTest.class.getResourceAsStream("/1_vehicle_980_orders.json"));
     final Gson gson = new Gson();
     final ProblemFormulation problem = gson.fromJson(reader, ProblemFormulation.class);
+    final int threadPoolSize = 15;
+    final int batchSize = 100;
+    final PermutationIterator permutationIterator = new PermutationIterator(input);
 
-    List<Order> orders = new LinkedList<>();
-    for (Order o : problem.getOrders()) {
-      orders.add(o);
+    while (permutationIterator.hasNext()) {
+      final ExecutorService executorService = Executors.newFixedThreadPool(threadPoolSize);
+      final CompletionService<Map<String, Double>> completionService =
+          new ExecutorCompletionService<>(executorService);
+
+      int totalTasksSubmitted = 0;
+      for (int i = 0; i < batchSize && permutationIterator.hasNext(); i++) {
+        final Map<String, Double> permutation = permutationIterator.next();
+        final Callable<Map<String, Double>> task = new TSPCallable(problem, permutation);
+        completionService.submit(task);
+        totalTasksSubmitted++;
+      }
+
+      executorService.shutdown();
+
+      // Process completed tasks from this batch
+      for (int i = 0; i < totalTasksSubmitted; ++i) {
+        try {
+          Future<Map<String, Double>> future = completionService.take();
+          ; // Blocks until at least one is complete
+          Map<String, Double> result = future.get();
+          // Verarbeiten Sie das Ergebnis wie gewünscht
+          if (bestScore > result.get("score")) {
+            System.out.println(result.toString());
+            bestScore = result.get("score");
+          }
+        } catch (InterruptedException e) {
+          throw new RuntimeException(e);
+        } catch (ExecutionException e) {
+          throw new RuntimeException(e);
+        }
+      }
+
+
     }
 
-    Collections.shuffle(orders, rng);
+    // Schließen des ExecutorService
+    // Warten Sie auf das vollständige Herunterfahren
 
-    Map<Integer, List<Order>> orderMapping = new TreeMap<>();
-    orderMapping.put(1, orders);
-
-    State initialState =
-        new State(new ArrayList<>(), orderMapping, problem.getVehicleStartPositions());
-    TSPNeighbourSelector ns = new TSPNeighbourSelector(sap.getTMax(), sap.getTMin(), rng);
-
-    return new SimulatedAnnealing(initialState, ns, rng, sap);
   }
-
 }

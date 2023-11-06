@@ -20,6 +20,7 @@ public final class CubicFunktionFitter extends SearchSpaceState {
 
   public CubicFunktionFitter(final CubicFunktion targetFunction, final List<DataPoint> data) {
     this(targetFunction, Double.POSITIVE_INFINITY, data);
+    this.score = computeMSE();
   }
 
   private CubicFunktionFitter(final CubicFunktion targetFunction, final double score,
@@ -58,13 +59,7 @@ public final class CubicFunktionFitter extends SearchSpaceState {
       case ParamConstant -> this.func.setConstant(qfa.value());
     }
 
-    double mse = 0.0;
-    for (DataPoint dp : this.data) {
-      mse += Math.pow(dp.y() - this.func.evaluate(dp.x()), 2.0);
-    }
-    mse *= 1.0 / (double) this.data.size();
-
-    this.score = mse;
+    this.score = computeMSE();
     return true;
   }
 
@@ -101,5 +96,15 @@ public final class CubicFunktionFitter extends SearchSpaceState {
   @Override
   public String toSVG() {
     return null;
+  }
+
+  private double computeMSE() {
+    double mse = 0.0;
+    for (DataPoint dp : this.data) {
+      mse += Math.pow(dp.y() - this.func.evaluate(dp.x()), 2.0);
+    }
+    mse *= 1.0 / (double) this.data.size();
+
+    return mse;
   }
 }

@@ -41,11 +41,14 @@ public final class SimulatedAnnealing {
   }
 
 
-  public SearchSpaceState optimize(final double solutionAccuracy) {
-    SearchSpaceState currentBestSolution = this.initialSolution;
-    double currentTemp = this.sap.getGamma() * this.sap.getTMax();
-    double gamma = this.sap.getGamma();
-    int outerImproved = 0;
+  public SearchSpaceState optimize() {
+    SearchSpaceState bestSolution = this.initialSolution;
+    Score bestScore = bestSolution.getScore();
+
+    SearchSpaceState currentSolution = this.initialSolution;
+    Score currentScore = bestSolution.getScore();
+
+    double gamma = this.sap.gamma();
 
     BufferedWriter bwData = null;
     if (telemetryFolder != null) {
@@ -57,29 +60,40 @@ public final class SimulatedAnnealing {
       }
     }
 
-    while (currentTemp >= this.sap.getTMin() && outerImproved < 50) {
-      Score currentBestScore = currentBestSolution.getScore();
+    final int numDeltaValues = 500;
+    double sum = 0.0;
+    // estimate initial temperature
+    for (int i = 0; i < numDeltaValues; i++) {
+      final SearchSpaceState solution = this.ns.select(currentSolution, sap.tMax());
+      final double score = solution.getScore().getAbsoluteScore();
+      sum += Math.abs(currentScore.getAbsoluteScore() - score);
 
+      if (score < bestScore.getAbsoluteScore()) {
+        bestSolution = solution;
+        bestScore = solution.getScore();
+      }
+    }
+
+    sum /= numDeltaValues;
+    double currentTemp = -sum / Math.log(sap.initialAcceptanceRatio());
+
+    // main loop
+    while (currentTemp > this.sap.tMin()) {
       int improved = 0;
-      double attempted = 0;
-      int iterSinceLastBestFound = 0;
+      int iterAtTemperature = 0;
 
-      Score temperatureBestScore = currentBestSolution.getScore();
-      SearchSpaceState temperatureBestSolution = currentBestSolution;
-      final double bestScoreValue = currentBestScore.getAbsoluteScore();
+      final double bestScoreValue = bestScore.getAbsoluteScore();
 
-      while (iterSinceLastBestFound < sap.getOmegaMax()) {
+      while (iterAtTemperature < sap.omegaMax() &&
+          improved <= sap.maxImprovementPerTemperature()) {
         this.totalIterationCounter++;
         final SearchSpaceState solutionCandidate =
-            this.ns.select(temperatureBestSolution, currentTemp);
+            this.ns.select(currentSolution, currentTemp);
         final Score candidateScore = solutionCandidate.getScore();
 
-        attempted++;
-
-        if (candidateScore.compareTo(currentBestScore) < 0) {
-          currentBestScore = candidateScore;
-          currentBestSolution = solutionCandidate;
-          iterSinceLastBestFound = 0;
+        if (candidateScore.compareTo(bestScore) < 0) {
+          bestScore = candidateScore;
+          bestSolution = solutionCandidate;
           improved++;
 
           if (this.telemetryFolder != null) {
@@ -87,7 +101,7 @@ public final class SimulatedAnnealing {
               BufferedWriter bwImage = new BufferedWriter(new FileWriter(
                   this.telemetryFolder.getAbsolutePath() + "/img_" + this.totalIterationCounter
                       + ".svg"));
-              bwImage.write(currentBestSolution.toSVG());
+              bwImage.write(bestSolution.toSVG());
               bwImage.close();
             } catch (IOException e) {
               throw new RuntimeException(e);
@@ -95,25 +109,20 @@ public final class SimulatedAnnealing {
           }
         }
 
-        if (candidateScore.compareTo(temperatureBestScore) < 0) {
-          temperatureBestScore = candidateScore;
-          temperatureBestSolution = solutionCandidate;
-        } else if (candidateScore.compareTo(temperatureBestScore) > 0) {
+        if (candidateScore.compareTo(currentScore) < 0) {
+          currentScore = candidateScore;
+          currentSolution = solutionCandidate;
+        } else if (candidateScore.compareTo(currentScore) > 0) {
           final double ex = -(Math.abs(solutionCandidate.getScore().getAbsoluteScore()
-              - temperatureBestSolution.getScore().getAbsoluteScore()) / currentTemp);
+              - currentScore.getAbsoluteScore()) / currentTemp);
           final double probability = Math.exp(ex);
 
           if (probability <= 1.0 && probability
               > this.rng.nextDouble()) {
-            temperatureBestScore = candidateScore;
-            temperatureBestSolution = solutionCandidate;
+            currentScore = candidateScore;
+            currentSolution = solutionCandidate;
           }
         }
-
-        if (temperatureBestScore.getAbsoluteScore() < solutionAccuracy) {
-          return temperatureBestSolution;
-        }
-        iterSinceLastBestFound++;
 
         if (telemetryFolder != null) {
           final StringBuilder sb = new StringBuilder();
@@ -123,7 +132,7 @@ public final class SimulatedAnnealing {
           sb.append(';');
           sb.append(candidateScore.getAbsoluteScore());
           sb.append(';');
-          sb.append(currentBestScore.getAbsoluteScore());
+          sb.append(bestScore.getAbsoluteScore());
           sb.append('\n');
           try {
             bwData.write(sb.toString());
@@ -131,26 +140,23 @@ public final class SimulatedAnnealing {
             throw new RuntimeException(e);
           }
         }
+        iterAtTemperature++;
       }
 
-      if (improved > 0) {
-        outerImproved = 0;
-      } else {
-        outerImproved++;
+      //System.out.println(this.totalIterationCounter + ";" + currentTemp + ";"
+      //    + bestScore.getAbsoluteScore() + ";" + currentScore.getAbsoluteScore()
+      //    + ";" + gamma + ";" + improved);
+
+      currentTemp = computeTemperature(currentTemp);
+      currentTemp = Math.max(this.sap.tMin(), currentTemp);
+
+      if (Double.isInfinite(bestScore.getAbsoluteScore())) {
+        throw new IllegalStateException("the score is infinity");
       }
 
-      System.out.println(this.totalIterationCounter + ";" + currentTemp + ";"
-          + currentBestScore.getAbsoluteScore() + ";" + temperatureBestScore.getAbsoluteScore()
-          + ";" + attempted + ";" + outerImproved + ";" + gamma + ";" + improved);
-
-      if ((bestScoreValue - currentBestScore.getAbsoluteScore()) / bestScoreValue > 0.005) {
-        gamma = 0.999;
-      } else {
-        gamma = this.sap.getGamma();
+      if (Double.isInfinite(currentTemp)) {
+        throw new IllegalStateException("the temperature is infinity");
       }
-
-      currentTemp = gamma * currentTemp;
-      currentTemp = Math.max(this.sap.getTMin(), currentTemp);
     }
 
     if (this.telemetryFolder != null) {
@@ -161,10 +167,15 @@ public final class SimulatedAnnealing {
       }
     }
 
-    return currentBestSolution;
+    return bestSolution;
   }
 
   public long getTotalIterationCounter() {
     return totalIterationCounter;
   }
+
+  private double computeTemperature(double currentTemperature) {
+    return this.sap.gamma() * currentTemperature;
+  }
+
 }

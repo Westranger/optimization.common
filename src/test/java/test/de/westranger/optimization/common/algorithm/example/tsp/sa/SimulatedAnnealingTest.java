@@ -45,17 +45,16 @@ public class SimulatedAnnealingTest {
     State initialState =
         new State(new ArrayList<>(), orderMapping, problem.getVehicleStartPositions());
 
-
     SimulatedAnnealingParameter sap =
-        new SimulatedAnnealingParameter(100000, .001, 0.99, 2000);
+        new SimulatedAnnealingParameter(100000, .001, 0.99, 2000, 10000, 0.9);
 
-    TSPNeighbourSelector ns = new TSPNeighbourSelector(sap.getTMax(), sap.getTMin(), rng);
+    TSPNeighbourSelector ns = new TSPNeighbourSelector(sap.tMax(), sap.tMin(), rng);
 
     SimulatedAnnealing sa = new SimulatedAnnealing(initialState, ns, rng, sap,
         new File(
             "C:\\Users\\Marius\\IdeaProjects\\optimization.common\\src\\test\\resources\\output"));
 
-    initialState = (State) sa.optimize(1e3);
+    initialState = (State) sa.optimize();
 
     System.out.println("done");
   }
@@ -80,15 +79,15 @@ public class SimulatedAnnealingTest {
         new State(new ArrayList<>(), orderMapping, problem.getVehicleStartPositions());
 
     SimulatedAnnealingParameter sap =
-        new SimulatedAnnealingParameter(50000, 0.1, 0.99, 200);
+        new SimulatedAnnealingParameter(50000, 0.1, 0.99, 200, 10000, 0.9);
 
-    TSPNeighbourSelector ns = new TSPNeighbourSelector(sap.getTMax(), sap.getTMin(), rng);
+    TSPNeighbourSelector ns = new TSPNeighbourSelector(sap.tMax(), sap.tMin(), rng);
 
     SimulatedAnnealing sa = new SimulatedAnnealing(initialState, ns, rng, sap,
         new File(
             "C:\\Users\\Marius\\IdeaProjects\\optimization.common\\src\\test\\resources\\output"));
 
-    SearchSpaceState optimizedState = sa.optimize(1e3);
+    SearchSpaceState optimizedState = sa.optimize();
 
     System.out.println("done");
   }
@@ -116,13 +115,13 @@ public class SimulatedAnnealingTest {
     State initialState = new State(new ArrayList<>(), orderMapping, vehicleMapping);
 
     SimulatedAnnealingParameter sap =
-        new SimulatedAnnealingParameter(100000, 1000, 0.7, 50);
+        new SimulatedAnnealingParameter(100000, 1000, 0.7, 50, 10000, 0.9);
     Random rng = new Random(47110816L);
-    TSPNeighbourSelector ns = new TSPNeighbourSelector(sap.getTMax(), sap.getTMin(), rng);
+    TSPNeighbourSelector ns = new TSPNeighbourSelector(sap.tMax(), sap.tMin(), rng);
 
     SimulatedAnnealing sa = new SimulatedAnnealing(initialState, ns, rng, sap);
 
-    SearchSpaceState optimizedState = sa.optimize(1e3);
+    SearchSpaceState optimizedState = sa.optimize();
 
     State x = (State) optimizedState;
     State y = new State(x.getOrderList(), x.getOrderMapping(), x.getVehiclePositions());
@@ -207,15 +206,15 @@ public class SimulatedAnnealingTest {
         new State(new ArrayList<>(), orderMapping, problem.getVehicleStartPositions());
 
     SimulatedAnnealingParameter sap =
-        new SimulatedAnnealingParameter(100000, .001, 0.99, 2000);
+        new SimulatedAnnealingParameter(100000, .001, 0.99, 2000, 10000, 0.9);
 
-    TSPNeighbourSelector ns = new TSPNeighbourSelector(sap.getTMax(), sap.getTMin(), rng);
+    TSPNeighbourSelector ns = new TSPNeighbourSelector(sap.tMax(), sap.tMin(), rng);
 
     SimulatedAnnealing sa = new SimulatedAnnealing(initialState, ns, rng, sap,
         new File(
             "C:\\Users\\Marius\\IdeaProjects\\optimization.common\\src\\test\\resources\\output"));
 
-    initialState = (State) sa.optimize(1e3);
+    initialState = (State) sa.optimize();
 
     System.out.println("done");
   }
@@ -241,9 +240,9 @@ public class SimulatedAnnealingTest {
         new State(new ArrayList<>(), orderMapping, problem.getVehicleStartPositions());
 
     SimulatedAnnealingParameter sap =
-        new SimulatedAnnealingParameter(100000, .001, 0.99, 2000);
+        new SimulatedAnnealingParameter(100000, .001, 0.99, 2000, 10000, 0.9);
 
-    TSPNeighbourSelector ns = new TSPNeighbourSelector(sap.getTMax(), sap.getTMin(), rng);
+    TSPNeighbourSelector ns = new TSPNeighbourSelector(sap.tMax(), sap.tMin(), rng);
 
 
     SearchSpaceState best = initialState;
@@ -281,7 +280,7 @@ public class SimulatedAnnealingTest {
         sb.append('\n');
         bw.append(sb.toString());
 
-        if(rng.nextDouble() < acceptanceRate){
+        if (rng.nextDouble() < acceptanceRate) {
           previous = tmp;
         }
         if (tmp.getScore().getAbsoluteScore() < best.getScore().getAbsoluteScore()) {
