@@ -51,7 +51,7 @@ public class TSPCallable implements Callable<Map<String, Double>> {
     iter /= 10.0;
 
     Map<String, Double> result = new TreeMap<>(this.param);
-    result.put("score", sum*iter);
+    result.put("score", sum);
     result.put("iter", iter);
     result.put("avg_score", sum);
     //System.out.println("done " + result);
