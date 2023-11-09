@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import de.westranger.optimization.common.util.PermutationIterator;
+import de.westranger.optimization.common.util.CombinationIterator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
-public class PermutationIteratorTest {
+public class CombinationIteratorTest {
   @Test
   public void testPermutations() {
     LinkedHashMap<String, List<Double>> input = new LinkedHashMap<>();
@@ -21,7 +21,7 @@ public class PermutationIteratorTest {
     input.put("B", Arrays.asList(1.0, 2.0, 3.0, 4.0));
     input.put("C", Arrays.asList(1.0, 2.0, 3.0, 4.0, 5.0));
 
-    PermutationIterator iterator = new PermutationIterator(input);
+    CombinationIterator iterator = new CombinationIterator(input);
 
     List<Map<String, Double>> expectedPermutations = new ArrayList<>();
     for (double a : input.get("A")) {

@@ -16,15 +16,17 @@ import test.de.westranger.optimization.common.algorithm.example.tsp.common.Probl
 import test.de.westranger.optimization.common.algorithm.example.tsp.common.State;
 import test.de.westranger.optimization.common.algorithm.example.tsp.dfs.TSPNeighbourSelector;
 
-public class TSPCallable implements Callable<Map<String, Double>> {
+public final class TSPCallable implements Callable<Map<String, Double>> {
 
   private final ProblemFormulation pf;
 
   private final Map<String, Double> param;
+  private final int numTries;
 
-  public TSPCallable(final ProblemFormulation pf, final Map<String, Double> param) {
+  public TSPCallable(final ProblemFormulation pf, final Map<String, Double> param, int numTries) {
     this.pf = pf;
     this.param = param;
+    this.numTries = numTries;
   }
 
   @Override
@@ -32,7 +34,7 @@ public class TSPCallable implements Callable<Map<String, Double>> {
 
     double iter = 0.0;
     double sum = 0.0;
-    for (long i = 0; i < 10; i++) {
+    for (long i = 0; i < this.numTries; i++) {
       final long seed = 47110815 + i * 10000;
       final SimulatedAnnealingParameter sap =
           new SimulatedAnnealingParameter(this.param.get("tMax"), this.param.get("tMin"),
@@ -47,14 +49,13 @@ public class TSPCallable implements Callable<Map<String, Double>> {
       sum += optimizedResult.getScore().getAbsoluteScore();
     }
 
-    sum /= 10.0;
-    iter /= 10.0;
+    sum /= this.numTries;
+    iter /= this.numTries;
 
     Map<String, Double> result = new TreeMap<>(this.param);
     result.put("score", sum);
     result.put("iter", iter);
     result.put("avg_score", sum);
-    //System.out.println("done " + result);
     return result;
   }
 

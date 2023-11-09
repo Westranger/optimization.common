@@ -8,14 +8,14 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
-public final class PermutationIterator {
+public final class CombinationIterator {
   private final LinkedHashMap<String, List<Double>> inputMap;
   private final LinkedHashMap<String, Integer> currentIndices;
   private boolean done = false;
   private long numPermutations;
   private long permutationCounter = 0;
 
-  public PermutationIterator(LinkedHashMap<String, List<Double>> inputMap) {
+  public CombinationIterator(LinkedHashMap<String, List<Double>> inputMap) {
     this.inputMap = inputMap;
     this.currentIndices = new LinkedHashMap<>();
     numPermutations = 1;
@@ -67,11 +67,11 @@ public final class PermutationIterator {
     return Collections.unmodifiableMap(currentPermutation);
   }
 
-  public long getNumPermutations() {
+  public long getNumCombinations() {
     return numPermutations;
   }
 
-  public long getPermutationCounter() {
+  public long getCombinationCounter() {
     return permutationCounter;
   }
 }

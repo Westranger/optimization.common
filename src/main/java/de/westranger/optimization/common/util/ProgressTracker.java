@@ -9,8 +9,8 @@ public class ProgressTracker {
   private long lastCurrent;
   private double averageDelta;
   private double progressPercentage;
-  private List<Long> deltasTime = new LinkedList<>();
-  private List<Long> deltasValue = new LinkedList<>();
+  private final List<Long> deltasTime = new LinkedList<>();
+  private final List<Long> deltasValue = new LinkedList<>();
 
   public ProgressTracker(long maxValue) {
     this.maxValue = maxValue;
@@ -22,7 +22,7 @@ public class ProgressTracker {
     final long deltaTime = currentTime - lastTime;
     final long deltaValue = currentValue - lastCurrent;
 
-    if(deltaValue < 0){
+    if (deltaValue < 0) {
       throw new IllegalArgumentException("progress is negative this is not allowed");
     }
 
@@ -34,7 +34,7 @@ public class ProgressTracker {
 
     averageDelta = 0.0;
     for (int i = 0; i < deltasTime.size(); i++) {
-      averageDelta += (double) deltaTime / (double) deltaValue;
+      averageDelta += (double) deltasTime.get(i) / (double) deltasValue.get(i);
     }
     averageDelta /= deltasTime.size();
 
