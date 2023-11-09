@@ -12,12 +12,16 @@ public final class PermutationIterator {
   private final LinkedHashMap<String, List<Double>> inputMap;
   private final LinkedHashMap<String, Integer> currentIndices;
   private boolean done = false;
+  private long numPermutations;
+  private long permutationCounter = 0;
 
   public PermutationIterator(LinkedHashMap<String, List<Double>> inputMap) {
     this.inputMap = inputMap;
     this.currentIndices = new LinkedHashMap<>();
-    for (String key : inputMap.keySet()) {
-      currentIndices.put(key, 0);
+    numPermutations = 1;
+    for (Map.Entry<String, List<Double>> entry : inputMap.entrySet()) {
+      currentIndices.put(entry.getKey(), 0);
+      numPermutations *= entry.getValue().size();
     }
   }
 
@@ -59,8 +63,15 @@ public final class PermutationIterator {
     if (!incremented) {
       done = true;
     }
-
+    permutationCounter++;
     return Collections.unmodifiableMap(currentPermutation);
   }
 
+  public long getNumPermutations() {
+    return numPermutations;
+  }
+
+  public long getPermutationCounter() {
+    return permutationCounter;
+  }
 }
