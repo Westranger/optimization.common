@@ -82,10 +82,8 @@ public final class SimulatedAnnealing {
       int improved = 0;
       int iterAtTemperature = 0;
 
-      final double bestScoreValue = bestScore.getAbsoluteScore();
-
-      while (iterAtTemperature < sap.omegaMax() &&
-          improved <= sap.maxImprovementPerTemperature()) {
+      while (iterAtTemperature < sap.omegaMax()
+          && improved <= sap.maxImprovementPerTemperature()) {
         this.totalIterationCounter++;
         final SearchSpaceState solutionCandidate =
             this.ns.select(currentSolution, currentTemp);
