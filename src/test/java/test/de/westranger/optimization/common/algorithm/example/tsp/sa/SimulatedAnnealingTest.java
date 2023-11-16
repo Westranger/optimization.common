@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Test;
 import test.de.westranger.optimization.common.algorithm.example.tsp.common.Order;
 import test.de.westranger.optimization.common.algorithm.example.tsp.common.ProblemFormulation;
 import test.de.westranger.optimization.common.algorithm.example.tsp.common.State;
-import test.de.westranger.optimization.common.algorithm.example.tsp.dfs.TSPNeighbourSelector;
 
 public class SimulatedAnnealingTest {
 

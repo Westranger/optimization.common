@@ -14,7 +14,7 @@ import java.util.concurrent.Callable;
 import test.de.westranger.optimization.common.algorithm.example.tsp.common.Order;
 import test.de.westranger.optimization.common.algorithm.example.tsp.common.ProblemFormulation;
 import test.de.westranger.optimization.common.algorithm.example.tsp.common.State;
-import test.de.westranger.optimization.common.algorithm.example.tsp.dfs.TSPNeighbourSelector;
+import test.de.westranger.optimization.common.algorithm.example.tsp.sa.TSPNeighbourSelector;
 
 public final class TSPCallable implements Callable<Map<String, Double>> {
 
