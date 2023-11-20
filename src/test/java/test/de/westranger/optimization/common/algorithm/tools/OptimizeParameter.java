@@ -1,6 +1,7 @@
 package test.de.westranger.optimization.common.algorithm.tools;
 
 import com.google.gson.Gson;
+import de.westranger.optimization.common.algorithm.tsp.common.ProblemFormulation;
 import de.westranger.optimization.common.util.CombinationIterator;
 import de.westranger.optimization.common.util.ProgressTracker;
 import java.io.InputStreamReader;
@@ -18,9 +19,8 @@ import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import test.de.westranger.optimization.common.algorithm.example.tsp.common.ProblemFormulation;
-import test.de.westranger.optimization.common.algorithm.example.tsp.sa.SimulatedAnnealingTest;
-import test.de.westranger.optimization.common.algorithm.tools.util.TSPCallable;
+import test.de.westranger.optimization.common.algorithm.tools.util.util.TSPCallable;
+import test.de.westranger.optimization.common.algorithm.tsp.sa.SimulatedAnnealingTest;
 
 public final class OptimizeParameter {
 

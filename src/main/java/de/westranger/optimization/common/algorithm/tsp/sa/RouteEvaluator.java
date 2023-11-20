@@ -1,4 +1,4 @@
-package test.de.westranger.optimization.common.algorithm.example.tsp.sa;
+package de.westranger.optimization.common.algorithm.tsp.sa;
 
 public final class RouteEvaluator {
 

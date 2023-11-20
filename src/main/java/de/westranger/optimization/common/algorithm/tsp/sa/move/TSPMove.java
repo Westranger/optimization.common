@@ -1,12 +1,12 @@
-package test.de.westranger.optimization.common.algorithm.example.tsp.sa.move;
+package de.westranger.optimization.common.algorithm.tsp.sa.move;
 
+import de.westranger.optimization.common.algorithm.tsp.sa.RouteEvaluator;
+import de.westranger.optimization.common.algorithm.tsp.sa.VehicleRoute;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
-import test.de.westranger.optimization.common.algorithm.example.tsp.sa.RouteEvaluator;
-import test.de.westranger.optimization.common.algorithm.example.tsp.sa.VehicleRoute;
 
 public abstract class TSPMove {
 
@@ -26,8 +26,8 @@ public abstract class TSPMove {
     return Optional.empty();
   }
 
-  protected List<Integer> generateValidIndices(final int listLength, final int numIndices,
-                                               final int minSegmentLength, final Random rng) {
+  public List<Integer> generateValidIndices(final int listLength, final int numIndices,
+                                            final int minSegmentLength, final Random rng) {
     if (listLength <= 0) {
       throw new IllegalArgumentException("invalid listLength");
     }
@@ -42,20 +42,21 @@ public abstract class TSPMove {
 
     List<Integer> candidates = new LinkedList<>();
     List<Integer> result = new ArrayList<>(listLength - minSegmentLength);
-    for (int i = minSegmentLength - 1; i < listLength - minSegmentLength; i++) {
+    for (int i = minSegmentLength; i <= listLength - minSegmentLength; i++) {
       candidates.add(i);
     }
 
     for (int idxCount = 0; idxCount < numIndices; idxCount++) {
-      List<Integer> toBeRemoved = new ArrayList<>((minSegmentLength * 2) + 1);
+      List<Integer> toBeRemoved = new LinkedList<>();
 
       if (candidates.isEmpty()) {
         throw new IllegalStateException("could not draw enough candidates");
       }
 
       final int idx = rng.nextInt(candidates.size());
-      result.add(idx);
-      for (int i = idx - minSegmentLength; i <= idx + minSegmentLength; i++) {
+      final int value = candidates.get(idx);
+      result.add(value);
+      for (int i = value - minSegmentLength; i <= value + minSegmentLength - 1; i++) {
         toBeRemoved.add(i);
       }
       candidates.removeAll(toBeRemoved);
@@ -64,9 +65,14 @@ public abstract class TSPMove {
     return result;
   }
 
-  protected boolean isGenerateValidIndicesPossible(final int listLength, final int numIndices,
-                                                   final int minSegmentLength) {
-    return Math.ceil((double) listLength / (double) ((minSegmentLength * 2) + 1)) <= numIndices;
+  public boolean isGenerateValidIndicesAlwaysPossible(final int listLength, final int numIndices,
+                                                      final int minSegmentLength) {
+    double delta = listLength - 2 * minSegmentLength;
+    if (delta < 0.0) {
+      return false;
+    }
+    final double frac = Math.floor(delta / (double) minSegmentLength);
+    return frac + 1 >= numIndices;
   }
 
 }

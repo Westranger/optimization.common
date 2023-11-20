@@ -6,8 +6,8 @@ import de.westranger.optimization.common.algorithm.action.planning.ActionPlannin
 import de.westranger.optimization.common.algorithm.action.planning.solver.dfs.DepthFirstSearchSolver;
 
 import java.util.*;
-import test.de.westranger.optimization.common.algorithm.example.tsp.common.Order;
-import test.de.westranger.optimization.common.algorithm.example.tsp.common.State;
+import de.westranger.optimization.common.algorithm.tsp.common.Order;
+import de.westranger.optimization.common.algorithm.tsp.common.State;
 
 public class Benchmark {
   public static void main(String[] args) {

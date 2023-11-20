@@ -1,4 +1,4 @@
-package test.de.westranger.optimization.common.algorithm.tools.util;
+package test.de.westranger.optimization.common.algorithm.tools.util.util;
 
 import de.westranger.optimization.common.algorithm.action.planning.SearchSpaceState;
 import de.westranger.optimization.common.algorithm.action.planning.solver.stochastic.SimulatedAnnealing;
@@ -11,10 +11,10 @@ import java.util.Map;
 import java.util.Random;
 import java.util.TreeMap;
 import java.util.concurrent.Callable;
-import test.de.westranger.optimization.common.algorithm.example.tsp.common.Order;
-import test.de.westranger.optimization.common.algorithm.example.tsp.common.ProblemFormulation;
-import test.de.westranger.optimization.common.algorithm.example.tsp.common.State;
-import test.de.westranger.optimization.common.algorithm.example.tsp.sa.TSPNeighbourSelector;
+import de.westranger.optimization.common.algorithm.tsp.common.Order;
+import de.westranger.optimization.common.algorithm.tsp.common.ProblemFormulation;
+import de.westranger.optimization.common.algorithm.tsp.common.State;
+import de.westranger.optimization.common.algorithm.tsp.sa.TSPNeighbourSelector;
 
 public final class TSPCallable implements Callable<Map<String, Double>> {
 

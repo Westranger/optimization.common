@@ -51,15 +51,14 @@ public class CubicFunktion {
 
   @Override
   public String toString() {
-    final StringBuilder sb = new StringBuilder();
-    sb.append(this.a1);
-    sb.append(" * x^3 + ");
-    sb.append(this.a2);
-    sb.append(" * x^2 + ");
-    sb.append(this.a3);
-    sb.append(" * x + ");
-    sb.append(this.constant);
-    return sb.toString();
+    String sb = this.a1 +
+        " * x^3 + " +
+        this.a2 +
+        " * x^2 + " +
+        this.a3 +
+        " * x + " +
+        this.constant;
+    return sb;
   }
 
 }

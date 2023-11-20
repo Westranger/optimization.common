@@ -1,4 +1,4 @@
-package test.de.westranger.optimization.common.algorithm.example.tsp.common;
+package de.westranger.optimization.common.algorithm.tsp.common;
 
 import de.westranger.optimization.common.algorithm.action.planning.solver.Score;
 

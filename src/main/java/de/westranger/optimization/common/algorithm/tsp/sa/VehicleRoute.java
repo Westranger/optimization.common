@@ -1,9 +1,9 @@
-package test.de.westranger.optimization.common.algorithm.example.tsp.sa;
+package de.westranger.optimization.common.algorithm.tsp.sa;
 
 
 import de.westranger.geometry.common.simple.Point2D;
+import de.westranger.optimization.common.algorithm.tsp.common.Order;
 import java.util.List;
-import test.de.westranger.optimization.common.algorithm.example.tsp.common.Order;
 
 public final class VehicleRoute {
 
@@ -35,15 +35,14 @@ public final class VehicleRoute {
 
   @Override
   public String toString() {
-    final StringBuilder sb = new StringBuilder();
-    sb.append("(id= ");
-    sb.append(this.id);
-    sb.append(", home=");
-    sb.append(this.homePosition.toString());
-    sb.append(", route=");
-    sb.append(route.toString());
-    sb.append(')');
-    return sb.toString();
+    String sb = "(id= " +
+        this.id +
+        ", home=" +
+        this.homePosition.toString() +
+        ", route=" +
+        route.toString() +
+        ')';
+    return sb;
   }
 
 }
