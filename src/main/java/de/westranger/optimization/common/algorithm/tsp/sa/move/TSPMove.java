@@ -26,8 +26,8 @@ public abstract class TSPMove {
     return Optional.empty();
   }
 
-  public List<Integer> generateValidIndices(final int listLength, final int numIndices,
-                                            final int minSegmentLength, final Random rng) {
+  public List<Integer> generateValidCuts(final int listLength, final int numIndices,
+                                         final int minSegmentLength, final Random rng) {
     if (listLength <= 0) {
       throw new IllegalArgumentException("invalid listLength");
     }
@@ -65,8 +65,8 @@ public abstract class TSPMove {
     return result;
   }
 
-  public boolean isGenerateValidIndicesAlwaysPossible(final int listLength, final int numIndices,
-                                                      final int minSegmentLength) {
+  public boolean isGenerateValidCutsAlwaysPossible(final int listLength, final int numIndices,
+                                                   final int minSegmentLength) {
     double delta = listLength - 2 * minSegmentLength;
     if (delta < 0.0) {
       return false;

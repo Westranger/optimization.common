@@ -2,6 +2,7 @@ package de.westranger.optimization.common.algorithm.tsp.common;
 
 import de.westranger.geometry.common.simple.Point2D;
 
+import de.westranger.optimization.common.algorithm.tsp.sa.VehicleRoute;
 import java.util.List;
 import java.util.Map;
 

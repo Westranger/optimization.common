@@ -1,16 +1,8 @@
 package test.de.westranger.optimization.common.algorithm.tools;
 
-import de.westranger.geometry.common.simple.Point2D;
-import de.westranger.optimization.common.algorithm.action.planning.ActionPlanningSolution;
-import de.westranger.optimization.common.algorithm.action.planning.ActionPlanningSolver;
-import de.westranger.optimization.common.algorithm.action.planning.solver.dfs.DepthFirstSearchSolver;
-
-import java.util.*;
-import de.westranger.optimization.common.algorithm.tsp.common.Order;
-import de.westranger.optimization.common.algorithm.tsp.common.State;
-
 public class Benchmark {
   public static void main(String[] args) {
+    /*
     final Map<Integer, List<Order>> orderMapping = new TreeMap<>();
     orderMapping.put(1, new ArrayList<>());
 
@@ -61,6 +53,8 @@ public class Benchmark {
     final long endSmart = System.currentTimeMillis();
     System.out.print(" smart=" + (endSmart - startSmart));
     System.out.println(" score=" + score.get().get(0).getScore());
+    */
+
   }
 
 }

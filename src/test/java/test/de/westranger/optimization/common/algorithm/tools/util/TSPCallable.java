@@ -1,8 +1,15 @@
-package test.de.westranger.optimization.common.algorithm.tools.util.util;
+package test.de.westranger.optimization.common.algorithm.tools.util;
 
+import de.westranger.geometry.common.simple.Point2D;
 import de.westranger.optimization.common.algorithm.action.planning.SearchSpaceState;
 import de.westranger.optimization.common.algorithm.action.planning.solver.stochastic.SimulatedAnnealing;
 import de.westranger.optimization.common.algorithm.action.planning.solver.stochastic.SimulatedAnnealingParameter;
+import de.westranger.optimization.common.algorithm.tsp.common.Order;
+import de.westranger.optimization.common.algorithm.tsp.common.ProblemFormulation;
+import de.westranger.optimization.common.algorithm.tsp.common.State;
+import de.westranger.optimization.common.algorithm.tsp.sa.RouteEvaluator;
+import de.westranger.optimization.common.algorithm.tsp.sa.TSPNeighbourSelector;
+import de.westranger.optimization.common.algorithm.tsp.sa.VehicleRoute;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -11,10 +18,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.TreeMap;
 import java.util.concurrent.Callable;
-import de.westranger.optimization.common.algorithm.tsp.common.Order;
-import de.westranger.optimization.common.algorithm.tsp.common.ProblemFormulation;
-import de.westranger.optimization.common.algorithm.tsp.common.State;
-import de.westranger.optimization.common.algorithm.tsp.sa.TSPNeighbourSelector;
 
 public final class TSPCallable implements Callable<Map<String, Double>> {
 
@@ -65,11 +68,13 @@ public final class TSPCallable implements Callable<Map<String, Double>> {
 
     Collections.shuffle(orders, rng);
 
-    Map<Integer, List<Order>> orderMapping = new TreeMap<>();
-    orderMapping.put(1, orders);
+    Map<Integer, VehicleRoute> orderMapping = new TreeMap<>();
+    Point2D home = this.pf.getVehicleStartPositions().get(1);
+    orderMapping.put(1, new VehicleRoute(1, home, orders));
 
+    RouteEvaluator re = new RouteEvaluator();
     State initialState =
-        new State(new ArrayList<>(), orderMapping, this.pf.getVehicleStartPositions());
+        new State(new ArrayList<>(), orderMapping, re);
     TSPNeighbourSelector ns = new TSPNeighbourSelector(sap.tMax(), sap.tMin(), rng);
 
     return new SimulatedAnnealing(initialState, ns, rng, sap);

@@ -3,9 +3,10 @@ package de.westranger.optimization.common.algorithm.tsp.sa;
 
 import de.westranger.geometry.common.simple.Point2D;
 import de.westranger.optimization.common.algorithm.tsp.common.Order;
+import java.util.ArrayList;
 import java.util.List;
 
-public final class VehicleRoute {
+public final class VehicleRoute implements Cloneable {
 
   private final int id;
   private final Point2D homePosition;
@@ -35,14 +36,18 @@ public final class VehicleRoute {
 
   @Override
   public String toString() {
-    String sb = "(id= " +
-        this.id +
-        ", home=" +
-        this.homePosition.toString() +
-        ", route=" +
-        route.toString() +
-        ')';
+    String sb = "(id= " + this.id + ", home=" + this.homePosition.toString() + ", route="
+        + route.toString() + ')';
     return sb;
   }
 
+  @Override
+  public VehicleRoute clone() {
+    final List<Order> result = new ArrayList<>(this.route.size());
+    for (Order order : this.route) {
+      result.add(order);
+    }
+
+    return new VehicleRoute(this.id, this.homePosition, result);
+  }
 }

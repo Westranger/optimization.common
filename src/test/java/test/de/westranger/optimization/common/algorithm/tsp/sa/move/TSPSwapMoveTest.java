@@ -14,7 +14,7 @@ import java.util.Random;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import test.de.westranger.optimization.common.algorithm.tools.util.CustomIntegerRandom;
+import test.de.westranger.optimization.common.algorithm.tools.util.CustomRandom;
 
 class TSPSwapMoveTest {
 
@@ -154,7 +154,7 @@ class TSPSwapMoveTest {
   @Test
   public void test1Vehicle6OrdersSameIndex() {
     RouteEvaluator re = new RouteEvaluator();
-    Random rng = new CustomIntegerRandom(new int[] {0, 0});
+    Random rng = new CustomRandom(new int[] {0, 0});
     TSPMove move = new TSPSwapMove(rng, re);
 
     Order orderA = new Order(1, new Point2D(1.0, 1.0));
@@ -185,7 +185,7 @@ class TSPSwapMoveTest {
   @Test
   public void test1Vehicle6OrdersA() {
     RouteEvaluator re = new RouteEvaluator();
-    Random rng = new CustomIntegerRandom(new int[] {2, 4});
+    Random rng = new CustomRandom(new int[] {2, 4});
     TSPMove move = new TSPSwapMove(rng, re);
 
     Order orderA = new Order(1, new Point2D(1.0, 1.0));
@@ -215,7 +215,7 @@ class TSPSwapMoveTest {
   @Test
   public void test1Vehicle6OrdersB() {
     RouteEvaluator re = new RouteEvaluator();
-    Random rng = new CustomIntegerRandom(new int[] {4, 2});
+    Random rng = new CustomRandom(new int[] {4, 2});
     TSPMove move = new TSPSwapMove(rng, re);
 
     Order orderA = new Order(1, new Point2D(1.0, 1.0));

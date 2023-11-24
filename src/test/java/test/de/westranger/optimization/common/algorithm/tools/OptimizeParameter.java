@@ -19,7 +19,7 @@ import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import test.de.westranger.optimization.common.algorithm.tools.util.util.TSPCallable;
+import test.de.westranger.optimization.common.algorithm.tools.util.TSPCallable;
 import test.de.westranger.optimization.common.algorithm.tsp.sa.SimulatedAnnealingTest;
 
 public final class OptimizeParameter {
@@ -38,7 +38,8 @@ public final class OptimizeParameter {
 
     input.put("tMax", List.of(0.0));
     input.put("initialAcceptanceRatio", Arrays.asList(0.9, 0.8, 0.7));
-    input.put("gamma", Arrays.asList(0.6, 0.7, 0.8, 0.9, 0.95, 0.96, 0.97, 0.98, 0.99, 0.999));
+    input.put("gamma",
+        Arrays.asList(0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.96, 0.97 /*, 0.98, 0.99, 0.999*/));
     input.put("tMin", Arrays.asList(0.001, 0.01, 0.1, 1.0, 10.0, 100.0, 1000.0));
     input.put("omegaMax",
         Arrays.asList(100.0, 250.0, 500.0, 1000.0, 2500.0, 5000.0, 10000.0, 25000.0, 50000.0,

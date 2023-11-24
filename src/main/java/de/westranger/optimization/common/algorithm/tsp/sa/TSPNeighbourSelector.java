@@ -2,18 +2,19 @@ package de.westranger.optimization.common.algorithm.tsp.sa;
 
 import de.westranger.optimization.common.algorithm.action.planning.SearchSpaceState;
 import de.westranger.optimization.common.algorithm.action.planning.solver.stochastic.NeighbourSelector;
-import de.westranger.optimization.common.algorithm.tsp.common.Order;
 import de.westranger.optimization.common.algorithm.tsp.common.State;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.TreeMap;
 import de.westranger.optimization.common.algorithm.tsp.sa.move.TSPInsertSubrouteMove;
-import de.westranger.optimization.common.algorithm.tsp.sa.move.TSPInsertSubrouteReverseMove;
 import de.westranger.optimization.common.algorithm.tsp.sa.move.TSPInsertionMove;
 import de.westranger.optimization.common.algorithm.tsp.sa.move.TSPMove;
+import de.westranger.optimization.common.algorithm.tsp.sa.move.TSPMoveResult;
 import de.westranger.optimization.common.algorithm.tsp.sa.move.TSPSwapMove;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Random;
+import java.util.TreeMap;
 
 public final class TSPNeighbourSelector implements NeighbourSelector {
 
@@ -32,10 +33,11 @@ public final class TSPNeighbourSelector implements NeighbourSelector {
     this.maxTemperature = maxTemperature;
     this.minTemperature = minTemperature;
     this.rng = rng;
-    moveSwap = new TSPSwapMove(rng, null);
-    moveInsert = new TSPInsertionMove(rng, null);
-    moveInsertSubroute = new TSPInsertSubrouteMove(rng, null);
-    moveInsertSubrouteReverse = new TSPInsertSubrouteReverseMove(rng, null);
+    final RouteEvaluator re = new RouteEvaluator();
+    moveSwap = new TSPSwapMove(rng, re);
+    moveInsert = new TSPInsertionMove(rng, re);
+    moveInsertSubroute = new TSPInsertSubrouteMove(rng, re, false);
+    moveInsertSubrouteReverse = new TSPInsertSubrouteMove(rng, re, true);
   }
 
 
@@ -51,86 +53,65 @@ public final class TSPNeighbourSelector implements NeighbourSelector {
       throw new IllegalStateException("there are still order which are not assigned to vehicles");
     }
 
-    // filter vehicle without any orders
-    Map<Integer, List<Order>> vehicleCandidates = new TreeMap<>();
-    for (Map.Entry<Integer, List<Order>> entry : state.getOrderMapping().entrySet()) {
-      if (!entry.getValue().isEmpty()) {
-        vehicleCandidates.put(entry.getKey(), entry.getValue());
-      }
-    }
-
     // now we have two lists
-    final int vehicleIdA = this.rng.nextInt(vehicleCandidates.size()) + 1;
+    final int vehicleIdA = this.rng.nextInt(state.getOrderMapping().size()) + 1;
     final int vehicleIdB = this.rng.nextInt(state.getOrderMapping().size()) + 1;
 
-    List<Order> ordersA = new ArrayList<>(state.getOrderMapping().get(vehicleIdA));
+    final Map<Integer, VehicleRoute> newMapping = new TreeMap<>();
 
-    final Map<Integer, List<Order>> newMapping = new TreeMap<>();
-
-    /*
+    final List<VehicleRoute> vrl = new LinkedList<>();
     if (vehicleIdA == vehicleIdB) {
-      // jetzt können wir 2 opt oder 3 opt, move insert, move swap, insert subroute
-      int maxRng = 2;
-      if (isGenerateValidIndicesPossible(ordersA.size(), 2, 2)) {
-        maxRng = 4;
-      }
-
-      int selected = rng.nextInt(maxRng);
-      switch (selected) {
-        case 0 -> moveInsert(ordersA, ordersA);
-        case 1 -> moveSwap(ordersA, ordersA);
-        case 2 -> {
-          final List<Integer> indices = generateValidIndices(ordersA.size(), 2, 2, rng);
-          moveInsertSubroute(ordersA, ordersA, indices.get(0), indices.get(1));
-        }
-        case 3 -> {
-          final List<Integer> indices = generateValidIndices(ordersA.size(), 2, 2, rng);
-          moveInsertSubrouteReverse(ordersA, ordersA, indices.get(0), indices.get(1));
-        }
-      }
-
-      newMapping.put(vehicleIdA, ordersA);
+      final VehicleRoute vrA = state.getOrderMapping().get(vehicleIdA);
+      vrl.add(vrA);
     } else {
-      List<Order> ordersB = new ArrayList<>(state.getOrderMapping().get(vehicleIdB));
-
-      if (ordersB.isEmpty()) {
-        int selected = rng.nextInt(2);
-        switch (selected) {
-          case 0 -> moveInsert(ordersA, ordersB);
-          case 1 -> moveSwap(ordersA, ordersB);
-        }
-      } else {
-        int maxRng = 2;
-        if (isGenerateValidIndicesPossible(ordersA.size(), 2, 2)) {
-          maxRng = 4;
-        }
-
-        int selected = rng.nextInt(maxRng);
-        switch (selected) {
-          case 0 -> moveInsert(ordersA, ordersB);
-          case 1 -> moveSwap(ordersA, ordersB);
-          case 2 -> {
-            final List<Integer> indices = generateValidIndices(ordersA.size(), 2, 2, rng);
-            moveInsertSubroute(ordersA, ordersB, indices.get(0), indices.get(1));
-          }
-          case 3 -> {
-            final List<Integer> indices = generateValidIndices(ordersA.size(), 2, 2, rng);
-            moveInsertSubrouteReverse(ordersA, ordersB, indices.get(0), indices.get(1));
-          }
-        }
-      }
-      newMapping.put(vehicleIdA, ordersA);
-      newMapping.put(vehicleIdB, ordersB);
+      final VehicleRoute vrA = state.getOrderMapping().get(vehicleIdA);
+      final VehicleRoute vrB = state.getOrderMapping().get(vehicleIdB);
+      vrl.add(vrA);
+      vrl.add(vrB);
     }
 
-    for (Map.Entry<Integer, List<Order>> entry : state.getOrderMapping().entrySet()) {
+    final Optional<TSPMoveResult> moveInsertResult = this.moveInsert.performMove(vrl);
+    final Optional<TSPMoveResult> moveSwapResult = this.moveSwap.performMove(vrl);
+    final Optional<TSPMoveResult> moveSRResult = this.moveInsertSubroute.performMove(vrl);
+    final Optional<TSPMoveResult> moveSRRResult = this.moveInsertSubrouteReverse.performMove(vrl);
+
+    Optional<TSPMoveResult> finalResult = Optional.empty();
+    double min = Double.POSITIVE_INFINITY;
+
+    if (moveInsertResult.isPresent() && moveInsertResult.get().score() < min) {
+      min = moveInsertResult.get().score();
+      finalResult = moveInsertResult;
+    }
+
+    if (moveSwapResult.isPresent() && moveSwapResult.get().score() < min) {
+      min = moveSwapResult.get().score();
+      finalResult = moveSwapResult;
+    }
+
+    if (moveSRResult.isPresent() && moveSRResult.get().score() < min) {
+      min = moveSRResult.get().score();
+      finalResult = moveSRResult;
+    }
+
+    if (moveSRRResult.isPresent() && moveSRRResult.get().score() < min) {
+      finalResult = moveSRRResult;
+    }
+
+    if (finalResult.isEmpty()) {
+      throw new IllegalStateException("none of the moves came up with an result");
+    }
+
+    for (VehicleRoute vr : finalResult.get().vehicles()) {
+      newMapping.put(vr.getId(), vr);
+    }
+
+    for (Map.Entry<Integer, VehicleRoute> entry : state.getOrderMapping().entrySet()) {
       if (!newMapping.containsKey(entry.getKey())) {
         newMapping.put(entry.getKey(), entry.getValue());
       }
     }
-    */
 
-    return new State(new ArrayList<>(), newMapping, state.getVehiclePositions());
+    return new State(new ArrayList<>(), newMapping, state.getRouteEval());
   }
 
 

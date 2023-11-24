@@ -2,7 +2,6 @@ package de.westranger.optimization.common.algorithm.action.planning;
 
 import de.westranger.optimization.common.algorithm.action.planning.solver.Score;
 import de.westranger.optimization.common.algorithm.action.planning.solver.Visualizable;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -11,6 +10,7 @@ public abstract class SearchSpaceState
 
   public abstract List<Action> getPossibleActions();
 
+  @Deprecated
   public abstract boolean perform(Action action);
 
   public abstract Score getScore();
