@@ -48,10 +48,10 @@ public final class OptimizeParameter {
         Arrays.asList(2.0, 5.0, 10.0, 25.0, 50.0, 100.0, 250.0, 500.0));
 
     final InputStreamReader reader = new InputStreamReader(
-        SimulatedAnnealingTest.class.getResourceAsStream("/tsp/1_vehicle_194_orders.json"));
+        SimulatedAnnealingTest.class.getResourceAsStream("/tsp/1_vehicle_980_orders.json"));
     final Gson gson = new Gson();
     final ProblemFormulation problem = gson.fromJson(reader, ProblemFormulation.class);
-    final int threadPoolSize = 15;
+    final int threadPoolSize = 13;
     final int batchSize = 100;
     final CombinationIterator combinationIterator = new CombinationIterator(input);
     final ProgressTracker pt = new ProgressTracker(combinationIterator.getNumCombinations());

@@ -42,7 +42,7 @@ public class SimulatedAnnealingTest {
     State initialState =
         new State(new ArrayList<>(), Map.of(vr.getId(), vr), re);
     SimulatedAnnealingParameter sap =
-        new SimulatedAnnealingParameter(0, 1.0, 0.8, 250000, 250, 0.9);
+        new SimulatedAnnealingParameter(0, 1.0, 0.96, 250000, 100, 0.9);
 
     TSPNeighbourSelector ns = new TSPNeighbourSelector(sap.tMax(), sap.tMin(), rng);
 
@@ -50,8 +50,8 @@ public class SimulatedAnnealingTest {
 
     SearchSpaceState optimizedState = sa.optimize();
 
-    Assertions.assertEquals(9016.415571672727, optimizedState.getScore().getAbsoluteScore(), 1e-10);
-    Assertions.assertEquals(9750000, sa.getTotalIterationCounter());
+    Assertions.assertEquals(9353.678079851821, optimizedState.getScore().getAbsoluteScore(), 1e-10);
+    Assertions.assertEquals(5.2500528E7, sa.getTotalIterationCounter());
   }
 
   @Test
