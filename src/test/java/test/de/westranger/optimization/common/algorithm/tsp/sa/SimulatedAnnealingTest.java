@@ -17,7 +17,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.TreeMap;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -40,7 +39,7 @@ public class SimulatedAnnealingTest {
     final RouteEvaluator re = new RouteEvaluator();
 
     State initialState =
-        new State(new ArrayList<>(), Map.of(vr.getId(), vr), re);
+        new State(new ArrayList<>(), Map.of(vr.id(), vr), re);
     SimulatedAnnealingParameter sap =
         new SimulatedAnnealingParameter(0, 1.0, 0.96, 250000, 100, 0.9);
 
@@ -71,7 +70,7 @@ public class SimulatedAnnealingTest {
     final RouteEvaluator re = new RouteEvaluator();
 
     State initialState =
-        new State(new ArrayList<>(), Map.of(vr.getId(), vr), re);
+        new State(new ArrayList<>(), Map.of(vr.id(), vr), re);
 
     SimulatedAnnealingParameter sap =
         new SimulatedAnnealingParameter(0, 0.001, 0.8, 100, 5, 0.9);

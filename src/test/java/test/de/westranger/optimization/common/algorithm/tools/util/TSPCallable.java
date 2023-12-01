@@ -70,7 +70,7 @@ public final class TSPCallable implements Callable<Map<String, Double>> {
 
     Map<Integer, VehicleRoute> orderMapping = new TreeMap<>();
     Point2D home = this.pf.getVehicleStartPositions().get(1);
-    orderMapping.put(1, new VehicleRoute(1, home, orders));
+    orderMapping.put(1, new VehicleRoute(1, home, orders, 0.0));
 
     RouteEvaluator re = new RouteEvaluator();
     State initialState =

@@ -32,11 +32,12 @@ public class Benchmark {
     List<Order> orders = new LinkedList<>(problem.getOrders());
     Collections.shuffle(orders, rng);
 
-    final VehicleRoute vr = new VehicleRoute(1, problem.getVehicleStartPositions().get(1), orders);
+    final VehicleRoute vr =
+        new VehicleRoute(1, problem.getVehicleStartPositions().get(1), orders, 0.0);
     final RouteEvaluator re = new RouteEvaluator();
 
     State initialState =
-        new State(new ArrayList<>(), Map.of(vr.getId(), vr), re);
+        new State(new ArrayList<>(), Map.of(vr.id(), vr), re);
     SimulatedAnnealingParameter sap =
         new SimulatedAnnealingParameter(0, 1.0, 0.96, 250000, 100, 0.9);
 

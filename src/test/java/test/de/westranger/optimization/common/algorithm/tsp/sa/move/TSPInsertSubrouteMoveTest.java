@@ -38,9 +38,9 @@ public class TSPInsertSubrouteMoveTest {
     RouteEvaluator re = new RouteEvaluator();
     TSPMove move = new TSPInsertSubrouteMove(rng, re, false);
 
-    VehicleRoute vrA = new VehicleRoute(1, new Point2D(1.0, 1.0), new LinkedList<>());
-    VehicleRoute vrB = new VehicleRoute(2, new Point2D(2.0, 2.0), new LinkedList<>());
-    VehicleRoute vrC = new VehicleRoute(3, new Point2D(3.0, 3.0), new LinkedList<>());
+    VehicleRoute vrA = new VehicleRoute(1, new Point2D(1.0, 1.0), new LinkedList<>(), 0.0);
+    VehicleRoute vrB = new VehicleRoute(2, new Point2D(2.0, 2.0), new LinkedList<>(), 0.0);
+    VehicleRoute vrC = new VehicleRoute(3, new Point2D(3.0, 3.0), new LinkedList<>(), 0.0);
 
     Assertions.assertThrows(IllegalArgumentException.class,
         () -> move.performMove(List.of(vrA, vrB, vrC)));
@@ -50,7 +50,7 @@ public class TSPInsertSubrouteMoveTest {
   public void test1VehicleNoOrders() {
     RouteEvaluator re = new RouteEvaluator();
     TSPMove move = new TSPInsertSubrouteMove(rng, re, false);
-    VehicleRoute vrA = new VehicleRoute(1, new Point2D(1.0, 1.0), new LinkedList<>());
+    VehicleRoute vrA = new VehicleRoute(1, new Point2D(1.0, 1.0), new LinkedList<>(), 0.0);
 
     Optional<TSPMoveResult> result = move.performMove(List.of(vrA));
     Assertions.assertTrue(result.isEmpty());
@@ -60,8 +60,8 @@ public class TSPInsertSubrouteMoveTest {
   public void test2VehiclesNoOrders() {
     RouteEvaluator re = new RouteEvaluator();
     TSPMove move = new TSPInsertSubrouteMove(rng, re, false);
-    VehicleRoute vrA = new VehicleRoute(1, new Point2D(1.0, 1.0), new LinkedList<>());
-    VehicleRoute vrB = new VehicleRoute(2, new Point2D(2.0, 2.0), new LinkedList<>());
+    VehicleRoute vrA = new VehicleRoute(1, new Point2D(1.0, 1.0), new LinkedList<>(), 0.0);
+    VehicleRoute vrB = new VehicleRoute(2, new Point2D(2.0, 2.0), new LinkedList<>(), 0.0);
 
     Optional<TSPMoveResult> result = move.performMove(List.of(vrA, vrB));
     Assertions.assertTrue(result.isEmpty());
@@ -73,12 +73,12 @@ public class TSPInsertSubrouteMoveTest {
     Random rng = new CustomRandom(new int[] {1, 0, 2});
     TSPMove move = new TSPInsertSubrouteMove(rng, re, false);
 
-    Order orderA = new Order(1, new Point2D(1.0, 1.0));
-    Order orderB = new Order(2, new Point2D(2.0, 2.0));
-    Order orderC = new Order(3, new Point2D(3.0, 3.0));
+    Order orderA = new Order(1, new Point2D(1.0, 1.0), null);
+    Order orderB = new Order(2, new Point2D(2.0, 2.0), null);
+    Order orderC = new Order(3, new Point2D(3.0, 3.0), null);
 
     VehicleRoute vrA = new VehicleRoute(1, new Point2D(1.0, 1.0),
-        List.of(orderA, orderB, orderC));
+        List.of(orderA, orderB, orderC), 0.0);
 
     Optional<TSPMoveResult> result = move.performMove(List.of(vrA));
     Assertions.assertFalse(result.isPresent());
@@ -90,24 +90,24 @@ public class TSPInsertSubrouteMoveTest {
     Random rng = new CustomRandom(new int[] {1, 0, 0});
     TSPMove move = new TSPInsertSubrouteMove(rng, re, false);
 
-    Order orderA = new Order(1, new Point2D(1.0, 1.0));
-    Order orderB = new Order(2, new Point2D(2.0, 2.0));
-    Order orderC = new Order(3, new Point2D(3.0, 3.0));
-    Order orderD = new Order(4, new Point2D(4.0, 4.0));
+    Order orderA = new Order(1, new Point2D(1.0, 1.0), null);
+    Order orderB = new Order(2, new Point2D(2.0, 2.0), null);
+    Order orderC = new Order(3, new Point2D(3.0, 3.0), null);
+    Order orderD = new Order(4, new Point2D(4.0, 4.0), null);
 
     VehicleRoute vrA = new VehicleRoute(1, new Point2D(1.0, 1.0),
-        List.of(orderA, orderB, orderC, orderD));
+        List.of(orderA, orderB, orderC, orderD), 0.0);
 
     Optional<TSPMoveResult> result = move.performMove(List.of(vrA));
     Assertions.assertTrue(result.isPresent());
 
     Assertions.assertEquals(1, result.get().vehicles().size());
-    Assertions.assertEquals(4, result.get().vehicles().get(0).getRoute().size());
+    Assertions.assertEquals(4, result.get().vehicles().get(0).route().size());
 
-    Assertions.assertEquals(2, result.get().vehicles().get(0).getRoute().get(0).getId());
-    Assertions.assertEquals(3, result.get().vehicles().get(0).getRoute().get(1).getId());
-    Assertions.assertEquals(1, result.get().vehicles().get(0).getRoute().get(2).getId());
-    Assertions.assertEquals(4, result.get().vehicles().get(0).getRoute().get(3).getId());
+    Assertions.assertEquals(2, result.get().vehicles().get(0).route().get(0).getId());
+    Assertions.assertEquals(3, result.get().vehicles().get(0).route().get(1).getId());
+    Assertions.assertEquals(1, result.get().vehicles().get(0).route().get(2).getId());
+    Assertions.assertEquals(4, result.get().vehicles().get(0).route().get(3).getId());
   }
 
   @Test
@@ -116,24 +116,24 @@ public class TSPInsertSubrouteMoveTest {
     Random rng = new CustomRandom(new int[] {1, 0, 2});
     TSPMove move = new TSPInsertSubrouteMove(rng, re, false);
 
-    Order orderA = new Order(1, new Point2D(1.0, 1.0));
-    Order orderB = new Order(2, new Point2D(2.0, 2.0));
-    Order orderC = new Order(3, new Point2D(3.0, 3.0));
-    Order orderD = new Order(4, new Point2D(4.0, 4.0));
+    Order orderA = new Order(1, new Point2D(1.0, 1.0), null);
+    Order orderB = new Order(2, new Point2D(2.0, 2.0), null);
+    Order orderC = new Order(3, new Point2D(3.0, 3.0), null);
+    Order orderD = new Order(4, new Point2D(4.0, 4.0), null);
 
     VehicleRoute vrA = new VehicleRoute(1, new Point2D(1.0, 1.0),
-        List.of(orderA, orderB, orderC, orderD));
+        List.of(orderA, orderB, orderC, orderD), 0.0);
 
     Optional<TSPMoveResult> result = move.performMove(List.of(vrA));
     Assertions.assertTrue(result.isPresent());
 
     Assertions.assertEquals(1, result.get().vehicles().size());
-    Assertions.assertEquals(4, result.get().vehicles().get(0).getRoute().size());
+    Assertions.assertEquals(4, result.get().vehicles().get(0).route().size());
 
-    Assertions.assertEquals(1, result.get().vehicles().get(0).getRoute().get(0).getId());
-    Assertions.assertEquals(4, result.get().vehicles().get(0).getRoute().get(1).getId());
-    Assertions.assertEquals(2, result.get().vehicles().get(0).getRoute().get(2).getId());
-    Assertions.assertEquals(3, result.get().vehicles().get(0).getRoute().get(3).getId());
+    Assertions.assertEquals(1, result.get().vehicles().get(0).route().get(0).getId());
+    Assertions.assertEquals(4, result.get().vehicles().get(0).route().get(1).getId());
+    Assertions.assertEquals(2, result.get().vehicles().get(0).route().get(2).getId());
+    Assertions.assertEquals(3, result.get().vehicles().get(0).route().get(3).getId());
   }
 
   @Test
@@ -142,24 +142,24 @@ public class TSPInsertSubrouteMoveTest {
     Random rng = new CustomRandom(new int[] {0, 0, 1});
     TSPMove move = new TSPInsertSubrouteMove(rng, re, false);
 
-    Order orderA = new Order(1, new Point2D(1.0, 1.0));
-    Order orderB = new Order(2, new Point2D(2.0, 2.0));
-    Order orderC = new Order(3, new Point2D(3.0, 3.0));
-    Order orderD = new Order(4, new Point2D(4.0, 4.0));
+    Order orderA = new Order(1, new Point2D(1.0, 1.0), null);
+    Order orderB = new Order(2, new Point2D(2.0, 2.0), null);
+    Order orderC = new Order(3, new Point2D(3.0, 3.0), null);
+    Order orderD = new Order(4, new Point2D(4.0, 4.0), null);
 
     VehicleRoute vrA = new VehicleRoute(1, new Point2D(1.0, 1.0),
-        List.of(orderA, orderB, orderC, orderD));
+        List.of(orderA, orderB, orderC, orderD), 0.0);
 
     Optional<TSPMoveResult> result = move.performMove(List.of(vrA));
     Assertions.assertTrue(result.isPresent());
 
     Assertions.assertEquals(1, result.get().vehicles().size());
-    Assertions.assertEquals(4, result.get().vehicles().get(0).getRoute().size());
+    Assertions.assertEquals(4, result.get().vehicles().get(0).route().size());
 
-    Assertions.assertEquals(3, result.get().vehicles().get(0).getRoute().get(0).getId());
-    Assertions.assertEquals(1, result.get().vehicles().get(0).getRoute().get(1).getId());
-    Assertions.assertEquals(2, result.get().vehicles().get(0).getRoute().get(2).getId());
-    Assertions.assertEquals(4, result.get().vehicles().get(0).getRoute().get(3).getId());
+    Assertions.assertEquals(3, result.get().vehicles().get(0).route().get(0).getId());
+    Assertions.assertEquals(1, result.get().vehicles().get(0).route().get(1).getId());
+    Assertions.assertEquals(2, result.get().vehicles().get(0).route().get(2).getId());
+    Assertions.assertEquals(4, result.get().vehicles().get(0).route().get(3).getId());
   }
 
   @Test
@@ -168,24 +168,24 @@ public class TSPInsertSubrouteMoveTest {
     Random rng = new CustomRandom(new int[] {1, 0, 0});
     TSPMove move = new TSPInsertSubrouteMove(rng, re, true);
 
-    Order orderA = new Order(1, new Point2D(1.0, 1.0));
-    Order orderB = new Order(2, new Point2D(2.0, 2.0));
-    Order orderC = new Order(3, new Point2D(3.0, 3.0));
-    Order orderD = new Order(4, new Point2D(4.0, 4.0));
+    Order orderA = new Order(1, new Point2D(1.0, 1.0), null);
+    Order orderB = new Order(2, new Point2D(2.0, 2.0), null);
+    Order orderC = new Order(3, new Point2D(3.0, 3.0), null);
+    Order orderD = new Order(4, new Point2D(4.0, 4.0), null);
 
     VehicleRoute vrA = new VehicleRoute(1, new Point2D(1.0, 1.0),
-        List.of(orderA, orderB, orderC, orderD));
+        List.of(orderA, orderB, orderC, orderD), 0.0);
 
     Optional<TSPMoveResult> result = move.performMove(List.of(vrA));
     Assertions.assertTrue(result.isPresent());
 
     Assertions.assertEquals(1, result.get().vehicles().size());
-    Assertions.assertEquals(4, result.get().vehicles().get(0).getRoute().size());
+    Assertions.assertEquals(4, result.get().vehicles().get(0).route().size());
 
-    Assertions.assertEquals(3, result.get().vehicles().get(0).getRoute().get(0).getId());
-    Assertions.assertEquals(2, result.get().vehicles().get(0).getRoute().get(1).getId());
-    Assertions.assertEquals(1, result.get().vehicles().get(0).getRoute().get(2).getId());
-    Assertions.assertEquals(4, result.get().vehicles().get(0).getRoute().get(3).getId());
+    Assertions.assertEquals(3, result.get().vehicles().get(0).route().get(0).getId());
+    Assertions.assertEquals(2, result.get().vehicles().get(0).route().get(1).getId());
+    Assertions.assertEquals(1, result.get().vehicles().get(0).route().get(2).getId());
+    Assertions.assertEquals(4, result.get().vehicles().get(0).route().get(3).getId());
   }
 
   @Test
@@ -194,24 +194,24 @@ public class TSPInsertSubrouteMoveTest {
     Random rng = new CustomRandom(new int[] {1, 0, 2});
     TSPMove move = new TSPInsertSubrouteMove(rng, re, true);
 
-    Order orderA = new Order(1, new Point2D(1.0, 1.0));
-    Order orderB = new Order(2, new Point2D(2.0, 2.0));
-    Order orderC = new Order(3, new Point2D(3.0, 3.0));
-    Order orderD = new Order(4, new Point2D(4.0, 4.0));
+    Order orderA = new Order(1, new Point2D(1.0, 1.0), null);
+    Order orderB = new Order(2, new Point2D(2.0, 2.0), null);
+    Order orderC = new Order(3, new Point2D(3.0, 3.0), null);
+    Order orderD = new Order(4, new Point2D(4.0, 4.0), null);
 
     VehicleRoute vrA = new VehicleRoute(1, new Point2D(1.0, 1.0),
-        List.of(orderA, orderB, orderC, orderD));
+        List.of(orderA, orderB, orderC, orderD), 0.0);
 
     Optional<TSPMoveResult> result = move.performMove(List.of(vrA));
     Assertions.assertTrue(result.isPresent());
 
     Assertions.assertEquals(1, result.get().vehicles().size());
-    Assertions.assertEquals(4, result.get().vehicles().get(0).getRoute().size());
+    Assertions.assertEquals(4, result.get().vehicles().get(0).route().size());
 
-    Assertions.assertEquals(1, result.get().vehicles().get(0).getRoute().get(0).getId());
-    Assertions.assertEquals(4, result.get().vehicles().get(0).getRoute().get(1).getId());
-    Assertions.assertEquals(3, result.get().vehicles().get(0).getRoute().get(2).getId());
-    Assertions.assertEquals(2, result.get().vehicles().get(0).getRoute().get(3).getId());
+    Assertions.assertEquals(1, result.get().vehicles().get(0).route().get(0).getId());
+    Assertions.assertEquals(4, result.get().vehicles().get(0).route().get(1).getId());
+    Assertions.assertEquals(3, result.get().vehicles().get(0).route().get(2).getId());
+    Assertions.assertEquals(2, result.get().vehicles().get(0).route().get(3).getId());
   }
 
   @Test
@@ -220,24 +220,24 @@ public class TSPInsertSubrouteMoveTest {
     Random rng = new CustomRandom(new int[] {0, 0, 1});
     TSPMove move = new TSPInsertSubrouteMove(rng, re, true);
 
-    Order orderA = new Order(1, new Point2D(1.0, 1.0));
-    Order orderB = new Order(2, new Point2D(2.0, 2.0));
-    Order orderC = new Order(3, new Point2D(3.0, 3.0));
-    Order orderD = new Order(4, new Point2D(4.0, 4.0));
+    Order orderA = new Order(1, new Point2D(1.0, 1.0), null);
+    Order orderB = new Order(2, new Point2D(2.0, 2.0), null);
+    Order orderC = new Order(3, new Point2D(3.0, 3.0), null);
+    Order orderD = new Order(4, new Point2D(4.0, 4.0), null);
 
     VehicleRoute vrA = new VehicleRoute(1, new Point2D(1.0, 1.0),
-        List.of(orderA, orderB, orderC, orderD));
+        List.of(orderA, orderB, orderC, orderD), 0.0);
 
     Optional<TSPMoveResult> result = move.performMove(List.of(vrA));
     Assertions.assertTrue(result.isPresent());
 
     Assertions.assertEquals(1, result.get().vehicles().size());
-    Assertions.assertEquals(4, result.get().vehicles().get(0).getRoute().size());
+    Assertions.assertEquals(4, result.get().vehicles().get(0).route().size());
 
-    Assertions.assertEquals(3, result.get().vehicles().get(0).getRoute().get(0).getId());
-    Assertions.assertEquals(2, result.get().vehicles().get(0).getRoute().get(1).getId());
-    Assertions.assertEquals(1, result.get().vehicles().get(0).getRoute().get(2).getId());
-    Assertions.assertEquals(4, result.get().vehicles().get(0).getRoute().get(3).getId());
+    Assertions.assertEquals(3, result.get().vehicles().get(0).route().get(0).getId());
+    Assertions.assertEquals(2, result.get().vehicles().get(0).route().get(1).getId());
+    Assertions.assertEquals(1, result.get().vehicles().get(0).route().get(2).getId());
+    Assertions.assertEquals(4, result.get().vehicles().get(0).route().get(3).getId());
   }
 
   @Test
@@ -246,36 +246,36 @@ public class TSPInsertSubrouteMoveTest {
     Random rng = new CustomRandom(new int[] {1, 0, 0}, new boolean[] {true});
     TSPMove move = new TSPInsertSubrouteMove(rng, re, false);
 
-    Order orderA = new Order(1, new Point2D(1.0, 1.0));
-    Order orderB = new Order(2, new Point2D(2.0, 2.0));
-    Order orderC = new Order(3, new Point2D(3.0, 3.0));
-    Order orderD = new Order(4, new Point2D(4.0, 4.0));
-    Order orderE = new Order(5, new Point2D(5.0, 5.0));
-    Order orderF = new Order(6, new Point2D(6.0, 6.0));
-    Order orderG = new Order(7, new Point2D(7.0, 7.0));
-    Order orderH = new Order(8, new Point2D(8.0, 8.0));
+    Order orderA = new Order(1, new Point2D(1.0, 1.0), null);
+    Order orderB = new Order(2, new Point2D(2.0, 2.0), null);
+    Order orderC = new Order(3, new Point2D(3.0, 3.0), null);
+    Order orderD = new Order(4, new Point2D(4.0, 4.0), null);
+    Order orderE = new Order(5, new Point2D(5.0, 5.0), null);
+    Order orderF = new Order(6, new Point2D(6.0, 6.0), null);
+    Order orderG = new Order(7, new Point2D(7.0, 7.0), null);
+    Order orderH = new Order(8, new Point2D(8.0, 8.0), null);
 
     VehicleRoute vrA = new VehicleRoute(1, new Point2D(1.0, 1.0),
-        List.of(orderA, orderB, orderC, orderD));
+        List.of(orderA, orderB, orderC, orderD), 0.0);
     VehicleRoute vrB = new VehicleRoute(2, new Point2D(2.0, 2.0),
-        List.of(orderE, orderF, orderG, orderH));
+        List.of(orderE, orderF, orderG, orderH), 0.0);
 
     Optional<TSPMoveResult> result = move.performMove(List.of(vrA, vrB));
     Assertions.assertTrue(result.isPresent());
 
     Assertions.assertEquals(2, result.get().vehicles().size());
-    Assertions.assertEquals(2, result.get().vehicles().get(0).getRoute().size());
-    Assertions.assertEquals(6, result.get().vehicles().get(1).getRoute().size());
+    Assertions.assertEquals(2, result.get().vehicles().get(0).route().size());
+    Assertions.assertEquals(6, result.get().vehicles().get(1).route().size());
 
-    Assertions.assertEquals(1, result.get().vehicles().get(0).getRoute().get(0).getId());
-    Assertions.assertEquals(4, result.get().vehicles().get(0).getRoute().get(1).getId());
+    Assertions.assertEquals(1, result.get().vehicles().get(0).route().get(0).getId());
+    Assertions.assertEquals(4, result.get().vehicles().get(0).route().get(1).getId());
 
-    Assertions.assertEquals(2, result.get().vehicles().get(1).getRoute().get(0).getId());
-    Assertions.assertEquals(3, result.get().vehicles().get(1).getRoute().get(1).getId());
-    Assertions.assertEquals(5, result.get().vehicles().get(1).getRoute().get(2).getId());
-    Assertions.assertEquals(6, result.get().vehicles().get(1).getRoute().get(3).getId());
-    Assertions.assertEquals(7, result.get().vehicles().get(1).getRoute().get(4).getId());
-    Assertions.assertEquals(8, result.get().vehicles().get(1).getRoute().get(5).getId());
+    Assertions.assertEquals(2, result.get().vehicles().get(1).route().get(0).getId());
+    Assertions.assertEquals(3, result.get().vehicles().get(1).route().get(1).getId());
+    Assertions.assertEquals(5, result.get().vehicles().get(1).route().get(2).getId());
+    Assertions.assertEquals(6, result.get().vehicles().get(1).route().get(3).getId());
+    Assertions.assertEquals(7, result.get().vehicles().get(1).route().get(4).getId());
+    Assertions.assertEquals(8, result.get().vehicles().get(1).route().get(5).getId());
   }
 
   @Test
@@ -284,36 +284,36 @@ public class TSPInsertSubrouteMoveTest {
     Random rng = new CustomRandom(new int[] {1, 0, 4}, new boolean[] {true});
     TSPMove move = new TSPInsertSubrouteMove(rng, re, false);
 
-    Order orderA = new Order(1, new Point2D(1.0, 1.0));
-    Order orderB = new Order(2, new Point2D(2.0, 2.0));
-    Order orderC = new Order(3, new Point2D(3.0, 3.0));
-    Order orderD = new Order(4, new Point2D(4.0, 4.0));
-    Order orderE = new Order(5, new Point2D(5.0, 5.0));
-    Order orderF = new Order(6, new Point2D(6.0, 6.0));
-    Order orderG = new Order(7, new Point2D(7.0, 7.0));
-    Order orderH = new Order(8, new Point2D(8.0, 8.0));
+    Order orderA = new Order(1, new Point2D(1.0, 1.0), null);
+    Order orderB = new Order(2, new Point2D(2.0, 2.0), null);
+    Order orderC = new Order(3, new Point2D(3.0, 3.0), null);
+    Order orderD = new Order(4, new Point2D(4.0, 4.0), null);
+    Order orderE = new Order(5, new Point2D(5.0, 5.0), null);
+    Order orderF = new Order(6, new Point2D(6.0, 6.0), null);
+    Order orderG = new Order(7, new Point2D(7.0, 7.0), null);
+    Order orderH = new Order(8, new Point2D(8.0, 8.0), null);
 
     VehicleRoute vrA = new VehicleRoute(1, new Point2D(1.0, 1.0),
-        List.of(orderA, orderB, orderC, orderD));
+        List.of(orderA, orderB, orderC, orderD), 0.0);
     VehicleRoute vrB = new VehicleRoute(2, new Point2D(2.0, 2.0),
-        List.of(orderE, orderF, orderG, orderH));
+        List.of(orderE, orderF, orderG, orderH), 0.0);
 
     Optional<TSPMoveResult> result = move.performMove(List.of(vrA, vrB));
     Assertions.assertTrue(result.isPresent());
 
     Assertions.assertEquals(2, result.get().vehicles().size());
-    Assertions.assertEquals(2, result.get().vehicles().get(0).getRoute().size());
-    Assertions.assertEquals(6, result.get().vehicles().get(1).getRoute().size());
+    Assertions.assertEquals(2, result.get().vehicles().get(0).route().size());
+    Assertions.assertEquals(6, result.get().vehicles().get(1).route().size());
 
-    Assertions.assertEquals(1, result.get().vehicles().get(0).getRoute().get(0).getId());
-    Assertions.assertEquals(4, result.get().vehicles().get(0).getRoute().get(1).getId());
+    Assertions.assertEquals(1, result.get().vehicles().get(0).route().get(0).getId());
+    Assertions.assertEquals(4, result.get().vehicles().get(0).route().get(1).getId());
 
-    Assertions.assertEquals(5, result.get().vehicles().get(1).getRoute().get(0).getId());
-    Assertions.assertEquals(6, result.get().vehicles().get(1).getRoute().get(1).getId());
-    Assertions.assertEquals(7, result.get().vehicles().get(1).getRoute().get(2).getId());
-    Assertions.assertEquals(8, result.get().vehicles().get(1).getRoute().get(3).getId());
-    Assertions.assertEquals(2, result.get().vehicles().get(1).getRoute().get(4).getId());
-    Assertions.assertEquals(3, result.get().vehicles().get(1).getRoute().get(5).getId());
+    Assertions.assertEquals(5, result.get().vehicles().get(1).route().get(0).getId());
+    Assertions.assertEquals(6, result.get().vehicles().get(1).route().get(1).getId());
+    Assertions.assertEquals(7, result.get().vehicles().get(1).route().get(2).getId());
+    Assertions.assertEquals(8, result.get().vehicles().get(1).route().get(3).getId());
+    Assertions.assertEquals(2, result.get().vehicles().get(1).route().get(4).getId());
+    Assertions.assertEquals(3, result.get().vehicles().get(1).route().get(5).getId());
   }
 
   @Test
@@ -322,36 +322,36 @@ public class TSPInsertSubrouteMoveTest {
     Random rng = new CustomRandom(new int[] {1, 0, 2}, new boolean[] {true});
     TSPMove move = new TSPInsertSubrouteMove(rng, re, false);
 
-    Order orderA = new Order(1, new Point2D(1.0, 1.0));
-    Order orderB = new Order(2, new Point2D(2.0, 2.0));
-    Order orderC = new Order(3, new Point2D(3.0, 3.0));
-    Order orderD = new Order(4, new Point2D(4.0, 4.0));
-    Order orderE = new Order(5, new Point2D(5.0, 5.0));
-    Order orderF = new Order(6, new Point2D(6.0, 6.0));
-    Order orderG = new Order(7, new Point2D(7.0, 7.0));
-    Order orderH = new Order(8, new Point2D(8.0, 8.0));
+    Order orderA = new Order(1, new Point2D(1.0, 1.0), null);
+    Order orderB = new Order(2, new Point2D(2.0, 2.0), null);
+    Order orderC = new Order(3, new Point2D(3.0, 3.0), null);
+    Order orderD = new Order(4, new Point2D(4.0, 4.0), null);
+    Order orderE = new Order(5, new Point2D(5.0, 5.0), null);
+    Order orderF = new Order(6, new Point2D(6.0, 6.0), null);
+    Order orderG = new Order(7, new Point2D(7.0, 7.0), null);
+    Order orderH = new Order(8, new Point2D(8.0, 8.0), null);
 
     VehicleRoute vrA = new VehicleRoute(1, new Point2D(1.0, 1.0),
-        List.of(orderA, orderB, orderC, orderD));
+        List.of(orderA, orderB, orderC, orderD), 0.0);
     VehicleRoute vrB = new VehicleRoute(2, new Point2D(2.0, 2.0),
-        List.of(orderE, orderF, orderG, orderH));
+        List.of(orderE, orderF, orderG, orderH), 0.0);
 
     Optional<TSPMoveResult> result = move.performMove(List.of(vrA, vrB));
     Assertions.assertTrue(result.isPresent());
 
     Assertions.assertEquals(2, result.get().vehicles().size());
-    Assertions.assertEquals(2, result.get().vehicles().get(0).getRoute().size());
-    Assertions.assertEquals(6, result.get().vehicles().get(1).getRoute().size());
+    Assertions.assertEquals(2, result.get().vehicles().get(0).route().size());
+    Assertions.assertEquals(6, result.get().vehicles().get(1).route().size());
 
-    Assertions.assertEquals(1, result.get().vehicles().get(0).getRoute().get(0).getId());
-    Assertions.assertEquals(4, result.get().vehicles().get(0).getRoute().get(1).getId());
+    Assertions.assertEquals(1, result.get().vehicles().get(0).route().get(0).getId());
+    Assertions.assertEquals(4, result.get().vehicles().get(0).route().get(1).getId());
 
-    Assertions.assertEquals(5, result.get().vehicles().get(1).getRoute().get(0).getId());
-    Assertions.assertEquals(6, result.get().vehicles().get(1).getRoute().get(1).getId());
-    Assertions.assertEquals(2, result.get().vehicles().get(1).getRoute().get(2).getId());
-    Assertions.assertEquals(3, result.get().vehicles().get(1).getRoute().get(3).getId());
-    Assertions.assertEquals(7, result.get().vehicles().get(1).getRoute().get(4).getId());
-    Assertions.assertEquals(8, result.get().vehicles().get(1).getRoute().get(5).getId());
+    Assertions.assertEquals(5, result.get().vehicles().get(1).route().get(0).getId());
+    Assertions.assertEquals(6, result.get().vehicles().get(1).route().get(1).getId());
+    Assertions.assertEquals(2, result.get().vehicles().get(1).route().get(2).getId());
+    Assertions.assertEquals(3, result.get().vehicles().get(1).route().get(3).getId());
+    Assertions.assertEquals(7, result.get().vehicles().get(1).route().get(4).getId());
+    Assertions.assertEquals(8, result.get().vehicles().get(1).route().get(5).getId());
   }
 
   @Test
@@ -360,36 +360,36 @@ public class TSPInsertSubrouteMoveTest {
     Random rng = new CustomRandom(new int[] {1, 0, 0}, new boolean[] {false});
     TSPMove move = new TSPInsertSubrouteMove(rng, re, false);
 
-    Order orderA = new Order(1, new Point2D(1.0, 1.0));
-    Order orderB = new Order(2, new Point2D(2.0, 2.0));
-    Order orderC = new Order(3, new Point2D(3.0, 3.0));
-    Order orderD = new Order(4, new Point2D(4.0, 4.0));
-    Order orderE = new Order(5, new Point2D(5.0, 5.0));
-    Order orderF = new Order(6, new Point2D(6.0, 6.0));
-    Order orderG = new Order(7, new Point2D(7.0, 7.0));
-    Order orderH = new Order(8, new Point2D(8.0, 8.0));
+    Order orderA = new Order(1, new Point2D(1.0, 1.0), null);
+    Order orderB = new Order(2, new Point2D(2.0, 2.0), null);
+    Order orderC = new Order(3, new Point2D(3.0, 3.0), null);
+    Order orderD = new Order(4, new Point2D(4.0, 4.0), null);
+    Order orderE = new Order(5, new Point2D(5.0, 5.0), null);
+    Order orderF = new Order(6, new Point2D(6.0, 6.0), null);
+    Order orderG = new Order(7, new Point2D(7.0, 7.0), null);
+    Order orderH = new Order(8, new Point2D(8.0, 8.0), null);
 
     VehicleRoute vrA = new VehicleRoute(1, new Point2D(1.0, 1.0),
-        List.of(orderA, orderB, orderC, orderD));
+        List.of(orderA, orderB, orderC, orderD), 0.0);
     VehicleRoute vrB = new VehicleRoute(2, new Point2D(2.0, 2.0),
-        List.of(orderE, orderF, orderG, orderH));
+        List.of(orderE, orderF, orderG, orderH), 0.0);
 
     Optional<TSPMoveResult> result = move.performMove(List.of(vrA, vrB));
     Assertions.assertTrue(result.isPresent());
 
     Assertions.assertEquals(2, result.get().vehicles().size());
-    Assertions.assertEquals(6, result.get().vehicles().get(0).getRoute().size());
-    Assertions.assertEquals(2, result.get().vehicles().get(1).getRoute().size());
+    Assertions.assertEquals(6, result.get().vehicles().get(0).route().size());
+    Assertions.assertEquals(2, result.get().vehicles().get(1).route().size());
 
-    Assertions.assertEquals(6, result.get().vehicles().get(0).getRoute().get(0).getId());
-    Assertions.assertEquals(7, result.get().vehicles().get(0).getRoute().get(1).getId());
-    Assertions.assertEquals(1, result.get().vehicles().get(0).getRoute().get(2).getId());
-    Assertions.assertEquals(2, result.get().vehicles().get(0).getRoute().get(3).getId());
-    Assertions.assertEquals(3, result.get().vehicles().get(0).getRoute().get(4).getId());
-    Assertions.assertEquals(4, result.get().vehicles().get(0).getRoute().get(5).getId());
+    Assertions.assertEquals(6, result.get().vehicles().get(0).route().get(0).getId());
+    Assertions.assertEquals(7, result.get().vehicles().get(0).route().get(1).getId());
+    Assertions.assertEquals(1, result.get().vehicles().get(0).route().get(2).getId());
+    Assertions.assertEquals(2, result.get().vehicles().get(0).route().get(3).getId());
+    Assertions.assertEquals(3, result.get().vehicles().get(0).route().get(4).getId());
+    Assertions.assertEquals(4, result.get().vehicles().get(0).route().get(5).getId());
 
-    Assertions.assertEquals(5, result.get().vehicles().get(1).getRoute().get(0).getId());
-    Assertions.assertEquals(8, result.get().vehicles().get(1).getRoute().get(1).getId());
+    Assertions.assertEquals(5, result.get().vehicles().get(1).route().get(0).getId());
+    Assertions.assertEquals(8, result.get().vehicles().get(1).route().get(1).getId());
   }
 
   @Test
@@ -398,36 +398,36 @@ public class TSPInsertSubrouteMoveTest {
     Random rng = new CustomRandom(new int[] {1, 0, 4}, new boolean[] {false});
     TSPMove move = new TSPInsertSubrouteMove(rng, re, false);
 
-    Order orderA = new Order(1, new Point2D(1.0, 1.0));
-    Order orderB = new Order(2, new Point2D(2.0, 2.0));
-    Order orderC = new Order(3, new Point2D(3.0, 3.0));
-    Order orderD = new Order(4, new Point2D(4.0, 4.0));
-    Order orderE = new Order(5, new Point2D(5.0, 5.0));
-    Order orderF = new Order(6, new Point2D(6.0, 6.0));
-    Order orderG = new Order(7, new Point2D(7.0, 7.0));
-    Order orderH = new Order(8, new Point2D(8.0, 8.0));
+    Order orderA = new Order(1, new Point2D(1.0, 1.0), null);
+    Order orderB = new Order(2, new Point2D(2.0, 2.0), null);
+    Order orderC = new Order(3, new Point2D(3.0, 3.0), null);
+    Order orderD = new Order(4, new Point2D(4.0, 4.0), null);
+    Order orderE = new Order(5, new Point2D(5.0, 5.0), null);
+    Order orderF = new Order(6, new Point2D(6.0, 6.0), null);
+    Order orderG = new Order(7, new Point2D(7.0, 7.0), null);
+    Order orderH = new Order(8, new Point2D(8.0, 8.0), null);
 
     VehicleRoute vrA = new VehicleRoute(1, new Point2D(1.0, 1.0),
-        List.of(orderA, orderB, orderC, orderD));
+        List.of(orderA, orderB, orderC, orderD), 0.0);
     VehicleRoute vrB = new VehicleRoute(2, new Point2D(2.0, 2.0),
-        List.of(orderE, orderF, orderG, orderH));
+        List.of(orderE, orderF, orderG, orderH), 0.0);
 
     Optional<TSPMoveResult> result = move.performMove(List.of(vrA, vrB));
     Assertions.assertTrue(result.isPresent());
 
     Assertions.assertEquals(2, result.get().vehicles().size());
-    Assertions.assertEquals(6, result.get().vehicles().get(0).getRoute().size());
-    Assertions.assertEquals(2, result.get().vehicles().get(1).getRoute().size());
+    Assertions.assertEquals(6, result.get().vehicles().get(0).route().size());
+    Assertions.assertEquals(2, result.get().vehicles().get(1).route().size());
 
-    Assertions.assertEquals(1, result.get().vehicles().get(0).getRoute().get(0).getId());
-    Assertions.assertEquals(2, result.get().vehicles().get(0).getRoute().get(1).getId());
-    Assertions.assertEquals(3, result.get().vehicles().get(0).getRoute().get(2).getId());
-    Assertions.assertEquals(4, result.get().vehicles().get(0).getRoute().get(3).getId());
-    Assertions.assertEquals(6, result.get().vehicles().get(0).getRoute().get(4).getId());
-    Assertions.assertEquals(7, result.get().vehicles().get(0).getRoute().get(5).getId());
+    Assertions.assertEquals(1, result.get().vehicles().get(0).route().get(0).getId());
+    Assertions.assertEquals(2, result.get().vehicles().get(0).route().get(1).getId());
+    Assertions.assertEquals(3, result.get().vehicles().get(0).route().get(2).getId());
+    Assertions.assertEquals(4, result.get().vehicles().get(0).route().get(3).getId());
+    Assertions.assertEquals(6, result.get().vehicles().get(0).route().get(4).getId());
+    Assertions.assertEquals(7, result.get().vehicles().get(0).route().get(5).getId());
 
-    Assertions.assertEquals(5, result.get().vehicles().get(1).getRoute().get(0).getId());
-    Assertions.assertEquals(8, result.get().vehicles().get(1).getRoute().get(1).getId());
+    Assertions.assertEquals(5, result.get().vehicles().get(1).route().get(0).getId());
+    Assertions.assertEquals(8, result.get().vehicles().get(1).route().get(1).getId());
   }
 
   @Test
@@ -436,70 +436,70 @@ public class TSPInsertSubrouteMoveTest {
     Random rng = new CustomRandom(new int[] {1, 0, 2}, new boolean[] {false});
     TSPMove move = new TSPInsertSubrouteMove(rng, re, false);
 
-    Order orderA = new Order(1, new Point2D(1.0, 1.0));
-    Order orderB = new Order(2, new Point2D(2.0, 2.0));
-    Order orderC = new Order(3, new Point2D(3.0, 3.0));
-    Order orderD = new Order(4, new Point2D(4.0, 4.0));
-    Order orderE = new Order(5, new Point2D(5.0, 5.0));
-    Order orderF = new Order(6, new Point2D(6.0, 6.0));
-    Order orderG = new Order(7, new Point2D(7.0, 7.0));
-    Order orderH = new Order(8, new Point2D(8.0, 8.0));
+    Order orderA = new Order(1, new Point2D(1.0, 1.0), null);
+    Order orderB = new Order(2, new Point2D(2.0, 2.0), null);
+    Order orderC = new Order(3, new Point2D(3.0, 3.0), null);
+    Order orderD = new Order(4, new Point2D(4.0, 4.0), null);
+    Order orderE = new Order(5, new Point2D(5.0, 5.0), null);
+    Order orderF = new Order(6, new Point2D(6.0, 6.0), null);
+    Order orderG = new Order(7, new Point2D(7.0, 7.0), null);
+    Order orderH = new Order(8, new Point2D(8.0, 8.0), null);
 
     VehicleRoute vrA = new VehicleRoute(1, new Point2D(1.0, 1.0),
-        List.of(orderA, orderB, orderC, orderD));
+        List.of(orderA, orderB, orderC, orderD), 0.0);
     VehicleRoute vrB = new VehicleRoute(2, new Point2D(2.0, 2.0),
-        List.of(orderE, orderF, orderG, orderH));
+        List.of(orderE, orderF, orderG, orderH), 0.0);
 
     Optional<TSPMoveResult> result = move.performMove(List.of(vrA, vrB));
     Assertions.assertTrue(result.isPresent());
 
     Assertions.assertEquals(2, result.get().vehicles().size());
-    Assertions.assertEquals(6, result.get().vehicles().get(0).getRoute().size());
-    Assertions.assertEquals(2, result.get().vehicles().get(1).getRoute().size());
+    Assertions.assertEquals(6, result.get().vehicles().get(0).route().size());
+    Assertions.assertEquals(2, result.get().vehicles().get(1).route().size());
 
-    Assertions.assertEquals(1, result.get().vehicles().get(0).getRoute().get(0).getId());
-    Assertions.assertEquals(2, result.get().vehicles().get(0).getRoute().get(1).getId());
-    Assertions.assertEquals(6, result.get().vehicles().get(0).getRoute().get(2).getId());
-    Assertions.assertEquals(7, result.get().vehicles().get(0).getRoute().get(3).getId());
-    Assertions.assertEquals(3, result.get().vehicles().get(0).getRoute().get(4).getId());
-    Assertions.assertEquals(4, result.get().vehicles().get(0).getRoute().get(5).getId());
+    Assertions.assertEquals(1, result.get().vehicles().get(0).route().get(0).getId());
+    Assertions.assertEquals(2, result.get().vehicles().get(0).route().get(1).getId());
+    Assertions.assertEquals(6, result.get().vehicles().get(0).route().get(2).getId());
+    Assertions.assertEquals(7, result.get().vehicles().get(0).route().get(3).getId());
+    Assertions.assertEquals(3, result.get().vehicles().get(0).route().get(4).getId());
+    Assertions.assertEquals(4, result.get().vehicles().get(0).route().get(5).getId());
 
-    Assertions.assertEquals(5, result.get().vehicles().get(1).getRoute().get(0).getId());
-    Assertions.assertEquals(8, result.get().vehicles().get(1).getRoute().get(1).getId());
+    Assertions.assertEquals(5, result.get().vehicles().get(1).route().get(0).getId());
+    Assertions.assertEquals(8, result.get().vehicles().get(1).route().get(1).getId());
   }
-  
+
   @Test
   public void test2Vehicle6OrdersInsertVehicleAAtBegin() {
     RouteEvaluator re = new RouteEvaluator();
     Random rng = new CustomRandom(new int[] {1, 0, 0}, new boolean[] {true});
     TSPMove move = new TSPInsertSubrouteMove(rng, re, false);
 
-    Order orderA = new Order(1, new Point2D(1.0, 1.0));
-    Order orderB = new Order(2, new Point2D(2.0, 2.0));
-    Order orderC = new Order(3, new Point2D(3.0, 3.0));
-    Order orderD = new Order(4, new Point2D(4.0, 4.0));
-    Order orderE = new Order(5, new Point2D(5.0, 5.0));
-    Order orderF = new Order(6, new Point2D(6.0, 6.0));
+    Order orderA = new Order(1, new Point2D(1.0, 1.0), null);
+    Order orderB = new Order(2, new Point2D(2.0, 2.0), null);
+    Order orderC = new Order(3, new Point2D(3.0, 3.0), null);
+    Order orderD = new Order(4, new Point2D(4.0, 4.0), null);
+    Order orderE = new Order(5, new Point2D(5.0, 5.0), null);
+    Order orderF = new Order(6, new Point2D(6.0, 6.0), null);
 
     VehicleRoute vrA = new VehicleRoute(1, new Point2D(1.0, 1.0),
-        List.of(orderA, orderB, orderC, orderD));
+        List.of(orderA, orderB, orderC, orderD), 0.0);
     VehicleRoute vrB = new VehicleRoute(2, new Point2D(2.0, 2.0),
-        List.of(orderE, orderF));
+        List.of(orderE, orderF), 0.0);
 
     Optional<TSPMoveResult> result = move.performMove(List.of(vrA, vrB));
     Assertions.assertTrue(result.isPresent());
 
     Assertions.assertEquals(2, result.get().vehicles().size());
-    Assertions.assertEquals(2, result.get().vehicles().get(0).getRoute().size());
-    Assertions.assertEquals(4, result.get().vehicles().get(1).getRoute().size());
+    Assertions.assertEquals(2, result.get().vehicles().get(0).route().size());
+    Assertions.assertEquals(4, result.get().vehicles().get(1).route().size());
 
-    Assertions.assertEquals(1, result.get().vehicles().get(0).getRoute().get(0).getId());
-    Assertions.assertEquals(4, result.get().vehicles().get(0).getRoute().get(1).getId());
+    Assertions.assertEquals(1, result.get().vehicles().get(0).route().get(0).getId());
+    Assertions.assertEquals(4, result.get().vehicles().get(0).route().get(1).getId());
 
-    Assertions.assertEquals(2, result.get().vehicles().get(1).getRoute().get(0).getId());
-    Assertions.assertEquals(3, result.get().vehicles().get(1).getRoute().get(1).getId());
-    Assertions.assertEquals(5, result.get().vehicles().get(1).getRoute().get(2).getId());
-    Assertions.assertEquals(6, result.get().vehicles().get(1).getRoute().get(3).getId());
+    Assertions.assertEquals(2, result.get().vehicles().get(1).route().get(0).getId());
+    Assertions.assertEquals(3, result.get().vehicles().get(1).route().get(1).getId());
+    Assertions.assertEquals(5, result.get().vehicles().get(1).route().get(2).getId());
+    Assertions.assertEquals(6, result.get().vehicles().get(1).route().get(3).getId());
   }
 
   @Test
@@ -508,32 +508,32 @@ public class TSPInsertSubrouteMoveTest {
     Random rng = new CustomRandom(new int[] {1, 0, 2}, new boolean[] {true});
     TSPMove move = new TSPInsertSubrouteMove(rng, re, false);
 
-    Order orderA = new Order(1, new Point2D(1.0, 1.0));
-    Order orderB = new Order(2, new Point2D(2.0, 2.0));
-    Order orderC = new Order(3, new Point2D(3.0, 3.0));
-    Order orderD = new Order(4, new Point2D(4.0, 4.0));
-    Order orderE = new Order(5, new Point2D(5.0, 5.0));
-    Order orderF = new Order(6, new Point2D(6.0, 6.0));
+    Order orderA = new Order(1, new Point2D(1.0, 1.0), null);
+    Order orderB = new Order(2, new Point2D(2.0, 2.0), null);
+    Order orderC = new Order(3, new Point2D(3.0, 3.0), null);
+    Order orderD = new Order(4, new Point2D(4.0, 4.0), null);
+    Order orderE = new Order(5, new Point2D(5.0, 5.0), null);
+    Order orderF = new Order(6, new Point2D(6.0, 6.0), null);
 
     VehicleRoute vrA = new VehicleRoute(1, new Point2D(1.0, 1.0),
-        List.of(orderA, orderB, orderC, orderD));
+        List.of(orderA, orderB, orderC, orderD), 0.0);
     VehicleRoute vrB = new VehicleRoute(2, new Point2D(2.0, 2.0),
-        List.of(orderE, orderF));
+        List.of(orderE, orderF), 0.0);
 
     Optional<TSPMoveResult> result = move.performMove(List.of(vrA, vrB));
     Assertions.assertTrue(result.isPresent());
 
     Assertions.assertEquals(2, result.get().vehicles().size());
-    Assertions.assertEquals(2, result.get().vehicles().get(0).getRoute().size());
-    Assertions.assertEquals(4, result.get().vehicles().get(1).getRoute().size());
+    Assertions.assertEquals(2, result.get().vehicles().get(0).route().size());
+    Assertions.assertEquals(4, result.get().vehicles().get(1).route().size());
 
-    Assertions.assertEquals(1, result.get().vehicles().get(0).getRoute().get(0).getId());
-    Assertions.assertEquals(4, result.get().vehicles().get(0).getRoute().get(1).getId());
+    Assertions.assertEquals(1, result.get().vehicles().get(0).route().get(0).getId());
+    Assertions.assertEquals(4, result.get().vehicles().get(0).route().get(1).getId());
 
-    Assertions.assertEquals(5, result.get().vehicles().get(1).getRoute().get(0).getId());
-    Assertions.assertEquals(6, result.get().vehicles().get(1).getRoute().get(1).getId());
-    Assertions.assertEquals(2, result.get().vehicles().get(1).getRoute().get(2).getId());
-    Assertions.assertEquals(3, result.get().vehicles().get(1).getRoute().get(3).getId());
+    Assertions.assertEquals(5, result.get().vehicles().get(1).route().get(0).getId());
+    Assertions.assertEquals(6, result.get().vehicles().get(1).route().get(1).getId());
+    Assertions.assertEquals(2, result.get().vehicles().get(1).route().get(2).getId());
+    Assertions.assertEquals(3, result.get().vehicles().get(1).route().get(3).getId());
   }
 
   @Test
@@ -542,32 +542,32 @@ public class TSPInsertSubrouteMoveTest {
     Random rng = new CustomRandom(new int[] {1, 0, 1}, new boolean[] {true});
     TSPMove move = new TSPInsertSubrouteMove(rng, re, false);
 
-    Order orderA = new Order(1, new Point2D(1.0, 1.0));
-    Order orderB = new Order(2, new Point2D(2.0, 2.0));
-    Order orderC = new Order(3, new Point2D(3.0, 3.0));
-    Order orderD = new Order(4, new Point2D(4.0, 4.0));
-    Order orderE = new Order(5, new Point2D(5.0, 5.0));
-    Order orderF = new Order(6, new Point2D(6.0, 6.0));
+    Order orderA = new Order(1, new Point2D(1.0, 1.0), null);
+    Order orderB = new Order(2, new Point2D(2.0, 2.0), null);
+    Order orderC = new Order(3, new Point2D(3.0, 3.0), null);
+    Order orderD = new Order(4, new Point2D(4.0, 4.0), null);
+    Order orderE = new Order(5, new Point2D(5.0, 5.0), null);
+    Order orderF = new Order(6, new Point2D(6.0, 6.0), null);
 
     VehicleRoute vrA = new VehicleRoute(1, new Point2D(1.0, 1.0),
-        List.of(orderA, orderB, orderC, orderD));
+        List.of(orderA, orderB, orderC, orderD), 0.0);
     VehicleRoute vrB = new VehicleRoute(2, new Point2D(2.0, 2.0),
-        List.of(orderE, orderF));
+        List.of(orderE, orderF), 0.0);
 
     Optional<TSPMoveResult> result = move.performMove(List.of(vrA, vrB));
     Assertions.assertTrue(result.isPresent());
 
     Assertions.assertEquals(2, result.get().vehicles().size());
-    Assertions.assertEquals(2, result.get().vehicles().get(0).getRoute().size());
-    Assertions.assertEquals(4, result.get().vehicles().get(1).getRoute().size());
+    Assertions.assertEquals(2, result.get().vehicles().get(0).route().size());
+    Assertions.assertEquals(4, result.get().vehicles().get(1).route().size());
 
-    Assertions.assertEquals(1, result.get().vehicles().get(0).getRoute().get(0).getId());
-    Assertions.assertEquals(4, result.get().vehicles().get(0).getRoute().get(1).getId());
+    Assertions.assertEquals(1, result.get().vehicles().get(0).route().get(0).getId());
+    Assertions.assertEquals(4, result.get().vehicles().get(0).route().get(1).getId());
 
-    Assertions.assertEquals(5, result.get().vehicles().get(1).getRoute().get(0).getId());
-    Assertions.assertEquals(2, result.get().vehicles().get(1).getRoute().get(1).getId());
-    Assertions.assertEquals(3, result.get().vehicles().get(1).getRoute().get(2).getId());
-    Assertions.assertEquals(6, result.get().vehicles().get(1).getRoute().get(3).getId());
+    Assertions.assertEquals(5, result.get().vehicles().get(1).route().get(0).getId());
+    Assertions.assertEquals(2, result.get().vehicles().get(1).route().get(1).getId());
+    Assertions.assertEquals(3, result.get().vehicles().get(1).route().get(2).getId());
+    Assertions.assertEquals(6, result.get().vehicles().get(1).route().get(3).getId());
   }
 
   @Test
@@ -576,32 +576,32 @@ public class TSPInsertSubrouteMoveTest {
     Random rng = new CustomRandom(new int[] {1, 0, 0}, new boolean[] {false});
     TSPMove move = new TSPInsertSubrouteMove(rng, re, false);
 
-    Order orderA = new Order(1, new Point2D(1.0, 1.0));
-    Order orderB = new Order(2, new Point2D(2.0, 2.0));
-    Order orderE = new Order(5, new Point2D(5.0, 5.0));
-    Order orderF = new Order(6, new Point2D(6.0, 6.0));
-    Order orderG = new Order(7, new Point2D(7.0, 7.0));
-    Order orderH = new Order(8, new Point2D(8.0, 8.0));
+    Order orderA = new Order(1, new Point2D(1.0, 1.0), null);
+    Order orderB = new Order(2, new Point2D(2.0, 2.0), null);
+    Order orderE = new Order(5, new Point2D(5.0, 5.0), null);
+    Order orderF = new Order(6, new Point2D(6.0, 6.0), null);
+    Order orderG = new Order(7, new Point2D(7.0, 7.0), null);
+    Order orderH = new Order(8, new Point2D(8.0, 8.0), null);
 
     VehicleRoute vrA = new VehicleRoute(1, new Point2D(1.0, 1.0),
-        List.of(orderA, orderB));
+        List.of(orderA, orderB), 0.0);
     VehicleRoute vrB = new VehicleRoute(2, new Point2D(2.0, 2.0),
-        List.of(orderE, orderF, orderG, orderH));
+        List.of(orderE, orderF, orderG, orderH), 0.0);
 
     Optional<TSPMoveResult> result = move.performMove(List.of(vrA, vrB));
     Assertions.assertTrue(result.isPresent());
 
     Assertions.assertEquals(2, result.get().vehicles().size());
-    Assertions.assertEquals(4, result.get().vehicles().get(0).getRoute().size());
-    Assertions.assertEquals(2, result.get().vehicles().get(1).getRoute().size());
+    Assertions.assertEquals(4, result.get().vehicles().get(0).route().size());
+    Assertions.assertEquals(2, result.get().vehicles().get(1).route().size());
 
-    Assertions.assertEquals(6, result.get().vehicles().get(0).getRoute().get(0).getId());
-    Assertions.assertEquals(7, result.get().vehicles().get(0).getRoute().get(1).getId());
-    Assertions.assertEquals(1, result.get().vehicles().get(0).getRoute().get(2).getId());
-    Assertions.assertEquals(2, result.get().vehicles().get(0).getRoute().get(3).getId());
+    Assertions.assertEquals(6, result.get().vehicles().get(0).route().get(0).getId());
+    Assertions.assertEquals(7, result.get().vehicles().get(0).route().get(1).getId());
+    Assertions.assertEquals(1, result.get().vehicles().get(0).route().get(2).getId());
+    Assertions.assertEquals(2, result.get().vehicles().get(0).route().get(3).getId());
 
-    Assertions.assertEquals(5, result.get().vehicles().get(1).getRoute().get(0).getId());
-    Assertions.assertEquals(8, result.get().vehicles().get(1).getRoute().get(1).getId());
+    Assertions.assertEquals(5, result.get().vehicles().get(1).route().get(0).getId());
+    Assertions.assertEquals(8, result.get().vehicles().get(1).route().get(1).getId());
   }
 
   @Test
@@ -610,32 +610,32 @@ public class TSPInsertSubrouteMoveTest {
     Random rng = new CustomRandom(new int[] {1, 0, 2}, new boolean[] {false});
     TSPMove move = new TSPInsertSubrouteMove(rng, re, false);
 
-    Order orderA = new Order(1, new Point2D(1.0, 1.0));
-    Order orderB = new Order(2, new Point2D(2.0, 2.0));
-    Order orderE = new Order(5, new Point2D(5.0, 5.0));
-    Order orderF = new Order(6, new Point2D(6.0, 6.0));
-    Order orderG = new Order(7, new Point2D(7.0, 7.0));
-    Order orderH = new Order(8, new Point2D(8.0, 8.0));
+    Order orderA = new Order(1, new Point2D(1.0, 1.0), null);
+    Order orderB = new Order(2, new Point2D(2.0, 2.0), null);
+    Order orderE = new Order(5, new Point2D(5.0, 5.0), null);
+    Order orderF = new Order(6, new Point2D(6.0, 6.0), null);
+    Order orderG = new Order(7, new Point2D(7.0, 7.0), null);
+    Order orderH = new Order(8, new Point2D(8.0, 8.0), null);
 
     VehicleRoute vrA = new VehicleRoute(1, new Point2D(1.0, 1.0),
-        List.of(orderA, orderB));
+        List.of(orderA, orderB), 0.0);
     VehicleRoute vrB = new VehicleRoute(2, new Point2D(2.0, 2.0),
-        List.of(orderE, orderF, orderG, orderH));
+        List.of(orderE, orderF, orderG, orderH), 0.0);
 
     Optional<TSPMoveResult> result = move.performMove(List.of(vrA, vrB));
     Assertions.assertTrue(result.isPresent());
 
     Assertions.assertEquals(2, result.get().vehicles().size());
-    Assertions.assertEquals(4, result.get().vehicles().get(0).getRoute().size());
-    Assertions.assertEquals(2, result.get().vehicles().get(1).getRoute().size());
+    Assertions.assertEquals(4, result.get().vehicles().get(0).route().size());
+    Assertions.assertEquals(2, result.get().vehicles().get(1).route().size());
 
-    Assertions.assertEquals(1, result.get().vehicles().get(0).getRoute().get(0).getId());
-    Assertions.assertEquals(2, result.get().vehicles().get(0).getRoute().get(1).getId());
-    Assertions.assertEquals(6, result.get().vehicles().get(0).getRoute().get(2).getId());
-    Assertions.assertEquals(7, result.get().vehicles().get(0).getRoute().get(3).getId());
+    Assertions.assertEquals(1, result.get().vehicles().get(0).route().get(0).getId());
+    Assertions.assertEquals(2, result.get().vehicles().get(0).route().get(1).getId());
+    Assertions.assertEquals(6, result.get().vehicles().get(0).route().get(2).getId());
+    Assertions.assertEquals(7, result.get().vehicles().get(0).route().get(3).getId());
 
-    Assertions.assertEquals(5, result.get().vehicles().get(1).getRoute().get(0).getId());
-    Assertions.assertEquals(8, result.get().vehicles().get(1).getRoute().get(1).getId());
+    Assertions.assertEquals(5, result.get().vehicles().get(1).route().get(0).getId());
+    Assertions.assertEquals(8, result.get().vehicles().get(1).route().get(1).getId());
   }
 
   @Test
@@ -644,32 +644,32 @@ public class TSPInsertSubrouteMoveTest {
     Random rng = new CustomRandom(new int[] {1, 0, 1}, new boolean[] {false});
     TSPMove move = new TSPInsertSubrouteMove(rng, re, false);
 
-    Order orderA = new Order(1, new Point2D(1.0, 1.0));
-    Order orderB = new Order(2, new Point2D(2.0, 2.0));
-    Order orderE = new Order(5, new Point2D(5.0, 5.0));
-    Order orderF = new Order(6, new Point2D(6.0, 6.0));
-    Order orderG = new Order(7, new Point2D(7.0, 7.0));
-    Order orderH = new Order(8, new Point2D(8.0, 8.0));
+    Order orderA = new Order(1, new Point2D(1.0, 1.0), null);
+    Order orderB = new Order(2, new Point2D(2.0, 2.0), null);
+    Order orderE = new Order(5, new Point2D(5.0, 5.0), null);
+    Order orderF = new Order(6, new Point2D(6.0, 6.0), null);
+    Order orderG = new Order(7, new Point2D(7.0, 7.0), null);
+    Order orderH = new Order(8, new Point2D(8.0, 8.0), null);
 
     VehicleRoute vrA = new VehicleRoute(1, new Point2D(1.0, 1.0),
-        List.of(orderA, orderB));
+        List.of(orderA, orderB), 0.0);
     VehicleRoute vrB = new VehicleRoute(2, new Point2D(2.0, 2.0),
-        List.of(orderE, orderF, orderG, orderH));
+        List.of(orderE, orderF, orderG, orderH), 0.0);
 
     Optional<TSPMoveResult> result = move.performMove(List.of(vrA, vrB));
     Assertions.assertTrue(result.isPresent());
 
     Assertions.assertEquals(2, result.get().vehicles().size());
-    Assertions.assertEquals(4, result.get().vehicles().get(0).getRoute().size());
-    Assertions.assertEquals(2, result.get().vehicles().get(1).getRoute().size());
+    Assertions.assertEquals(4, result.get().vehicles().get(0).route().size());
+    Assertions.assertEquals(2, result.get().vehicles().get(1).route().size());
 
-    Assertions.assertEquals(1, result.get().vehicles().get(0).getRoute().get(0).getId());
-    Assertions.assertEquals(6, result.get().vehicles().get(0).getRoute().get(1).getId());
-    Assertions.assertEquals(7, result.get().vehicles().get(0).getRoute().get(2).getId());
-    Assertions.assertEquals(2, result.get().vehicles().get(0).getRoute().get(3).getId());
+    Assertions.assertEquals(1, result.get().vehicles().get(0).route().get(0).getId());
+    Assertions.assertEquals(6, result.get().vehicles().get(0).route().get(1).getId());
+    Assertions.assertEquals(7, result.get().vehicles().get(0).route().get(2).getId());
+    Assertions.assertEquals(2, result.get().vehicles().get(0).route().get(3).getId());
 
-    Assertions.assertEquals(5, result.get().vehicles().get(1).getRoute().get(0).getId());
-    Assertions.assertEquals(8, result.get().vehicles().get(1).getRoute().get(1).getId());
+    Assertions.assertEquals(5, result.get().vehicles().get(1).route().get(0).getId());
+    Assertions.assertEquals(8, result.get().vehicles().get(1).route().get(1).getId());
   }
 
 }

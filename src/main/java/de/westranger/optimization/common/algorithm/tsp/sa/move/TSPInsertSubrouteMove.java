@@ -4,7 +4,6 @@ import de.westranger.optimization.common.algorithm.tsp.common.Order;
 import de.westranger.optimization.common.algorithm.tsp.sa.RouteEvaluator;
 import de.westranger.optimization.common.algorithm.tsp.sa.VehicleRoute;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -29,7 +28,7 @@ public final class TSPInsertSubrouteMove extends TSPMove {
     if (vehicles.size() == 1) {
       final VehicleRoute vrA = vehicles.get(0);
 
-      if (vrA.getRoute().size() < 4) {
+      if (vrA.route().size() < 4) {
         return Optional.empty();
       }
 
@@ -41,8 +40,8 @@ public final class TSPInsertSubrouteMove extends TSPMove {
       final VehicleRoute vrA = vehicles.get(0);
       final VehicleRoute vrB = vehicles.get(1);
 
-      final boolean cutRouteAPossible = vrA.getRoute().size() >= 4;
-      final boolean cutRouteBPossible = vrB.getRoute().size() >= 4;
+      final boolean cutRouteAPossible = vrA.route().size() >= 4;
+      final boolean cutRouteBPossible = vrB.route().size() >= 4;
 
       if (!cutRouteAPossible && !cutRouteBPossible) {
         return Optional.empty();
@@ -58,14 +57,14 @@ public final class TSPInsertSubrouteMove extends TSPMove {
   }
 
   private VehicleRoute insertSubrouteOneVehicle(VehicleRoute vrA) {
-    final int startIdx = rng.nextInt(vrA.getRoute().size() - 1);
-    final int endIdx = startIdx + rng.nextInt(vrA.getRoute().size() - startIdx - 1) + 1;
-    final List<Order> lstA = new ArrayList<>(vrA.getRoute());
+    final int startIdx = rng.nextInt(vrA.route().size() - 1);
+    final int endIdx = startIdx + rng.nextInt(vrA.route().size() - startIdx - 1) + 1;
+    final List<Order> lstA = new ArrayList<>(vrA.route());
     final List<Order> subroute = new ArrayList<>(endIdx - startIdx + 1);
 
     extractSubrouteAndAdd(startIdx, endIdx, subroute, lstA, lstA);
 
-    final VehicleRoute vrANew = new VehicleRoute(vrA.getId(), vrA.getHomePosition(), lstA);
+    final VehicleRoute vrANew = new VehicleRoute(vrA.id(), vrA.homePosition(), lstA, 0.0);
     return vrANew;
   }
 
@@ -79,8 +78,8 @@ public final class TSPInsertSubrouteMove extends TSPMove {
       useA = true;
     }
 
-    final List<Order> lstA = new ArrayList<>(vrA.getRoute());
-    final List<Order> lstB = new ArrayList<>(vrB.getRoute());
+    final List<Order> lstA = new ArrayList<>(vrA.route());
+    final List<Order> lstB = new ArrayList<>(vrB.route());
 
 
     List<Order> srcRoute;
@@ -99,8 +98,8 @@ public final class TSPInsertSubrouteMove extends TSPMove {
     final List<Order> subroute = new ArrayList<>(endIdx - startIdx + 1);
     extractSubrouteAndAdd(startIdx, endIdx, subroute, srcRoute, dstRoute);
 
-    final VehicleRoute vrANew = new VehicleRoute(vrA.getId(), vrA.getHomePosition(), lstA);
-    final VehicleRoute vrBNew = new VehicleRoute(vrB.getId(), vrB.getHomePosition(), lstB);
+    final VehicleRoute vrANew = new VehicleRoute(vrA.id(), vrA.homePosition(), lstA, 0.0);
+    final VehicleRoute vrBNew = new VehicleRoute(vrB.id(), vrB.homePosition(), lstB, 0.0);
     return List.of(vrANew, vrBNew);
   }
 

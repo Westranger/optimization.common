@@ -102,7 +102,7 @@ public final class TSPNeighbourSelector implements NeighbourSelector {
     }
 
     for (VehicleRoute vr : finalResult.get().vehicles()) {
-      newMapping.put(vr.getId(), vr);
+      newMapping.put(vr.id(), vr);
     }
 
     for (Map.Entry<Integer, VehicleRoute> entry : state.getOrderMapping().entrySet()) {

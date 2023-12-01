@@ -160,7 +160,7 @@ public class State extends SearchSpaceState {
     Point2D previousPoint = null;
     for (Map.Entry<Integer, VehicleRoute> entry : this.orderMapping.entrySet()) {
       String vehicleColor = colors.get(entry.getKey());
-      for (Order order : entry.getValue().getRoute()) {
+      for (Order order : entry.getValue().route()) {
         if (previousPoint != null) {
           svgBuilder.append('\t');
           svgBuilder.append(String.format(Locale.ENGLISH,
@@ -184,17 +184,17 @@ public class State extends SearchSpaceState {
       svgBuilder.append('\t');
       svgBuilder.append(String.format(Locale.ENGLISH,
           "<rect x=\"%f\" y=\"%f\" width=\"25\" height=\"25\" fill=\"%s\"/>",
-          entry.getValue().getHomePosition().getY(), entry.getValue().getHomePosition().getX(),
+          entry.getValue().homePosition().getY(), entry.getValue().homePosition().getX(),
           vehicleColor));
       svgBuilder.append('\n');
 
-      List<Order> orders = entry.getValue().getRoute();
+      List<Order> orders = entry.getValue().route();
       if (orders != null && !orders.isEmpty()) {
         final Point2D start = orders.get(0).getTo();
         svgBuilder.append('\t');
         svgBuilder.append(String.format(Locale.ENGLISH,
             "<line x1=\"%f\" y1=\"%f\" x2=\"%f\" y2=\"%f\" stroke=\"%s\"/>",
-            entry.getValue().getHomePosition().getY(), entry.getValue().getHomePosition().getX(),
+            entry.getValue().homePosition().getY(), entry.getValue().homePosition().getX(),
             start.getY(), start.getX(),
             vehicleColor));
         svgBuilder.append('\n');
@@ -220,14 +220,14 @@ public class State extends SearchSpaceState {
     }
 
     for (Map.Entry<Integer, VehicleRoute> entry : this.orderMapping.entrySet()) {
-      final Point2D src = entry.getValue().getHomePosition();
+      final Point2D src = entry.getValue().homePosition();
 
       minX = Math.min(minX, src.getX());
       maxX = Math.max(maxX, src.getX());
       minY = Math.min(minY, src.getY());
       maxY = Math.max(maxY, src.getY());
 
-      for (Order order : entry.getValue().getRoute()) {
+      for (Order order : entry.getValue().route()) {
         minX = Math.min(minX, order.getTo().getX());
         maxX = Math.max(maxX, order.getTo().getX());
         minY = Math.min(minY, order.getTo().getY());

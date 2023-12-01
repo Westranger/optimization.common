@@ -84,10 +84,10 @@ class TSPInsertionMoveTest {
     Assertions.assertTrue(result.isPresent());
 
     Assertions.assertEquals(1, result.get().vehicles().size());
-    Assertions.assertEquals(2, result.get().vehicles().get(0).getRoute().size());
+    Assertions.assertEquals(2, result.get().vehicles().get(0).route().size());
 
-    Assertions.assertEquals(2, result.get().vehicles().get(0).getRoute().get(0).getId());
-    Assertions.assertEquals(1, result.get().vehicles().get(0).getRoute().get(1).getId());
+    Assertions.assertEquals(2, result.get().vehicles().get(0).route().get(0).getId());
+    Assertions.assertEquals(1, result.get().vehicles().get(0).route().get(1).getId());
   }
 
   @Test
@@ -106,10 +106,10 @@ class TSPInsertionMoveTest {
     Assertions.assertTrue(result.isPresent());
 
     Assertions.assertEquals(1, result.get().vehicles().size());
-    Assertions.assertEquals(2, result.get().vehicles().get(0).getRoute().size());
+    Assertions.assertEquals(2, result.get().vehicles().get(0).route().size());
 
-    Assertions.assertEquals(2, result.get().vehicles().get(0).getRoute().get(0).getId());
-    Assertions.assertEquals(1, result.get().vehicles().get(0).getRoute().get(1).getId());
+    Assertions.assertEquals(2, result.get().vehicles().get(0).route().get(0).getId());
+    Assertions.assertEquals(1, result.get().vehicles().get(0).route().get(1).getId());
   }
 
   @Test
@@ -129,11 +129,11 @@ class TSPInsertionMoveTest {
     Assertions.assertTrue(result.isPresent());
 
     Assertions.assertEquals(1, result.get().vehicles().size());
-    Assertions.assertEquals(3, result.get().vehicles().get(0).getRoute().size());
+    Assertions.assertEquals(3, result.get().vehicles().get(0).route().size());
 
-    Assertions.assertEquals(2, result.get().vehicles().get(0).getRoute().get(0).getId());
-    Assertions.assertEquals(1, result.get().vehicles().get(0).getRoute().get(1).getId());
-    Assertions.assertEquals(3, result.get().vehicles().get(0).getRoute().get(2).getId());
+    Assertions.assertEquals(2, result.get().vehicles().get(0).route().get(0).getId());
+    Assertions.assertEquals(1, result.get().vehicles().get(0).route().get(1).getId());
+    Assertions.assertEquals(3, result.get().vehicles().get(0).route().get(2).getId());
   }
 
   @Test
@@ -153,11 +153,11 @@ class TSPInsertionMoveTest {
     Assertions.assertTrue(result.isPresent());
 
     Assertions.assertEquals(1, result.get().vehicles().size());
-    Assertions.assertEquals(3, result.get().vehicles().get(0).getRoute().size());
+    Assertions.assertEquals(3, result.get().vehicles().get(0).route().size());
 
-    Assertions.assertEquals(1, result.get().vehicles().get(0).getRoute().get(0).getId());
-    Assertions.assertEquals(3, result.get().vehicles().get(0).getRoute().get(1).getId());
-    Assertions.assertEquals(2, result.get().vehicles().get(0).getRoute().get(2).getId());
+    Assertions.assertEquals(1, result.get().vehicles().get(0).route().get(0).getId());
+    Assertions.assertEquals(3, result.get().vehicles().get(0).route().get(1).getId());
+    Assertions.assertEquals(2, result.get().vehicles().get(0).route().get(2).getId());
   }
 
   @Test
@@ -176,12 +176,12 @@ class TSPInsertionMoveTest {
     Optional<TSPMoveResult> result = move.performMove(List.of(vrA, vrB));
 
     Assertions.assertEquals(2, result.get().vehicles().size());
-    Assertions.assertEquals(1, result.get().vehicles().get(0).getRoute().size());
-    Assertions.assertEquals(2, result.get().vehicles().get(1).getRoute().size());
+    Assertions.assertEquals(1, result.get().vehicles().get(0).route().size());
+    Assertions.assertEquals(2, result.get().vehicles().get(1).route().size());
 
-    Assertions.assertEquals(2, result.get().vehicles().get(0).getRoute().get(0).getId());
-    Assertions.assertEquals(1, result.get().vehicles().get(1).getRoute().get(0).getId());
-    Assertions.assertEquals(3, result.get().vehicles().get(1).getRoute().get(1).getId());
+    Assertions.assertEquals(2, result.get().vehicles().get(0).route().get(0).getId());
+    Assertions.assertEquals(1, result.get().vehicles().get(1).route().get(0).getId());
+    Assertions.assertEquals(3, result.get().vehicles().get(1).route().get(1).getId());
   }
 
   @Test
@@ -200,12 +200,12 @@ class TSPInsertionMoveTest {
     Optional<TSPMoveResult> result = move.performMove(List.of(vrA, vrB));
 
     Assertions.assertEquals(2, result.get().vehicles().size());
-    Assertions.assertEquals(2, result.get().vehicles().get(0).getRoute().size());
-    Assertions.assertEquals(1, result.get().vehicles().get(1).getRoute().size());
+    Assertions.assertEquals(2, result.get().vehicles().get(0).route().size());
+    Assertions.assertEquals(1, result.get().vehicles().get(1).route().size());
 
-    Assertions.assertEquals(1, result.get().vehicles().get(0).getRoute().get(0).getId());
-    Assertions.assertEquals(3, result.get().vehicles().get(0).getRoute().get(1).getId());
-    Assertions.assertEquals(2, result.get().vehicles().get(1).getRoute().get(0).getId());
+    Assertions.assertEquals(1, result.get().vehicles().get(0).route().get(0).getId());
+    Assertions.assertEquals(3, result.get().vehicles().get(0).route().get(1).getId());
+    Assertions.assertEquals(2, result.get().vehicles().get(1).route().get(0).getId());
   }
 
   @Test
@@ -227,16 +227,16 @@ class TSPInsertionMoveTest {
     Optional<TSPMoveResult> result = move.performMove(List.of(vrA, vrB));
 
     Assertions.assertEquals(2, result.get().vehicles().size());
-    Assertions.assertEquals(2, result.get().vehicles().get(0).getRoute().size());
-    Assertions.assertEquals(4, result.get().vehicles().get(1).getRoute().size());
+    Assertions.assertEquals(2, result.get().vehicles().get(0).route().size());
+    Assertions.assertEquals(4, result.get().vehicles().get(1).route().size());
 
-    Assertions.assertEquals(1, result.get().vehicles().get(0).getRoute().get(0).getId());
-    Assertions.assertEquals(3, result.get().vehicles().get(0).getRoute().get(1).getId());
+    Assertions.assertEquals(1, result.get().vehicles().get(0).route().get(0).getId());
+    Assertions.assertEquals(3, result.get().vehicles().get(0).route().get(1).getId());
 
-    Assertions.assertEquals(4, result.get().vehicles().get(1).getRoute().get(0).getId());
-    Assertions.assertEquals(5, result.get().vehicles().get(1).getRoute().get(1).getId());
-    Assertions.assertEquals(6, result.get().vehicles().get(1).getRoute().get(2).getId());
-    Assertions.assertEquals(2, result.get().vehicles().get(1).getRoute().get(3).getId());
+    Assertions.assertEquals(4, result.get().vehicles().get(1).route().get(0).getId());
+    Assertions.assertEquals(5, result.get().vehicles().get(1).route().get(1).getId());
+    Assertions.assertEquals(6, result.get().vehicles().get(1).route().get(2).getId());
+    Assertions.assertEquals(2, result.get().vehicles().get(1).route().get(3).getId());
   }
 
   @Test
@@ -258,16 +258,16 @@ class TSPInsertionMoveTest {
     Optional<TSPMoveResult> result = move.performMove(List.of(vrA, vrB));
 
     Assertions.assertEquals(2, result.get().vehicles().size());
-    Assertions.assertEquals(2, result.get().vehicles().get(0).getRoute().size());
-    Assertions.assertEquals(4, result.get().vehicles().get(1).getRoute().size());
+    Assertions.assertEquals(2, result.get().vehicles().get(0).route().size());
+    Assertions.assertEquals(4, result.get().vehicles().get(1).route().size());
 
-    Assertions.assertEquals(1, result.get().vehicles().get(0).getRoute().get(0).getId());
-    Assertions.assertEquals(3, result.get().vehicles().get(0).getRoute().get(1).getId());
+    Assertions.assertEquals(1, result.get().vehicles().get(0).route().get(0).getId());
+    Assertions.assertEquals(3, result.get().vehicles().get(0).route().get(1).getId());
 
-    Assertions.assertEquals(2, result.get().vehicles().get(1).getRoute().get(0).getId());
-    Assertions.assertEquals(4, result.get().vehicles().get(1).getRoute().get(1).getId());
-    Assertions.assertEquals(5, result.get().vehicles().get(1).getRoute().get(2).getId());
-    Assertions.assertEquals(6, result.get().vehicles().get(1).getRoute().get(3).getId());
+    Assertions.assertEquals(2, result.get().vehicles().get(1).route().get(0).getId());
+    Assertions.assertEquals(4, result.get().vehicles().get(1).route().get(1).getId());
+    Assertions.assertEquals(5, result.get().vehicles().get(1).route().get(2).getId());
+    Assertions.assertEquals(6, result.get().vehicles().get(1).route().get(3).getId());
   }
 
   @Test
@@ -289,16 +289,16 @@ class TSPInsertionMoveTest {
     Optional<TSPMoveResult> result = move.performMove(List.of(vrA, vrB));
 
     Assertions.assertEquals(2, result.get().vehicles().size());
-    Assertions.assertEquals(4, result.get().vehicles().get(0).getRoute().size());
-    Assertions.assertEquals(2, result.get().vehicles().get(1).getRoute().size());
+    Assertions.assertEquals(4, result.get().vehicles().get(0).route().size());
+    Assertions.assertEquals(2, result.get().vehicles().get(1).route().size());
 
-    Assertions.assertEquals(1, result.get().vehicles().get(0).getRoute().get(0).getId());
-    Assertions.assertEquals(2, result.get().vehicles().get(0).getRoute().get(1).getId());
-    Assertions.assertEquals(3, result.get().vehicles().get(0).getRoute().get(2).getId());
-    Assertions.assertEquals(5, result.get().vehicles().get(0).getRoute().get(3).getId());
+    Assertions.assertEquals(1, result.get().vehicles().get(0).route().get(0).getId());
+    Assertions.assertEquals(2, result.get().vehicles().get(0).route().get(1).getId());
+    Assertions.assertEquals(3, result.get().vehicles().get(0).route().get(2).getId());
+    Assertions.assertEquals(5, result.get().vehicles().get(0).route().get(3).getId());
 
-    Assertions.assertEquals(4, result.get().vehicles().get(1).getRoute().get(0).getId());
-    Assertions.assertEquals(6, result.get().vehicles().get(1).getRoute().get(1).getId());
+    Assertions.assertEquals(4, result.get().vehicles().get(1).route().get(0).getId());
+    Assertions.assertEquals(6, result.get().vehicles().get(1).route().get(1).getId());
   }
 
   @Test
@@ -320,16 +320,16 @@ class TSPInsertionMoveTest {
     Optional<TSPMoveResult> result = move.performMove(List.of(vrA, vrB));
 
     Assertions.assertEquals(2, result.get().vehicles().size());
-    Assertions.assertEquals(4, result.get().vehicles().get(0).getRoute().size());
-    Assertions.assertEquals(2, result.get().vehicles().get(1).getRoute().size());
+    Assertions.assertEquals(4, result.get().vehicles().get(0).route().size());
+    Assertions.assertEquals(2, result.get().vehicles().get(1).route().size());
 
-    Assertions.assertEquals(5, result.get().vehicles().get(0).getRoute().get(0).getId());
-    Assertions.assertEquals(1, result.get().vehicles().get(0).getRoute().get(1).getId());
-    Assertions.assertEquals(2, result.get().vehicles().get(0).getRoute().get(2).getId());
-    Assertions.assertEquals(3, result.get().vehicles().get(0).getRoute().get(3).getId());
+    Assertions.assertEquals(5, result.get().vehicles().get(0).route().get(0).getId());
+    Assertions.assertEquals(1, result.get().vehicles().get(0).route().get(1).getId());
+    Assertions.assertEquals(2, result.get().vehicles().get(0).route().get(2).getId());
+    Assertions.assertEquals(3, result.get().vehicles().get(0).route().get(3).getId());
 
-    Assertions.assertEquals(4, result.get().vehicles().get(1).getRoute().get(0).getId());
-    Assertions.assertEquals(6, result.get().vehicles().get(1).getRoute().get(1).getId());
+    Assertions.assertEquals(4, result.get().vehicles().get(1).route().get(0).getId());
+    Assertions.assertEquals(6, result.get().vehicles().get(1).route().get(1).getId());
   }
 
   @Test

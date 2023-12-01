@@ -26,18 +26,18 @@ class DepthFirstSearchSolverTest {
   @Test
   void solveTSP6Locations() {
     final List<Order> orderList = new LinkedList<>();
-    orderList.add(new Order(1, new Point2D(3.0, 2.0)));
-    orderList.add(new Order(2, new Point2D(3.0, 3.0)));
-    orderList.add(new Order(3, new Point2D(3.0, 4.0)));
+    orderList.add(new Order(1, new Point2D(3.0, 2.0), null));
+    orderList.add(new Order(2, new Point2D(3.0, 3.0), null));
+    orderList.add(new Order(3, new Point2D(3.0, 4.0), null));
 
-    orderList.add(new Order(4, new Point2D(1.0, 2.0)));
-    orderList.add(new Order(5, new Point2D(1.0, 3.0)));
-    orderList.add(new Order(6, new Point2D(1.0, 4.0)));
+    orderList.add(new Order(4, new Point2D(1.0, 2.0), null));
+    orderList.add(new Order(5, new Point2D(1.0, 3.0), null));
+    orderList.add(new Order(6, new Point2D(1.0, 4.0), null));
 
     final Map<Integer, VehicleRoute> orderMapping = new TreeMap<>();
-    orderMapping.put(1, new VehicleRoute(1, new Point2D(1.0, 1.0), new ArrayList<>()));
-    orderMapping.put(2, new VehicleRoute(2, new Point2D(3.0, 1.0), new ArrayList<>()));
-    orderMapping.put(3, new VehicleRoute(3, new Point2D(5.0, 1.0), new ArrayList<>()));
+    orderMapping.put(1, new VehicleRoute(1, new Point2D(1.0, 1.0), new ArrayList<>(),0.0));
+    orderMapping.put(2, new VehicleRoute(2, new Point2D(3.0, 1.0), new ArrayList<>(),0.0));
+    orderMapping.put(3, new VehicleRoute(3, new Point2D(5.0, 1.0), new ArrayList<>(),0.0));
 
     final Map<Integer, Point2D> vehiclePositions = new TreeMap<>();
 
@@ -79,12 +79,12 @@ class DepthFirstSearchSolverTest {
     Gson gson = new Gson();
 
     final List<Order> orderList = new LinkedList<>();
-    Order o1 = new Order(1, new Point2D(3.0, 2.0));
-    Order o2 = new Order(2, new Point2D(3.0, 3.0));
-    Order o3 = new Order(3, new Point2D(3.0, 4.0));
-    Order o4 = new Order(4, new Point2D(1.0, 2.0));
-    Order o5 = new Order(5, new Point2D(1.0, 3.0));
-    Order o6 = new Order(6, new Point2D(1.0, 4.0));
+    Order o1 = new Order(1, new Point2D(3.0, 2.0), null);
+    Order o2 = new Order(2, new Point2D(3.0, 3.0), null);
+    Order o3 = new Order(3, new Point2D(3.0, 4.0), null);
+    Order o4 = new Order(4, new Point2D(1.0, 2.0), null);
+    Order o5 = new Order(5, new Point2D(1.0, 3.0), null);
+    Order o6 = new Order(6, new Point2D(1.0, 4.0), null);
 
     orderList.add(o1);
     orderList.add(o2);

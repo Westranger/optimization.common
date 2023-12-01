@@ -24,11 +24,11 @@ public final class TSPSwapMove extends TSPMove {
     if (vehicles.size() == 1) {
       final VehicleRoute vrA = vehicles.get(0);
 
-      if (vrA.getRoute().size() < 2) {
+      if (vrA.route().size() < 2) {
         return Optional.empty();
       }
 
-      final List<Order> lstA = new ArrayList<>(vrA.getRoute());
+      final List<Order> lstA = new ArrayList<>(vrA.route());
       final int removeIdxA = this.rng.nextInt(lstA.size());
       final Order orderA = lstA.remove(removeIdxA);
 
@@ -38,7 +38,7 @@ public final class TSPSwapMove extends TSPMove {
       lstA.add(removeIdxB, orderA);
       lstA.add(removeIdxA, orderB);
 
-      final VehicleRoute vrANew = new VehicleRoute(vrA.getId(), vrA.getHomePosition(), lstA);
+      final VehicleRoute vrANew = new VehicleRoute(vrA.id(), vrA.homePosition(), lstA, 0.0);
       vrl.add(vrANew);
 
       score += routeEvaluator.scoreRoute(vrANew);
@@ -46,24 +46,24 @@ public final class TSPSwapMove extends TSPMove {
       final VehicleRoute vrA = vehicles.get(0);
       final VehicleRoute vrB = vehicles.get(1);
 
-      if (vrA.getRoute().isEmpty() || vrB.getRoute().isEmpty()) {
+      if (vrA.route().isEmpty() || vrB.route().isEmpty()) {
         return Optional.empty();
       }
 
-      final List<Order> lstA = new ArrayList<>(vrA.getRoute());
-      final List<Order> lstB = new ArrayList<>(vrB.getRoute());
+      final List<Order> lstA = new ArrayList<>(vrA.route());
+      final List<Order> lstB = new ArrayList<>(vrB.route());
 
-      final int removeIdxA = this.rng.nextInt(vrA.getRoute().size());
+      final int removeIdxA = this.rng.nextInt(vrA.route().size());
       final Order orderA = lstA.remove(removeIdxA);
 
-      final int removeIdxB = this.rng.nextInt(vrA.getRoute().size());
+      final int removeIdxB = this.rng.nextInt(vrA.route().size());
       final Order orderB = lstB.remove(removeIdxB);
 
       lstA.add(removeIdxA, orderB);
       lstB.add(removeIdxB, orderA);
 
-      final VehicleRoute vrANew = new VehicleRoute(vrA.getId(), vrA.getHomePosition(), lstA);
-      final VehicleRoute vrBNew = new VehicleRoute(vrB.getId(), vrB.getHomePosition(), lstB);
+      final VehicleRoute vrANew = new VehicleRoute(vrA.id(), vrA.homePosition(), lstA, 0.0);
+      final VehicleRoute vrBNew = new VehicleRoute(vrB.id(), vrB.homePosition(), lstB, 0.0);
 
       vrl.add(vrANew);
       vrl.add(vrBNew);
