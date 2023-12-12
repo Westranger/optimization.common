@@ -3,6 +3,9 @@ package test.de.westranger.optimization.common.util;
 import de.westranger.geometry.common.simple.Point2D;
 import de.westranger.optimization.common.algorithm.tsp.common.Order;
 import de.westranger.optimization.common.util.PermutationIterator;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -119,8 +122,9 @@ public class PermutationIteratorTest {
     Collections.shuffle(elements, new Random(47110815L));
 
     Point2D start = new Point2D(0.0, 0.0);
+    Point2D end = new Point2D(0.0, 12.0);
 
-    int[] priorities = new int[] {1, 1, 2, 2, 3, 3};
+    int[] priorities = new int[] {1, 1, 2, 2, 3, 3, 4, 4};
 
     for (int a = 0; a < elements.size(); a++) {
       for (int b = a + 1; b < elements.size(); b++) {
@@ -128,15 +132,15 @@ public class PermutationIteratorTest {
           for (int d = c + 1; d < elements.size(); d++) {
             for (int e = d + 1; e < elements.size(); e++) {
               for (int f = e + 1; f < elements.size(); f++) {
-                //for (int g = f + 1; g < elements.size(); g++) {
-                //for (int h = g + 1; h < elements.size(); h++) {
+                for (int g = f + 1; g < elements.size(); g++) {
+                  for (int h = g + 1; h < elements.size(); h++) {
 
-                List<Order> candidates =
-                    List.of(elements.get(a), elements.get(b), elements.get(c), elements.get(d),
-                        elements.get(e), elements.get(f)/*, elements.get(g), elements.get(h)*/);
-                extracted(start, candidates, priorities);
-                //}
-                //}
+                    List<Order> candidates =
+                        List.of(elements.get(a), elements.get(b), elements.get(c), elements.get(d),
+                            elements.get(e), elements.get(f), elements.get(g), elements.get(h));
+                    extracted(start, end, candidates, priorities);
+                  }
+                }
               }
             }
           }
@@ -146,9 +150,12 @@ public class PermutationIteratorTest {
 
   }
 
-  private void extracted(Point2D start, List<Order> candidates, int[] priorities) {
+  private ProblemFinderScore masterScore = new ProblemFinderScore(0.0, 0.0, 0.0, null);
+  private int fileCnt = 0;
+
+  private void extracted(Point2D start, Point2D end, List<Order> candidates, int[] priorities) {
     // compute shortest path
-    List<Order> shortestPath = computeShortestPath(start, candidates);
+    List<Order> shortestPath = computeShortestPath(start, end, candidates);
 
     long[] dueTimes = new long[priorities.length];
 
@@ -161,30 +168,84 @@ public class PermutationIteratorTest {
       }
     }
 
+    for (int i = 0; i < shortestPath.size(); i++) {
+      shortestPath.set(i,
+          new Order(shortestPath.get(i).getId(), shortestPath.get(i).getTo(), null,
+              priorities[i], 0, dueTimes[i]));
+    }
+
+
     List<Order> newOrders = new ArrayList<>(candidates.size());
-    for (int i = 0; i < candidates.size(); i++) {
-      Order oOld = shortestPath.get(i);
+    for (Order oOld : candidates) {
+      // find idx in candidates
+      int idx = -1;
+      for (int j = 0; j < shortestPath.size(); j++) {
+        if (shortestPath.get(j).getTo().distance(oOld.getTo()) <= 1e-6) {
+          idx = j;
+          break;
+        }
+      }
+
+      // assemble new order
       Order oNew =
-          new Order(oOld.getId(), oOld.getTo(), null, priorities[i], 0, dueTimes[i]);
+          new Order(oOld.getId(), oOld.getTo(), null, priorities[idx], 0, dueTimes[idx]);
       newOrders.add(oNew);
     }
 
-    ProblemFinderScore optimalScore = computeScore(start, newOrders, priorities);
+    ProblemFinderScore optimalScore = computeScore(start, end, shortestPath, priorities);
 
     final List<Order> greedyPathSolution = findGreedyPathSolution(start, newOrders);
-    ProblemFinderScore greedyPathScore = computeScore(start, greedyPathSolution, priorities);
+    ProblemFinderScore greedyPathScore = computeScore(start, end, greedyPathSolution, priorities);
 
     final List<Order> greedyPrioritySolution = findGreedyPrioritySolution(newOrders);
     ProblemFinderScore greedyPriorityScore =
-        computeScore(start, greedyPrioritySolution, priorities);
+        computeScore(start, end, greedyPrioritySolution, priorities);
 
     final List<Order> greedyDueSolution = findGreedyDueDateSolution(newOrders);
-    ProblemFinderScore greedyDueScore = computeScore(start, greedyDueSolution, priorities);
+    ProblemFinderScore greedyDueScore = computeScore(start, end, greedyDueSolution, priorities);
 
-    if (optimalScore.compareTo(greedyDueScore) <= 0 &&
-        optimalScore.compareTo(greedyPathScore) <= 0 &&
-        optimalScore.compareTo(greedyPriorityScore) <= 0) {
-      System.out.println("found one ");
+    if (optimalScore.compareTo(greedyDueScore) > 0 &&
+        optimalScore.compareTo(greedyPathScore) > 0 &&
+        optimalScore.compareTo(greedyPriorityScore) > 0) {
+      //System.out.println("found one ");
+
+      double diffPath = greedyPathScore.getPathScore() - optimalScore.getPathScore() +
+          greedyDueScore.getPathScore() - optimalScore.getPathScore() /*+
+          greedyPriorityScore.getPathScore() - optimalScore.getPathScore()*/;
+      diffPath /= 2.0;
+
+      double diffPrio = greedyDueScore.getPriorityScore() - optimalScore.getPriorityScore() +
+          greedyPathScore.getPriorityScore() - optimalScore.getPriorityScore() +
+          greedyPriorityScore.getPriorityScore() - optimalScore.getPriorityScore();
+      diffPrio = 0.0;
+
+      double diffDueDate = /*greedyDueScore.getDueDateScore() - optimalScore.getDueDateScore()*/ +
+          greedyPathScore.getDueDateScore() - optimalScore.getDueDateScore()/* +
+          greedyPriorityScore.getDueDateScore() - optimalScore.getDueDateScore()*/;
+      diffDueDate /= 2.0;
+
+
+      ProblemFinderScore tmp =
+          new ProblemFinderScore(diffPath, diffPrio, diffDueDate, optimalScore.getOrders());
+
+      if (tmp.compareTo(masterScore) < 0) {
+        masterScore = tmp;
+        System.out.println(
+            "found one " + optimalScore.getOrders() + " " + diffPath + " " + diffPrio + " " + " " +
+                diffDueDate);
+
+        String svgContent = SvgPlotter.plotProblemFinderScores(
+            new ProblemFinderScore[] {optimalScore, greedyPathScore, greedyPriorityScore,
+                greedyDueScore}, start, end);
+
+        try (BufferedWriter writer = new BufferedWriter(
+            new FileWriter("./img_" + (fileCnt++) + ".svg"))) {
+          writer.write(svgContent);
+        } catch (IOException e) {
+          throw new RuntimeException(e);
+        }
+
+      }
     }
   }
 
@@ -201,9 +262,10 @@ public class PermutationIteratorTest {
     return result;
   }
 
-  private List<Order> findGreedyPathSolution(final Point2D start, final List<Order> orders) {
+  private List<Order> findGreedyPathSolution(final Point2D start,
+                                             final List<Order> orders) {
     List<Order> tmp = new ArrayList<>(orders);
-    List<Order> result = new ArrayList<>(orders);
+    List<Order> result = new ArrayList<>(orders.size());
     Point2D lastPt = start;
     while (!tmp.isEmpty()) {
       int idx = 0;
@@ -224,7 +286,8 @@ public class PermutationIteratorTest {
     return result;
   }
 
-  private List<Order> computeShortestPath(final Point2D start, final List<Order> orders) {
+  private List<Order> computeShortestPath(final Point2D start, final Point2D end,
+                                          final List<Order> orders) {
     PermutationIterator<Order> optIter =
         new PermutationIterator<>(orders, orders.size());
 
@@ -237,6 +300,7 @@ public class PermutationIteratorTest {
       for (int a = 1; a < perm.size(); a++) {
         dst += perm.get(a - 1).getTo().distance(perm.get(a).getTo());
       }
+      dst += end.distance(perm.get(perm.size() - 1).getTo());
 
       if (dst < opt) {
         opt = dst;
@@ -246,24 +310,25 @@ public class PermutationIteratorTest {
     return optLst.get();
   }
 
-  private ProblemFinderScore computeScore(final Point2D start, final List<Order> orders,
+  private ProblemFinderScore computeScore(final Point2D start, final Point2D end,
+                                          final List<Order> orders,
                                           final int[] priorities) {
     final double dueDateScore = computeDueDateScore(start, orders);
     final double priorityScore = computePriorityScore(priorities, orders);
-    final double distanceScore = computeDistanceScore(start, orders);
+    final double distanceScore = computeDistanceScore(start, end, orders);
     return new ProblemFinderScore(distanceScore, priorityScore, dueDateScore, orders);
   }
 
 
   private double computeDueDateScore(final Point2D start, final List<Order> orders) {
     double sum = 0.0;
-    double travelTime = start.distance(orders.get(0).getTo()); // speed = 1.0;
+    double travelTime = start.distance(orders.get(0).getTo()) * 1000.0; // speed = 1.0;
 
     for (int i = 0; i < orders.size(); i++) {
-      sum += travelTime - orders.get(i).getDueTime();
       if (i > 0) {
-        travelTime += orders.get(i - 1).getTo().distance(orders.get(i).getTo());
+        travelTime += orders.get(i - 1).getTo().distance(orders.get(i).getTo()) * 1000.0;
       }
+      sum += Math.floor(travelTime) - orders.get(i).getDueTime();
     }
 
     return sum;
@@ -277,12 +342,15 @@ public class PermutationIteratorTest {
     return sum;
   }
 
-  private double computeDistanceScore(final Point2D start, final List<Order> orders) {
+  private double computeDistanceScore(final Point2D start, final Point2D end,
+                                      final List<Order> orders) {
     double sum = start.distance(orders.get(0).getTo());
 
     for (int i = 1; i < orders.size(); i++) {
       sum += orders.get(i - 1).getTo().distance(orders.get(i).getTo());
     }
+    sum += end.distance(orders.get(orders.size() - 1).getTo());
+
     return sum;
   }
 

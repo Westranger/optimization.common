@@ -39,9 +39,9 @@ class TSPInsertionMoveTest {
     RouteEvaluator re = new RouteEvaluator();
     TSPMove move = new TSPInsertionMove(rng, re);
 
-    VehicleRoute vrA = new VehicleRoute(1, new Point2D(1.0, 1.0), new LinkedList<>());
-    VehicleRoute vrB = new VehicleRoute(2, new Point2D(2.0, 2.0), new LinkedList<>());
-    VehicleRoute vrC = new VehicleRoute(3, new Point2D(3.0, 3.0), new LinkedList<>());
+    VehicleRoute vrA = new VehicleRoute(1, new Point2D(1.0, 1.0), new LinkedList<>(), 0.0);
+    VehicleRoute vrB = new VehicleRoute(2, new Point2D(2.0, 2.0), new LinkedList<>(), 0.0);
+    VehicleRoute vrC = new VehicleRoute(3, new Point2D(3.0, 3.0), new LinkedList<>(), 0.0);
 
     Assertions.assertThrows(IllegalArgumentException.class,
         () -> move.performMove(List.of(vrA, vrB, vrC)));
@@ -51,7 +51,7 @@ class TSPInsertionMoveTest {
   public void test1VehicleNoOrders() {
     RouteEvaluator re = new RouteEvaluator();
     TSPMove move = new TSPInsertionMove(rng, re);
-    VehicleRoute vrA = new VehicleRoute(1, new Point2D(1.0, 1.0), new LinkedList<>());
+    VehicleRoute vrA = new VehicleRoute(1, new Point2D(1.0, 1.0), new LinkedList<>(), 0.0);
 
     Optional<TSPMoveResult> result = move.performMove(List.of(vrA));
     Assertions.assertTrue(result.isEmpty());
@@ -61,8 +61,8 @@ class TSPInsertionMoveTest {
   public void test2VehiclesNoOrders() {
     RouteEvaluator re = new RouteEvaluator();
     TSPMove move = new TSPInsertionMove(rng, re);
-    VehicleRoute vrA = new VehicleRoute(1, new Point2D(1.0, 1.0), new LinkedList<>());
-    VehicleRoute vrB = new VehicleRoute(2, new Point2D(2.0, 2.0), new LinkedList<>());
+    VehicleRoute vrA = new VehicleRoute(1, new Point2D(1.0, 1.0), new LinkedList<>(), 0.0);
+    VehicleRoute vrB = new VehicleRoute(2, new Point2D(2.0, 2.0), new LinkedList<>(), 0.0);
 
     Optional<TSPMoveResult> result = move.performMove(List.of(vrA, vrB));
     Assertions.assertTrue(result.isEmpty());
@@ -74,11 +74,11 @@ class TSPInsertionMoveTest {
     Random rng = new CustomRandom(new int[] {0, 0});
     TSPMove move = new TSPInsertionMove(rng, re);
 
-    Order orderA = new Order(1, new Point2D(1.0, 1.0));
-    Order orderB = new Order(2, new Point2D(2.0, 2.0));
+    Order orderA = new Order(1, new Point2D(1.0, 1.0), null);
+    Order orderB = new Order(2, new Point2D(2.0, 2.0), null);
 
     VehicleRoute vrA = new VehicleRoute(1, new Point2D(1.0, 1.0),
-        List.of(orderA, orderB));
+        List.of(orderA, orderB), 0.0);
 
     Optional<TSPMoveResult> result = move.performMove(List.of(vrA));
     Assertions.assertTrue(result.isPresent());
@@ -96,11 +96,11 @@ class TSPInsertionMoveTest {
     Random rng = new CustomRandom(new int[] {1, 0});
     TSPMove move = new TSPInsertionMove(rng, re);
 
-    Order orderA = new Order(1, new Point2D(1.0, 1.0));
-    Order orderB = new Order(2, new Point2D(2.0, 2.0));
+    Order orderA = new Order(1, new Point2D(1.0, 1.0), null);
+    Order orderB = new Order(2, new Point2D(2.0, 2.0), null);
 
     VehicleRoute vrA = new VehicleRoute(1, new Point2D(1.0, 1.0),
-        List.of(orderA, orderB));
+        List.of(orderA, orderB), 0.0);
 
     Optional<TSPMoveResult> result = move.performMove(List.of(vrA));
     Assertions.assertTrue(result.isPresent());
@@ -118,12 +118,12 @@ class TSPInsertionMoveTest {
     Random rng = new CustomRandom(new int[] {1, 0}, new boolean[] {true});
     TSPMove move = new TSPInsertionMove(rng, re);
 
-    Order orderA = new Order(1, new Point2D(1.0, 1.0));
-    Order orderB = new Order(2, new Point2D(2.0, 2.0));
-    Order orderC = new Order(3, new Point2D(3.0, 3.0));
+    Order orderA = new Order(1, new Point2D(1.0, 1.0), null);
+    Order orderB = new Order(2, new Point2D(2.0, 2.0), null);
+    Order orderC = new Order(3, new Point2D(3.0, 3.0), null);
 
     VehicleRoute vrA = new VehicleRoute(1, new Point2D(1.0, 1.0),
-        List.of(orderA, orderB, orderC));
+        List.of(orderA, orderB, orderC), 0.0);
 
     Optional<TSPMoveResult> result = move.performMove(List.of(vrA));
     Assertions.assertTrue(result.isPresent());
@@ -142,12 +142,12 @@ class TSPInsertionMoveTest {
     Random rng = new CustomRandom(new int[] {1, 0}, new boolean[] {false});
     TSPMove move = new TSPInsertionMove(rng, re);
 
-    Order orderA = new Order(1, new Point2D(1.0, 1.0));
-    Order orderB = new Order(2, new Point2D(2.0, 2.0));
-    Order orderC = new Order(3, new Point2D(3.0, 3.0));
+    Order orderA = new Order(1, new Point2D(1.0, 1.0), null);
+    Order orderB = new Order(2, new Point2D(2.0, 2.0), null);
+    Order orderC = new Order(3, new Point2D(3.0, 3.0), null);
 
     VehicleRoute vrA = new VehicleRoute(1, new Point2D(1.0, 1.0),
-        List.of(orderA, orderB, orderC));
+        List.of(orderA, orderB, orderC), 0.0);
 
     Optional<TSPMoveResult> result = move.performMove(List.of(vrA));
     Assertions.assertTrue(result.isPresent());
@@ -166,12 +166,13 @@ class TSPInsertionMoveTest {
     Random rng = new CustomRandom(new int[] {1, 0});
     TSPMove move = new TSPInsertionMove(rng, re);
 
-    Order orderA = new Order(1, new Point2D(1.0, 1.0));
-    Order orderB = new Order(2, new Point2D(2.0, 2.0));
-    Order orderC = new Order(3, new Point2D(3.0, 3.0));
+    Order orderA = new Order(1, new Point2D(1.0, 1.0), null);
+    Order orderB = new Order(2, new Point2D(2.0, 2.0), null);
+    Order orderC = new Order(3, new Point2D(3.0, 3.0), null);
 
-    VehicleRoute vrA = new VehicleRoute(1, new Point2D(1.0, 1.0), new LinkedList<>());
-    VehicleRoute vrB = new VehicleRoute(2, new Point2D(2.0, 2.0), List.of(orderA, orderB, orderC));
+    VehicleRoute vrA = new VehicleRoute(1, new Point2D(1.0, 1.0), new LinkedList<>(), 0.0);
+    VehicleRoute vrB =
+        new VehicleRoute(2, new Point2D(2.0, 2.0), List.of(orderA, orderB, orderC), 0.0);
 
     Optional<TSPMoveResult> result = move.performMove(List.of(vrA, vrB));
 
@@ -190,12 +191,13 @@ class TSPInsertionMoveTest {
     Random rng = new CustomRandom(new int[] {1, 0});
     TSPMove move = new TSPInsertionMove(rng, re);
 
-    Order orderA = new Order(1, new Point2D(1.0, 1.0));
-    Order orderB = new Order(2, new Point2D(2.0, 2.0));
-    Order orderC = new Order(3, new Point2D(3.0, 3.0));
+    Order orderA = new Order(1, new Point2D(1.0, 1.0), null);
+    Order orderB = new Order(2, new Point2D(2.0, 2.0), null);
+    Order orderC = new Order(3, new Point2D(3.0, 3.0), null);
 
-    VehicleRoute vrA = new VehicleRoute(1, new Point2D(1.0, 1.0), List.of(orderA, orderB, orderC));
-    VehicleRoute vrB = new VehicleRoute(2, new Point2D(2.0, 2.0), new LinkedList<>());
+    VehicleRoute vrA =
+        new VehicleRoute(1, new Point2D(1.0, 1.0), List.of(orderA, orderB, orderC), 0.0);
+    VehicleRoute vrB = new VehicleRoute(2, new Point2D(2.0, 2.0), new LinkedList<>(), 0.0);
 
     Optional<TSPMoveResult> result = move.performMove(List.of(vrA, vrB));
 
@@ -214,15 +216,17 @@ class TSPInsertionMoveTest {
     Random rng = new CustomRandom(new int[] {1, 3}, new boolean[] {true});
     TSPMove move = new TSPInsertionMove(rng, re);
 
-    Order orderA = new Order(1, new Point2D(1.0, 1.0));
-    Order orderB = new Order(2, new Point2D(2.0, 2.0));
-    Order orderC = new Order(3, new Point2D(3.0, 3.0));
-    Order orderD = new Order(4, new Point2D(4.0, 4.0));
-    Order orderE = new Order(5, new Point2D(5.0, 5.0));
-    Order orderF = new Order(6, new Point2D(6.0, 6.0));
+    Order orderA = new Order(1, new Point2D(1.0, 1.0), null);
+    Order orderB = new Order(2, new Point2D(2.0, 2.0), null);
+    Order orderC = new Order(3, new Point2D(3.0, 3.0), null);
+    Order orderD = new Order(4, new Point2D(4.0, 4.0), null);
+    Order orderE = new Order(5, new Point2D(5.0, 5.0), null);
+    Order orderF = new Order(6, new Point2D(6.0, 6.0), null);
 
-    VehicleRoute vrA = new VehicleRoute(1, new Point2D(1.0, 1.0), List.of(orderA, orderB, orderC));
-    VehicleRoute vrB = new VehicleRoute(2, new Point2D(2.0, 2.0), List.of(orderD, orderE, orderF));
+    VehicleRoute vrA =
+        new VehicleRoute(1, new Point2D(1.0, 1.0), List.of(orderA, orderB, orderC), 0.0);
+    VehicleRoute vrB =
+        new VehicleRoute(2, new Point2D(2.0, 2.0), List.of(orderD, orderE, orderF), 0.0);
 
     Optional<TSPMoveResult> result = move.performMove(List.of(vrA, vrB));
 
@@ -245,15 +249,17 @@ class TSPInsertionMoveTest {
     Random rng = new CustomRandom(new int[] {1, 0}, new boolean[] {true});
     TSPMove move = new TSPInsertionMove(rng, re);
 
-    Order orderA = new Order(1, new Point2D(1.0, 1.0));
-    Order orderB = new Order(2, new Point2D(2.0, 2.0));
-    Order orderC = new Order(3, new Point2D(3.0, 3.0));
-    Order orderD = new Order(4, new Point2D(4.0, 4.0));
-    Order orderE = new Order(5, new Point2D(5.0, 5.0));
-    Order orderF = new Order(6, new Point2D(6.0, 6.0));
+    Order orderA = new Order(1, new Point2D(1.0, 1.0), null);
+    Order orderB = new Order(2, new Point2D(2.0, 2.0), null);
+    Order orderC = new Order(3, new Point2D(3.0, 3.0), null);
+    Order orderD = new Order(4, new Point2D(4.0, 4.0), null);
+    Order orderE = new Order(5, new Point2D(5.0, 5.0), null);
+    Order orderF = new Order(6, new Point2D(6.0, 6.0), null);
 
-    VehicleRoute vrA = new VehicleRoute(1, new Point2D(1.0, 1.0), List.of(orderA, orderB, orderC));
-    VehicleRoute vrB = new VehicleRoute(2, new Point2D(2.0, 2.0), List.of(orderD, orderE, orderF));
+    VehicleRoute vrA =
+        new VehicleRoute(1, new Point2D(1.0, 1.0), List.of(orderA, orderB, orderC), 0.0);
+    VehicleRoute vrB =
+        new VehicleRoute(2, new Point2D(2.0, 2.0), List.of(orderD, orderE, orderF), 0.0);
 
     Optional<TSPMoveResult> result = move.performMove(List.of(vrA, vrB));
 
@@ -276,15 +282,17 @@ class TSPInsertionMoveTest {
     Random rng = new CustomRandom(new int[] {1, 3}, new boolean[] {false});
     TSPMove move = new TSPInsertionMove(rng, re);
 
-    Order orderA = new Order(1, new Point2D(1.0, 1.0));
-    Order orderB = new Order(2, new Point2D(2.0, 2.0));
-    Order orderC = new Order(3, new Point2D(3.0, 3.0));
-    Order orderD = new Order(4, new Point2D(4.0, 4.0));
-    Order orderE = new Order(5, new Point2D(5.0, 5.0));
-    Order orderF = new Order(6, new Point2D(6.0, 6.0));
+    Order orderA = new Order(1, new Point2D(1.0, 1.0), null);
+    Order orderB = new Order(2, new Point2D(2.0, 2.0), null);
+    Order orderC = new Order(3, new Point2D(3.0, 3.0), null);
+    Order orderD = new Order(4, new Point2D(4.0, 4.0), null);
+    Order orderE = new Order(5, new Point2D(5.0, 5.0), null);
+    Order orderF = new Order(6, new Point2D(6.0, 6.0), null);
 
-    VehicleRoute vrA = new VehicleRoute(1, new Point2D(1.0, 1.0), List.of(orderA, orderB, orderC));
-    VehicleRoute vrB = new VehicleRoute(2, new Point2D(2.0, 2.0), List.of(orderD, orderE, orderF));
+    VehicleRoute vrA =
+        new VehicleRoute(1, new Point2D(1.0, 1.0), List.of(orderA, orderB, orderC), 0.0);
+    VehicleRoute vrB =
+        new VehicleRoute(2, new Point2D(2.0, 2.0), List.of(orderD, orderE, orderF), 0.0);
 
     Optional<TSPMoveResult> result = move.performMove(List.of(vrA, vrB));
 
@@ -307,15 +315,17 @@ class TSPInsertionMoveTest {
     Random rng = new CustomRandom(new int[] {1, 0}, new boolean[] {false});
     TSPMove move = new TSPInsertionMove(rng, re);
 
-    Order orderA = new Order(1, new Point2D(1.0, 1.0));
-    Order orderB = new Order(2, new Point2D(2.0, 2.0));
-    Order orderC = new Order(3, new Point2D(3.0, 3.0));
-    Order orderD = new Order(4, new Point2D(4.0, 4.0));
-    Order orderE = new Order(5, new Point2D(5.0, 5.0));
-    Order orderF = new Order(6, new Point2D(6.0, 6.0));
+    Order orderA = new Order(1, new Point2D(1.0, 1.0), null);
+    Order orderB = new Order(2, new Point2D(2.0, 2.0), null);
+    Order orderC = new Order(3, new Point2D(3.0, 3.0), null);
+    Order orderD = new Order(4, new Point2D(4.0, 4.0), null);
+    Order orderE = new Order(5, new Point2D(5.0, 5.0), null);
+    Order orderF = new Order(6, new Point2D(6.0, 6.0), null);
 
-    VehicleRoute vrA = new VehicleRoute(1, new Point2D(1.0, 1.0), List.of(orderA, orderB, orderC));
-    VehicleRoute vrB = new VehicleRoute(2, new Point2D(2.0, 2.0), List.of(orderD, orderE, orderF));
+    VehicleRoute vrA =
+        new VehicleRoute(1, new Point2D(1.0, 1.0), List.of(orderA, orderB, orderC), 0.0);
+    VehicleRoute vrB =
+        new VehicleRoute(2, new Point2D(2.0, 2.0), List.of(orderD, orderE, orderF), 0.0);
 
     Optional<TSPMoveResult> result = move.performMove(List.of(vrA, vrB));
 

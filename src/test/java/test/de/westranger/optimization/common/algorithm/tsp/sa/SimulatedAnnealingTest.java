@@ -35,7 +35,7 @@ public class SimulatedAnnealingTest {
     List<Order> orders = new LinkedList<>(problem.getOrders());
     Collections.shuffle(orders, rng);
 
-    final VehicleRoute vr = new VehicleRoute(1, problem.getVehicleStartPositions().get(1), orders);
+    final VehicleRoute vr = new VehicleRoute(1, problem.getVehicleStartPositions().get(1), orders,0.0);
     final RouteEvaluator re = new RouteEvaluator();
 
     State initialState =
@@ -66,7 +66,7 @@ public class SimulatedAnnealingTest {
 
     Collections.shuffle(orders, rng);
 
-    final VehicleRoute vr = new VehicleRoute(1, problem.getVehicleStartPositions().get(1), orders);
+    final VehicleRoute vr = new VehicleRoute(1, problem.getVehicleStartPositions().get(1), orders,0.0);
     final RouteEvaluator re = new RouteEvaluator();
 
     State initialState =
