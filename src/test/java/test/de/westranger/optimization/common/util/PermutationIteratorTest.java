@@ -1,7 +1,9 @@
 package test.de.westranger.optimization.common.util;
 
+import com.google.gson.Gson;
 import de.westranger.geometry.common.simple.Point2D;
 import de.westranger.optimization.common.algorithm.tsp.common.Order;
+import de.westranger.optimization.common.algorithm.tsp.common.ProblemFormulation;
 import de.westranger.optimization.common.util.PermutationIterator;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -10,9 +12,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
+import java.util.TreeMap;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -110,6 +115,64 @@ public class PermutationIteratorTest {
 
   @Test
   void testConstructTSPProblem() {
+
+    Point2D start = new Point2D(0.0, 0.0);
+    Point2D end = new Point2D(0.0, 12.0);
+
+    int[] priorities = new int[] {1, 1, 2, 2, 3, 3, 4, 4, 5, 5};
+
+    Order o1 = new Order(10, new Point2D(2, 1), null);
+    Order o2 = new Order(1, new Point2D(0, 2), null);
+
+    Order o3 = new Order(2, new Point2D(-2, 3), null);
+    Order o4 = new Order(3, new Point2D(0, 4), null);
+
+    Order o5 = new Order(4, new Point2D(2, 5), null);
+    Order o6 = new Order(5, new Point2D(0, 6), null);
+
+    Order o7 = new Order(6, new Point2D(-2, 7), null);
+    Order o8 = new Order(7, new Point2D(0, 8), null);
+
+    Order o9 = new Order(8, new Point2D(2, 9), null);
+    Order o10 = new Order(9, new Point2D(0, 10), null);
+
+
+    List<Order> candidates =
+        List.of(o2, o1, o4, o3, o6, o5, o8, o7, o10, o9);
+    extracted(start, end, candidates, priorities);
+
+
+
+    /*
+
+    for (int x1 = -3; x1 <= 3; x1++) {
+      Order o2 = new Order(2, new Point2D(x1, 2), null);
+      for (int x2 = -3; x2 <= 3; x2++) {
+        Order o4 = new Order(4, new Point2D(x2, 4), null);
+        for (int x3 = -3; x3 <= 3; x3++) {
+          Order o6 = new Order(6, new Point2D(x3, 6), null);
+          for (int x4 = -3; x4 <= 3; x4++) {
+            Order o8 = new Order(8, new Point2D(x4, 8), null);
+            for (int x5 = -3; x5 <= 3; x5++) {
+              Order o10 = new Order(10, new Point2D(x5, 10), null);
+
+              Order o3 = new Order(3, new Point2D(0, 3), null);
+              Order o5 = new Order(5, new Point2D(0, 5), null);
+              Order o7 = new Order(7, new Point2D(0, 7), null);
+              Order o9 = new Order(9, new Point2D(0, 9), null);
+
+              List<Order> candidates =
+                  List.of(o2, o3, o4, o5, o6, o7, o8, o9);
+              extracted(start, end, candidates, priorities);
+            }
+          }
+        }
+      }
+    }
+*/
+
+
+    /*
     int idCnt = 1;
     List<Order> elements = new ArrayList<>();
     for (int x = -3; x <= 3; x++) {
@@ -148,12 +211,36 @@ public class PermutationIteratorTest {
       }
     }
 
+*/
+
   }
 
   private ProblemFinderScore masterScore = new ProblemFinderScore(0.0, 0.0, 0.0, null);
   private int fileCnt = 0;
 
   private void extracted(Point2D start, Point2D end, List<Order> candidates, int[] priorities) {
+   /* boolean accept =
+        acceptSolution(start, start, candidates.get(0).getTo(), candidates.get(1).getTo(),
+            candidates.get(2).getTo());
+
+    if (!accept) {
+      return;
+    }
+
+    //System.out.println("pass 0");
+    for (int i = 0; i < candidates.size() - 3; i += 1) {
+      accept =
+          acceptSolution(start, candidates.get(0).getTo(), candidates.get(1).getTo(),
+              candidates.get(2).getTo(), candidates.get(3).getTo());
+
+      if (!accept) {
+        return;
+      }
+      //System.out.println("pass " + (i - 1));
+    }*/
+
+    //System.out.println("GOT ONE");
+
     // compute shortest path
     List<Order> shortestPath = computeShortestPath(start, end, candidates);
 
@@ -204,49 +291,49 @@ public class PermutationIteratorTest {
     final List<Order> greedyDueSolution = findGreedyDueDateSolution(newOrders);
     ProblemFinderScore greedyDueScore = computeScore(start, end, greedyDueSolution, priorities);
 
-    if (optimalScore.compareTo(greedyDueScore) > 0 &&
-        optimalScore.compareTo(greedyPathScore) > 0 &&
-        optimalScore.compareTo(greedyPriorityScore) > 0) {
-      //System.out.println("found one ");
+//    if (optimalScore.compareTo(greedyDueScore) > 0 &&
+    //   optimalScore.compareTo(greedyPathScore) > 0 &&
+    //   optimalScore.compareTo(greedyPriorityScore) > 0) {
+    //System.out.println("found one ");
 
-      double diffPath = greedyPathScore.getPathScore() - optimalScore.getPathScore() +
-          greedyDueScore.getPathScore() - optimalScore.getPathScore() /*+
+    double diffPath = greedyPathScore.getPathScore() - optimalScore.getPathScore() +
+        greedyDueScore.getPathScore() - optimalScore.getPathScore() /*+
           greedyPriorityScore.getPathScore() - optimalScore.getPathScore()*/;
-      diffPath /= 2.0;
+    diffPath /= 2.0;
 
-      double diffPrio = greedyDueScore.getPriorityScore() - optimalScore.getPriorityScore() +
-          greedyPathScore.getPriorityScore() - optimalScore.getPriorityScore() +
-          greedyPriorityScore.getPriorityScore() - optimalScore.getPriorityScore();
-      diffPrio = 0.0;
+    double diffPrio = greedyDueScore.getPriorityScore() - optimalScore.getPriorityScore() +
+        greedyPathScore.getPriorityScore() - optimalScore.getPriorityScore() +
+        greedyPriorityScore.getPriorityScore() - optimalScore.getPriorityScore();
+    diffPrio = 0.0;
 
-      double diffDueDate = /*greedyDueScore.getDueDateScore() - optimalScore.getDueDateScore()*/ +
-          greedyPathScore.getDueDateScore() - optimalScore.getDueDateScore()/* +
+    double diffDueDate = /*greedyDueScore.getDueDateScore() - optimalScore.getDueDateScore()*/ +
+        greedyPathScore.getDueDateScore() - optimalScore.getDueDateScore()/* +
           greedyPriorityScore.getDueDateScore() - optimalScore.getDueDateScore()*/;
-      diffDueDate /= 2.0;
+    diffDueDate /= 2.0;
 
 
-      ProblemFinderScore tmp =
-          new ProblemFinderScore(diffPath, diffPrio, diffDueDate, optimalScore.getOrders());
+    ProblemFinderScore tmp =
+        new ProblemFinderScore(diffPath, diffPrio, diffDueDate, optimalScore.getOrders());
 
-      if (tmp.compareTo(masterScore) < 0) {
-        masterScore = tmp;
-        System.out.println(
-            "found one " + optimalScore.getOrders() + " " + diffPath + " " + diffPrio + " " + " " +
-                diffDueDate);
+    //if (tmp.compareTo(masterScore) < 0) {
+    masterScore = tmp;
+    System.out.println(
+        "found one " + optimalScore.getOrders() + " " + diffPath + " " + diffPrio + " " + " " +
+            diffDueDate);
 
-        String svgContent = SvgPlotter.plotProblemFinderScores(
-            new ProblemFinderScore[] {optimalScore, greedyPathScore, greedyPriorityScore,
-                greedyDueScore}, start, end);
+    String svgContent = SvgPlotter.plotProblemFinderScores(
+        new ProblemFinderScore[] {optimalScore, greedyPathScore, greedyPriorityScore,
+            greedyDueScore}, start, end);
 
-        try (BufferedWriter writer = new BufferedWriter(
-            new FileWriter("./img_" + (fileCnt++) + ".svg"))) {
-          writer.write(svgContent);
-        } catch (IOException e) {
-          throw new RuntimeException(e);
-        }
-
-      }
+    try (BufferedWriter writer = new BufferedWriter(
+        new FileWriter("./img_" + (fileCnt++) + ".svg"))) {
+      writer.write(svgContent);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
+
+    //}
+    //}
   }
 
 
@@ -393,33 +480,181 @@ public class PermutationIteratorTest {
           diff = problemFinderScore.getPathScore() - this.pathScore;
           if (Math.abs(diff) <= 1e-6) {
             return 0;
-          } else if (diff < 0) {
+          } else if (this.pathScore < problemFinderScore.getPathScore()) {
             return -1;
           }
-        } else if (diff < 0) {
+        } else if (this.priorityScore < problemFinderScore.getPriorityScore()) {
           return -1;
         }
-      } else if (diff < 0) {
+      } else if (this.dueDateScore < problemFinderScore.getDueDateScore()) {
         return -1;
       }
       return 1;
     }
   }
 
+
+  public boolean acceptSolution(Point2D pOrigin, Point2D p0, Point2D p1, Point2D p2, Point2D p3) {
+    final double distA = p0.distance(p2);
+    final double distB = p0.distance(p1);
+    final double distC = p1.distance(p2);
+    final double distD = p2.distance(p3);
+    final double distE = p1.distance(p3);
+    final double distF = pOrigin.distance(p3);
+
+    return distC < distE && distE > distD && distA + distC + distC > distB + distC &&
+        distA > distB && distF > distA;
+  }
+
+  // ###############################################################################################
+  // ###############################################################################################
+  // ###############################################################################################
+  // ###############################################################################################
+  // ###############################################################################################
+
+
+  @Test
+
+  void testConstructTSPProblemList() {
+    for (boolean usePriorities : new boolean[] {true, false}) {
+      for (boolean useDueDates : new boolean[] {true, false}) {
+        for (boolean emptyVehicles : new boolean[] {true, false}) {
+          for (int numVehicles : new int[] {1, 3, 5, 10, 15, 25, 50}) {
+            for (int orderPerVehicle : new int[] {3, 5, 7, 11, 13}) {
+              final StringBuilder sb = new StringBuilder();
+              sb.append("vrp_problem_");
+              sb.append(numVehicles);
+              sb.append('_');
+              sb.append(numVehicles * orderPerVehicle);
+              sb.append('_');
+
+              if (usePriorities) {
+                sb.append('P');
+              }
+              if (useDueDates) {
+                sb.append('D');
+              }
+              if (emptyVehicles) {
+                sb.append('E');
+              }
+              sb.append(".json");
+
+              generateSolution(usePriorities, useDueDates, emptyVehicles, orderPerVehicle, numVehicles, sb.toString());
+            }
+          }
+        }
+      }
+    }
+  }
+
+  private void generateSolution(final boolean usePriorities, final boolean useDueDates,
+                                final boolean emptyVehicles, final int orderPerVehicle,
+                                final int numVehicles, final String fileName) {
+    int xStep = 2 + 2 + 3;
+    double xBase = 0;
+    double yBase = 2;
+    double yDeltaPerVehicle = 0.1;
+
+    int oderIdCounter = 1;
+
+    Map<Integer, Point2D> vehicleStartPositions = new TreeMap<>();
+    final Map<Integer, List<Order>> finalOrderMapping = new TreeMap<>();
+    List<Order> orderAll = new LinkedList<>();
+
+    double score = 0.0;
+
+    for (int i = 0; i < numVehicles; i++) {
+      // compute coordinates
+      Point2D start = new Point2D(xBase, 0.0);
+
+      List<Point2D> points = new ArrayList<>(orderPerVehicle);
+      long[] dueTimes = new long[orderPerVehicle];
+      int[] priorities = new int[orderPerVehicle];
+
+      if (emptyVehicles && i % 2 != 1) {
+        boolean toggle = false;
+        for (int y = 0; y < orderPerVehicle; y++) {
+          double xValue;
+          double yValue;
+          if (y % 2 == 0) {
+            yValue = y + yBase + (i * yDeltaPerVehicle);
+            if (!toggle) {
+              xValue = xBase - 2;
+            } else {
+              xValue = xBase + 2;
+            }
+            toggle = !toggle;
+          } else {
+            yValue = y + yBase + (i * yDeltaPerVehicle);
+            xValue = xBase;
+          }
+          points.add(new Point2D(xValue, yValue));
+        }
+
+        // create priorities
+        if (usePriorities) {
+          int prio = 0;
+          for (int j = 0; j < priorities.length; j++) {
+            if (j % 2 == 0) {
+              prio++;
+            }
+            priorities[j] = prio;
+          }
+        }
+
+        // compute due times
+
+          double travelTime = start.distance(points.get(0));
+          score += start.distance(points.get(0));
+          for (int j = 1; j < points.size(); j++) {
+            travelTime += points.get(j).distance(points.get(j - 1));
+            score += points.get(j).distance(points.get(j - 1));
+            if (useDueDates && j % 2 == 1) {
+              dueTimes[j] = (long) (travelTime * 1000);
+              dueTimes[j - 1] = dueTimes[j] + 1;
+            }
+          }
+        if (useDueDates && dueTimes.length < points.size()) {
+          dueTimes[dueTimes.length-1] = (long) travelTime;
+        }
+      }
+
+      vehicleStartPositions.put(i + 1, start);
+
+      List<Order> order = new LinkedList<>();
+      for (int j = 0; j < points.size(); j++) {
+        final Order ord =
+            new Order(oderIdCounter++, points.get(j), points.get(j), priorities[j], 0, dueTimes[j]);
+        order.add(ord);
+      }
+      finalOrderMapping.put(i + 1, order);
+      orderAll.addAll(order);
+
+      // generate Problem formulation
+
+
+      // make point 2D Pist
+      if (emptyVehicles) {
+        xBase += xStep;
+      } else {
+        xBase += 2 * xStep;
+      }
+    }
+
+    Random rng = new Random(47110815L);
+
+    Collections.shuffle(orderAll, rng);
+    ProblemFormulation pf =
+        new ProblemFormulation(orderAll, vehicleStartPositions, finalOrderMapping, score);
+
+    Gson gson = new Gson();
+
+    try (FileWriter writer = new FileWriter(fileName)) {
+      writer.write(gson.toJson(pf));
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
+  }
+
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

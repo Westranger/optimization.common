@@ -97,13 +97,23 @@ public final class TSPNeighbourSelector implements NeighbourSelector {
       finalResult = moveSRRResult;
     }
 
-    if (finalResult.isEmpty()) {
-      throw new IllegalStateException("none of the moves came up with an result");
+    // TODO es kann passieren das zwei fahrzeuge selectiert werden die beide keine order haben, dann wäre das hier ein noop aber vielleicht kann man das so schrieben das immer ein Fahrzeug mit order gezogen wird
+    //if (finalResult.isEmpty()) {
+    //  throw new IllegalStateException("none of the moves came up with an result");
+    //}
+
+    if (finalResult.isPresent()) {
+      for (VehicleRoute vr : finalResult.get().vehicles()) {
+        newMapping.put(vr.id(), vr);
+      }
+    } else {
+      // TODO der brnach hier ist auch nur um den case zu handeln 2 leer fahreuge
+      for (Map.Entry<Integer, VehicleRoute> entry : state.getOrderMapping()
+          .entrySet()) {
+        newMapping.put(entry.getKey(), entry.getValue());
+      }
     }
 
-    for (VehicleRoute vr : finalResult.get().vehicles()) {
-      newMapping.put(vr.id(), vr);
-    }
 
     for (Map.Entry<Integer, VehicleRoute> entry : state.getOrderMapping().entrySet()) {
       if (!newMapping.containsKey(entry.getKey())) {

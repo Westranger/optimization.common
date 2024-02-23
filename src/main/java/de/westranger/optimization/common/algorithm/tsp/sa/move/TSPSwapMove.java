@@ -56,7 +56,7 @@ public final class TSPSwapMove extends TSPMove {
       final int removeIdxA = this.rng.nextInt(vrA.route().size());
       final Order orderA = lstA.remove(removeIdxA);
 
-      final int removeIdxB = this.rng.nextInt(vrA.route().size());
+      final int removeIdxB = this.rng.nextInt(vrB.route().size());
       final Order orderB = lstB.remove(removeIdxB);
 
       lstA.add(removeIdxA, orderB);

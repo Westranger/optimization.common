@@ -119,6 +119,8 @@ class TSPSwapMoveTest {
     Assertions.assertEquals(2, result.get().vehicles().get(0).route().get(0).getId());
   }
 
+  // TODO test case schreiben bei dem die listen verschiedene längen haben, es ist aufgefallen das dies zu einem index out of bounds exception geführt hat
+
   @Test
   public void test2Vehicle6Orders() {
     RouteEvaluator re = new RouteEvaluator();
