@@ -8,7 +8,7 @@ public final class RouteEvaluator {
   private final boolean roundtrip;
 
   public RouteEvaluator() {
-    this(true);
+    this(false); // TODO auslagern in variable !!!
   }
 
   public RouteEvaluator(final boolean roundtrip) {

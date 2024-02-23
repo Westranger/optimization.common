@@ -1,6 +1,7 @@
 package test.de.westranger.optimization.common.algorithm.tools;
 
 import com.google.gson.Gson;
+import de.westranger.geometry.common.simple.Point2D;
 import de.westranger.optimization.common.algorithm.action.planning.SearchSpaceState;
 import de.westranger.optimization.common.algorithm.action.planning.solver.stochastic.SimulatedAnnealing;
 import de.westranger.optimization.common.algorithm.action.planning.solver.stochastic.SimulatedAnnealingParameter;
@@ -17,13 +18,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.TreeMap;
 import org.junit.jupiter.api.Assertions;
 import test.de.westranger.optimization.common.algorithm.tsp.sa.SimulatedAnnealingTest;
 
 public class Benchmark {
   public static void main(String[] args) {
     final InputStreamReader reader = new InputStreamReader(
-        SimulatedAnnealingTest.class.getResourceAsStream("/tsp/1_vehicle_194_orders.json"));
+        SimulatedAnnealingTest.class.getResourceAsStream("/tsp/vrp_problem_3_39_PDE.json"));
     final Gson gson = new Gson();
     final ProblemFormulation problem = gson.fromJson(reader, ProblemFormulation.class);
 
@@ -32,12 +34,23 @@ public class Benchmark {
     List<Order> orders = new LinkedList<>(problem.getOrders());
     Collections.shuffle(orders, rng);
 
-    final VehicleRoute vr =
-        new VehicleRoute(1, problem.getVehicleStartPositions().get(1), orders, 0.0);
-    final RouteEvaluator re = new RouteEvaluator();
+    Map<Integer, VehicleRoute> orderMapping = new TreeMap<>();
 
+    for (Map.Entry<Integer, Point2D> entry : problem.getVehicleStartPositions()
+        .entrySet()) {
+      if (entry.getKey() == 1) {
+        final VehicleRoute vr = new VehicleRoute(entry.getKey(), entry.getValue(), orders, 0.0);
+        orderMapping.put(entry.getKey(), vr);
+      } else {
+        final VehicleRoute vr =
+            new VehicleRoute(entry.getKey(), entry.getValue(), new ArrayList<>(), 0.0);
+        orderMapping.put(entry.getKey(), vr);
+      }
+    }
+
+    final RouteEvaluator re = new RouteEvaluator();
     State initialState =
-        new State(new ArrayList<>(), Map.of(vr.id(), vr), re);
+        new State(new ArrayList<>(), orderMapping, re);
     SimulatedAnnealingParameter sap =
         new SimulatedAnnealingParameter(0, 1.0, 0.96, 250000, 100, 0.9);
 
