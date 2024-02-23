@@ -7,24 +7,18 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public final class QuadTreeNode {
+public final class QuadTreeNode<T extends Point2D> {
 
   private final Point2D center;
   private final double quadrantLength;
 
-  private QuadTreeNode parent;
-  private QuadTreeNode[] children;
-  private List<Point2D> points;
+  private QuadTreeNode<T>[] children;
+  private List<T> points;
 
   private final boolean isLeaf;
 
-  public QuadTreeNode(final Point2D center, final double cellSideLength, final boolean isLeaf) {
-    this(null, center, cellSideLength, isLeaf);
-  }
-
-  public QuadTreeNode(final QuadTreeNode parent, final Point2D center, final double cellSideLength,
+  public QuadTreeNode(final Point2D center, final double cellSideLength,
                       final boolean isLeaf) {
-    this.parent = parent;
     this.center = center;
     this.quadrantLength = cellSideLength * 0.5;
     this.children = null;
@@ -32,14 +26,14 @@ public final class QuadTreeNode {
     this.isLeaf = isLeaf;
   }
 
-  public void addPoint(final Point2D pt) {
+  public void addPoint(final T pt) {
     if (points == null) {
       this.points = new ArrayList<>(1);
     }
     this.points.add(pt);
   }
 
-  public QuadTreeNode createChild(final QuadTreeChildPosition qtcp, final boolean isLeaf) {
+  public QuadTreeNode<T> createChild(final QuadTreeChildPosition qtcp, final boolean isLeaf) {
     if (this.children == null) {
       this.children = new QuadTreeNode[4];
     }
@@ -49,28 +43,28 @@ public final class QuadTreeNode {
         final double x = this.center.getX() + this.quadrantLength * 0.5;
         final double y = this.center.getY() + this.quadrantLength * 0.5;
         this.children[qtcp.getValue()] =
-            new QuadTreeNode(this, new Point2D(x, y), this.quadrantLength, isLeaf);
+            new QuadTreeNode(new Point2D(x, y), this.quadrantLength, isLeaf);
       } else if (qtcp == QuadTreeChildPosition.CHILD_LOWER_RIGHT) {
         final double x = this.center.getX() + this.quadrantLength * 0.5;
         final double y = this.center.getY() - this.quadrantLength * 0.5;
         this.children[qtcp.getValue()] =
-            new QuadTreeNode(this, new Point2D(x, y), this.quadrantLength, isLeaf);
+            new QuadTreeNode(new Point2D(x, y), this.quadrantLength, isLeaf);
       } else if (qtcp == QuadTreeChildPosition.CHILD_UPPER_LEFT) {
         final double x = this.center.getX() - this.quadrantLength * 0.5;
         final double y = this.center.getY() + this.quadrantLength * 0.5;
         this.children[qtcp.getValue()] =
-            new QuadTreeNode(this, new Point2D(x, y), this.quadrantLength, isLeaf);
+            new QuadTreeNode(new Point2D(x, y), this.quadrantLength, isLeaf);
       } else if (qtcp == QuadTreeChildPosition.CHILD_LOWER_LEFT) {
         final double x = this.center.getX() - this.quadrantLength * 0.5;
         final double y = this.center.getY() - this.quadrantLength * 0.5;
         this.children[qtcp.getValue()] =
-            new QuadTreeNode(this, new Point2D(x, y), this.quadrantLength, isLeaf);
+            new QuadTreeNode(new Point2D(x, y), this.quadrantLength, isLeaf);
       }
     }
     return this.children[qtcp.getValue()];
   }
 
-  public boolean setChild(final QuadTreeNode qtn, final QuadTreeChildPosition qtcp) {
+  public boolean setChild(final QuadTreeNode<T> qtn, final QuadTreeChildPosition qtcp) {
     if (this.children == null) {
       this.children = new QuadTreeNode[4];
     }
@@ -98,7 +92,7 @@ public final class QuadTreeNode {
     return Optional.empty();
   }
 
-  public Optional<QuadTreeNode> getChild(final QuadTreeChildPosition qtcp) {
+  public Optional<QuadTreeNode<T>> getChild(final QuadTreeChildPosition qtcp) {
     if (this.children == null) {
       return Optional.empty();
     }
@@ -108,18 +102,10 @@ public final class QuadTreeNode {
     return Optional.empty();
   }
 
-  public Optional<QuadTreeNode> getParent() {
-    return Optional.of(this.parent);
-  }
-
-  public void setParent(final QuadTreeNode parent) {
-    this.parent = parent;
-  }
-
   public BoundingBox getBoundingBox() {
-    final Point2D min = new Point2D(this.center.getY() - this.quadrantLength,
+    final Point2D min = new Point2D(this.center.getX() - this.quadrantLength,
         this.center.getY() - this.quadrantLength);
-    final Point2D max = new Point2D(this.center.getY() + this.quadrantLength,
+    final Point2D max = new Point2D(this.center.getX() + this.quadrantLength,
         this.center.getY() + this.quadrantLength);
     return new BoundingBox(min, max);
   }
@@ -132,34 +118,7 @@ public final class QuadTreeNode {
     return this.center;
   }
 
-  @Override
-  public String toString() {
-    final StringBuilder sb = new StringBuilder();
-    sb.append("QTN(center=");
-    sb.append(this.center);
-    sb.append(" sl=");
-    sb.append(this.quadrantLength * 2.0);
-    sb.append(' ');
-    if (this.children != null) {
-      if (this.children[QuadTreeChildPosition.CHILD_UPPER_RIGHT.getValue()] != null) {
-        sb.append("ur ");
-      }
-      if (this.children[QuadTreeChildPosition.CHILD_LOWER_RIGHT.getValue()] != null) {
-        sb.append("lr ");
-      }
-      if (this.children[QuadTreeChildPosition.CHILD_UPPER_LEFT.getValue()] != null) {
-        sb.append("ul ");
-      }
-      if (this.children[QuadTreeChildPosition.CHILD_LOWER_LEFT.getValue()] != null) {
-        sb.append("ll ");
-      }
-    }
-    sb.delete(sb.length() - 1, sb.length());
-    sb.append(')');
-    return sb.toString();
-  }
-
-  public Optional<List<Point2D>> getPoints() {
+  public Optional<List<T>> getPoints() {
     if (points == null) {
       return Optional.empty();
     }

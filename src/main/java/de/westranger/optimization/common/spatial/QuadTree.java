@@ -2,19 +2,18 @@ package de.westranger.optimization.common.spatial;
 
 import de.westranger.geometry.common.math.Vector2D;
 import de.westranger.geometry.common.simple.BoundingBox;
-import de.westranger.geometry.common.simple.Circle;
 import de.westranger.geometry.common.simple.Point2D;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public final class QuadTree {
+public final class QuadTree<T extends Point2D> {
 
-  private QuadTreeNode root;
+  private QuadTreeNode<T> root;
   private final double smallestCellSideLength;
 
-  public QuadTree(final double smallestCellSideLength, final Point2D firstPt) {
+  public QuadTree(final double smallestCellSideLength, final T firstPt) {
     this.smallestCellSideLength = smallestCellSideLength;
 
     this.root =
@@ -22,25 +21,21 @@ public final class QuadTree {
     this.root.addPoint(firstPt);
   }
 
-  public void add(final Point2D pt) {
+  public void add(final T pt) {
     if (this.root.isInside(pt).isEmpty()) {
       // we need to calculate the extend and in which direction we need to extend the tree
       extendTreeUpwards(pt);
     }
     // lets add and also create new children if no children are present
 
-    QuadTreeNode current = this.root;
+    QuadTreeNode<T> current = this.root;
     BoundingBox bb = this.root.getBoundingBox();
     double sideLength = bb.getMax().getX() - bb.getMin().getX();
 
     while (!current.isLeaf()) {
       final Optional<QuadTreeChildPosition> inside = current.isInside(pt);
-      if (inside.isEmpty()) {
-        throw new IllegalStateException("something went wrong");
-      }
-
       final QuadTreeChildPosition qtcp = inside.get();
-      final Optional<QuadTreeNode> child = current.getChild(qtcp);
+      final Optional<QuadTreeNode<T>> child = current.getChild(qtcp);
 
       if (child.isPresent()) {
         current = child.get();
@@ -87,32 +82,28 @@ public final class QuadTree {
         final double newX = this.root.getCenter().getX() - initialSideLength * 0.5;
         final double newY = this.root.getCenter().getY() - initialSideLength * 0.5;
         final Point2D newCenter = new Point2D(newX, newY);
-        QuadTreeNode newRoot = new QuadTreeNode(newCenter, initialSideLength * 2.0, false);
-        this.root.setParent(newRoot);
+        QuadTreeNode<T> newRoot = new QuadTreeNode(newCenter, initialSideLength * 2.0, false);
         newRoot.setChild(this.root, qtcp);
         this.root = newRoot;
       } else if (qtcp == QuadTreeChildPosition.CHILD_LOWER_RIGHT) {
         final double newX = this.root.getCenter().getX() - initialSideLength * 0.5;
         final double newY = this.root.getCenter().getY() + initialSideLength * 0.5;
         final Point2D newCenter = new Point2D(newX, newY);
-        QuadTreeNode newRoot = new QuadTreeNode(newCenter, initialSideLength * 2.0, false);
-        this.root.setParent(newRoot);
+        QuadTreeNode<T> newRoot = new QuadTreeNode(newCenter, initialSideLength * 2.0, false);
         newRoot.setChild(this.root, qtcp);
         this.root = newRoot;
       } else if (qtcp == QuadTreeChildPosition.CHILD_UPPER_LEFT) {
         final double newX = this.root.getCenter().getX() + initialSideLength * 0.5;
         final double newY = this.root.getCenter().getY() - initialSideLength * 0.5;
         final Point2D newCenter = new Point2D(newX, newY);
-        QuadTreeNode newRoot = new QuadTreeNode(newCenter, initialSideLength * 2.0, false);
-        this.root.setParent(newRoot);
+        QuadTreeNode<T> newRoot = new QuadTreeNode(newCenter, initialSideLength * 2.0, false);
         newRoot.setChild(this.root, qtcp);
         this.root = newRoot;
-      } else if (qtcp == QuadTreeChildPosition.CHILD_LOWER_LEFT) {
+      } else {
         final double newX = this.root.getCenter().getX() + initialSideLength * 0.5;
         final double newY = this.root.getCenter().getY() + initialSideLength * 0.5;
         final Point2D newCenter = new Point2D(newX, newY);
-        QuadTreeNode newRoot = new QuadTreeNode(newCenter, initialSideLength * 2.0, false);
-        this.root.setParent(newRoot);
+        QuadTreeNode<T> newRoot = new QuadTreeNode(newCenter, initialSideLength * 2.0, false);
         newRoot.setChild(this.root, qtcp);
         this.root = newRoot;
       }
@@ -120,83 +111,75 @@ public final class QuadTree {
     }
   }
 
-  public QuadTreeNode getRoot() {
+  public QuadTreeNode<T> getRoot() {
     return this.root;
   }
 
-  public Optional<List<Point2D>> getPointsInArea(final Point2D referencePoint,
-                                                 final double distance) {
-    final Circle circ = new Circle(referencePoint, distance);
-    final BoundingBox bb = circ.getBoundingBox();
+  public Optional<List<T>> getPointsInArea(final BoundingBox area) {
 
-    if (!intersectsOrInsideOrTouches(root.getBoundingBox(), bb)) {
+    if (!intersectsOrInsideOrTouches(root.getBoundingBox(), area)) {
       return Optional.empty();
     }
 
-    final Optional<List<Point2D>> points = findPoints(this.root, bb);
+    final Optional<List<T>> points = findPoints(this.root, area);
     if (points.isPresent()) {
-      List<Point2D> result = points.get();
-      List<Point2D> tmp = new ArrayList<>();
+      List<T> result = points.get();
+      List<T> tmp = new ArrayList<>();
+      // TODO hier den speicherverbrauch verbessern, alle elemente einfach aus der liste entfernen
+      // (rückwärts durchgehen und dann entfernen)
 
-      for (Point2D pt : result) {
-        final Vector2D diffMax = pt.diff(bb.getMax());
-        final Vector2D diffMin = bb.getMin().diff(pt);
+      for (T pt : result) {
+        final Vector2D diffMax = pt.diff(area.getMax());
+        final Vector2D diffMin = area.getMin().diff(pt);
 
-        if (diffMax.getX() >= 0 && diffMax.getY() >= 0 && diffMin.getX() >= 0 &&
-            diffMin.getY() >= 0) {
+        if (diffMax.getX() >= 0 && diffMax.getY() >= 0 && diffMin.getX() >= 0
+            && diffMin.getY() >= 0) {
           tmp.add(pt);
         }
       }
 
-      result = tmp;
-      tmp = new ArrayList<>();
-      for (Point2D pt : result) {
-        double dist = referencePoint.distance(pt);
-        if (dist <= distance) {
-          tmp.add(pt);
-        }
+      if (tmp.isEmpty()) {
+        return Optional.empty();
       }
+
       return Optional.of(Collections.unmodifiableList(tmp));
     }
     return Optional.empty();
   }
 
-  private Optional<List<Point2D>> findPoints(QuadTreeNode node, BoundingBox bb) {
+  private Optional<List<T>> findPoints(QuadTreeNode<T> node, BoundingBox bb) {
     if (intersectsOrInsideOrTouches(node.getBoundingBox(), bb)) {
       if (node.isLeaf()) {
         return node.getPoints();
       } else {
-        final List<Point2D> result = new ArrayList<>();
+        final List<T> result = new ArrayList<>();
         collectPoints(node, bb, result, QuadTreeChildPosition.CHILD_UPPER_RIGHT);
         collectPoints(node, bb, result, QuadTreeChildPosition.CHILD_LOWER_RIGHT);
         collectPoints(node, bb, result, QuadTreeChildPosition.CHILD_UPPER_LEFT);
         collectPoints(node, bb, result, QuadTreeChildPosition.CHILD_LOWER_LEFT);
+
+        if (result.isEmpty()) {
+          return Optional.empty();
+        }
         return Optional.of(Collections.unmodifiableList(result));
       }
     }
     return Optional.empty();
   }
 
-  private void collectPoints(final QuadTreeNode node, final BoundingBox bb, List<Point2D> result,
+  private void collectPoints(final QuadTreeNode<T> node, final BoundingBox bb, List<T> result,
                              QuadTreeChildPosition qtcp) {
-    final Optional<QuadTreeNode> qtn = node.getChild(qtcp);
+    final Optional<QuadTreeNode<T>> qtn = node.getChild(qtcp);
     if (qtn.isPresent()) {
-      final Optional<List<Point2D>> rqtn = findPoints(qtn.get(), bb);
-      if (rqtn.isPresent()) {
-        result.addAll(rqtn.get());
-      }
+      final Optional<List<T>> rqtn = findPoints(qtn.get(), bb);
+      rqtn.ifPresent(result::addAll);
     }
   }
 
-  private boolean intersectsOrInsideOrTouches(BoundingBox outer, BoundingBox inner) {
-    final Vector2D diffMin = outer.getMax().diff(inner.getMin());
-    final Vector2D diffMax = inner.getMax().diff(outer.getMin());
-
-    if ((diffMin.getX() > 0.0 || diffMin.getY() > 0.0) || (diffMax.getX() > 0.0 ||
-        diffMax.getY() > 0.0)) {
-      return false;
-    }
-    return true;
+  private boolean intersectsOrInsideOrTouches(final BoundingBox outer, final BoundingBox inner) {
+    return !(inner.getMax().getX() < outer.getMin().getX()
+        || inner.getMax().getY() < outer.getMin().getY()
+        || inner.getMin().getX() > outer.getMax().getX()
+        || inner.getMin().getY() > outer.getMax().getY());
   }
-
 }

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import de.westranger.geometry.common.math.Vector2D;
+import de.westranger.geometry.common.simple.BoundingBox;
 import de.westranger.geometry.common.simple.Point2D;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,12 +16,8 @@ class QuadTreeTest {
 
 
   @Test
-  void testAddPointsA() {
+  void testAddPointsAndTreeConstructionPartialTree() {
     final double baseLength = 0.5;
-    final Point2D upperRight = new Point2D(7 * 0.5, 7 * 0.5);
-    final Point2D lowerRight = new Point2D(7 * 0.5, 0.5);
-    final Point2D upperLeft = new Point2D(0.5, 7 * 0.5);
-    final Point2D lowerLeft = new Point2D(0.5, 0.5);
 
     List<Point2D> pts = new ArrayList<>();
     List<List<QuadTreeChildPosition>> solutionPosition = new ArrayList<>();
@@ -30,21 +27,21 @@ class QuadTreeTest {
         List<QuadTreeChildPosition> pos = new ArrayList<>();
         if (i > 1 && j > 1) {
           pos.add(QuadTreeChildPosition.CHILD_UPPER_RIGHT);
-        } else if (i > 1 && j < 2) {
+        } else if (i > 1/* && j < 2*/) {
           pos.add(QuadTreeChildPosition.CHILD_LOWER_RIGHT);
-        } else if (i < 2 && j > 1) {
+        } else if (/*i < 2 &&*/ j > 1) {
           pos.add(QuadTreeChildPosition.CHILD_UPPER_LEFT);
-        } else if (i < 2 && j < 2) {
+        } else /*if (i < 2 && j < 2)*/ {
           pos.add(QuadTreeChildPosition.CHILD_LOWER_LEFT);
         }
 
         if (i % 2 == 1 && j % 2 == 1) {
           pos.add(QuadTreeChildPosition.CHILD_UPPER_RIGHT);
-        } else if (i % 2 == 1 && j % 2 == 0) {
+        } else if (i % 2 == 1 /*&& j % 2 == 0*/) {
           pos.add(QuadTreeChildPosition.CHILD_LOWER_RIGHT);
-        } else if (i % 2 == 0 && j % 2 == 1) {
+        } else if (/*i % 2 == 0 &&*/ j % 2 == 1) {
           pos.add(QuadTreeChildPosition.CHILD_UPPER_LEFT);
-        } else if (i % 2 == 0 && j % 2 == 0) {
+        } else /*if (i % 2 == 0 && j % 2 == 0)*/ {
           pos.add(QuadTreeChildPosition.CHILD_LOWER_LEFT);
         }
 
@@ -62,10 +59,10 @@ class QuadTreeTest {
           continue;
         }
 
-        QuadTree qt = new QuadTree(1.0, ptA);
+        QuadTree<Point2D> qt = new QuadTree(1.0, ptA);
         qt.add(ptB);
 
-        QuadTreeNode root = qt.getRoot();
+        QuadTreeNode<Point2D> root = qt.getRoot();
         if (root.getCenter().distance(new Point2D(2.0, 2.0)) > 0.0) {
           continue;
         }
@@ -83,12 +80,12 @@ class QuadTreeTest {
           assertTrue(root.getChild(value).isEmpty());
         }
 
-        Optional<QuadTreeNode> childA = root.getChild(solutionPosition.get(i).get(0));
+        Optional<QuadTreeNode<Point2D>> childA = root.getChild(solutionPosition.get(i).get(0));
         assertTrue(childA.isPresent());
         assertFalse(childA.get().isLeaf());
         assertTrue(childA.get().getPoints().isEmpty());
 
-        Optional<QuadTreeNode> childB = root.getChild(solutionPosition.get(j).get(0));
+        Optional<QuadTreeNode<Point2D>> childB = root.getChild(solutionPosition.get(j).get(0));
         assertTrue(childB.isPresent());
         assertFalse(childB.get().isLeaf());
         assertTrue(childB.get().getPoints().isEmpty());
@@ -123,7 +120,7 @@ class QuadTreeTest {
   }
 
   @Test
-  void testAddPointsB() {
+  void testAddPointsAndTreeConstructionFullTree() {
     final double baseLength = 0.5;
     final Point2D upperRight = new Point2D(7 * 0.5, 7 * 0.5);
     final Point2D lowerLeft = new Point2D(0.5, 0.5);
@@ -136,21 +133,21 @@ class QuadTreeTest {
         List<QuadTreeChildPosition> pos = new ArrayList<>();
         if (i > 1 && j > 1) {
           pos.add(QuadTreeChildPosition.CHILD_UPPER_RIGHT);
-        } else if (i > 1 && j < 2) {
+        } else if (i > 1/* && j < 2*/) {
           pos.add(QuadTreeChildPosition.CHILD_LOWER_RIGHT);
-        } else if (i < 2 && j > 1) {
+        } else if (/*i < 2 &&*/ j > 1) {
           pos.add(QuadTreeChildPosition.CHILD_UPPER_LEFT);
-        } else if (i < 2 && j < 2) {
+        } else /*if (i < 2 && j < 2)*/ {
           pos.add(QuadTreeChildPosition.CHILD_LOWER_LEFT);
         }
 
         if (i % 2 == 1 && j % 2 == 1) {
           pos.add(QuadTreeChildPosition.CHILD_UPPER_RIGHT);
-        } else if (i % 2 == 1 && j % 2 == 0) {
+        } else if (i % 2 == 1/* && j % 2 == 0*/) {
           pos.add(QuadTreeChildPosition.CHILD_LOWER_RIGHT);
-        } else if (i % 2 == 0 && j % 2 == 1) {
+        } else if (/*i % 2 == 0 &&*/ j % 2 == 1) {
           pos.add(QuadTreeChildPosition.CHILD_UPPER_LEFT);
-        } else if (i % 2 == 0 && j % 2 == 0) {
+        } else /*if (i % 2 == 0 && j % 2 == 0)*/ {
           pos.add(QuadTreeChildPosition.CHILD_LOWER_LEFT);
         }
 
@@ -158,7 +155,7 @@ class QuadTreeTest {
       }
     }
 
-    QuadTree qt = new QuadTree(1.0, upperRight);
+    QuadTree<Point2D> qt = new QuadTree(1.0, upperRight);
     qt.add(lowerLeft);
 
     for (int i = 1; i < pts.size() - 1; i++) {
@@ -166,10 +163,10 @@ class QuadTreeTest {
     }
 
     for (int i = 0; i < pts.size(); i++) {
-      QuadTreeNode root = qt.getRoot();
+      QuadTreeNode<Point2D> root = qt.getRoot();
       List<QuadTreeChildPosition> list = solutionPosition.get(i);
 
-      Optional<QuadTreeNode> child = root.getChild(list.get(0));
+      Optional<QuadTreeNode<Point2D>> child = root.getChild(list.get(0));
       assertTrue(child.isPresent());
       child = child.get().getChild(list.get(1));
       assertTrue(child.isPresent());
@@ -180,15 +177,13 @@ class QuadTreeTest {
   }
 
   @Test
-  void testFindPoints() {
-    final double baseLength = 0.5;
+  void testFindPointsWithResult() {
     final Point2D upperRight = new Point2D(7 * 0.5, 7 * 0.5);
     final Point2D lowerRight = new Point2D(7 * 0.5, 0.5);
     final Point2D upperLeft = new Point2D(0.5, 7 * 0.5);
     final Point2D lowerLeft = new Point2D(0.5, 0.5);
 
-
-    QuadTree qt = new QuadTree(1.0, upperRight);
+    QuadTree<Point2D> qt = new QuadTree(1.0, upperRight);
     qt.add(lowerLeft);
     qt.add(lowerRight);
     qt.add(upperLeft);
@@ -212,11 +207,71 @@ class QuadTreeTest {
     qt.add(a8);
     qt.add(a9);
 
-    Optional<List<Point2D>> pointsInArea = qt.getPointsInArea(a1, 0.4);
+    BoundingBox bb =
+        new BoundingBox(new Point2D(3.1 - 0.4, 1.1 - 0.4), new Point2D(3.1 + 0.4, 1.1 + 0.4));
+
+    Optional<List<Point2D>> pointsInArea = qt.getPointsInArea(bb);
     assertTrue(pointsInArea.isPresent());
     assertEquals(4, pointsInArea.get().size());
 
+    comparePoint2D(a2, pointsInArea.get().get(0));
+    comparePoint2D(a5, pointsInArea.get().get(1));
+    comparePoint2D(a4, pointsInArea.get().get(2));
+    comparePoint2D(a3, pointsInArea.get().get(3));
   }
 
+  private void comparePoint2D(final Point2D ptA, final Point2D ptB) {
+    assertEquals(0.0, Math.abs(ptA.getX() - ptB.getX()), 1e-10);
+    assertEquals(0.0, Math.abs(ptA.getY() - ptB.getY()), 1e-10);
+  }
+
+  @Test
+  void testFindPointsNoResultFullTree() {
+    final Point2D upperRight = new Point2D(7 * 0.5, 7 * 0.5);
+    final Point2D lowerRight = new Point2D(7 * 0.5, 0.5);
+    final Point2D upperLeft = new Point2D(0.5, 7 * 0.5);
+    final Point2D lowerLeft = new Point2D(0.5, 0.5);
+
+    QuadTree<Point2D> qt = new QuadTree(1.0, upperRight);
+    qt.add(lowerLeft);
+    qt.add(lowerRight);
+    qt.add(upperLeft);
+
+    BoundingBox bb =
+        new BoundingBox(new Point2D(1.0 - 0.1, 1.0 - 0.1), new Point2D(1.0 + 0.1, 1.0 + 0.1));
+
+    Optional<List<Point2D>> pointsInArea = qt.getPointsInArea(bb);
+    assertTrue(pointsInArea.isEmpty());
+  }
+
+  @Test
+  void testFindPointsNoResultPartialTree() {
+    final Point2D upperRight = new Point2D(7 * 0.5, 7 * 0.5);
+    final Point2D lowerLeft = new Point2D(0.5, 0.5);
+
+    QuadTree<Point2D> qt = new QuadTree(1.0, upperRight);
+    qt.add(lowerLeft);
+
+    BoundingBox bb =
+        new BoundingBox(new Point2D(1.0 - 0.1, 3.0 - 0.1), new Point2D(1.0 + 0.1, 3.0 + 0.1));
+
+    Optional<List<Point2D>> pointsInArea = qt.getPointsInArea(bb);
+    assertTrue(pointsInArea.isEmpty());
+  }
+
+  @Test
+  void testFindPointsNoResultBoundingBoxOutsideTree() {
+    final Point2D upperRight = new Point2D(7 * 0.5, 7 * 0.5);
+    final Point2D lowerLeft = new Point2D(0.5, 0.5);
+
+    QuadTree<Point2D> qt = new QuadTree(1.0, upperRight);
+    qt.add(lowerLeft);
+
+    BoundingBox bb =
+        new BoundingBox(new Point2D(5.0 - 0.1, 5.0 - 0.1), new Point2D(5.0 + 0.1, 5.0 + 0.1));
+
+    Optional<List<Point2D>> pointsInArea = qt.getPointsInArea(bb);
+    assertTrue(pointsInArea.isEmpty());
+  }
 
 }
