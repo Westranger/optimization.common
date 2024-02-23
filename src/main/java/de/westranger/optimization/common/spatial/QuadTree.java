@@ -1,10 +1,10 @@
 package de.westranger.optimization.common.spatial;
 
-import de.westranger.geometry.common.math.Vector2D;
 import de.westranger.geometry.common.simple.BoundingBox;
 import de.westranger.geometry.common.simple.Point2D;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -123,26 +123,22 @@ public final class QuadTree<T extends Point2D> {
 
     final Optional<List<T>> points = findPoints(this.root, area);
     if (points.isPresent()) {
-      List<T> result = points.get();
-      List<T> tmp = new ArrayList<>();
-      // TODO hier den speicherverbrauch verbessern, alle elemente einfach aus der liste entfernen
-      // (rückwärts durchgehen und dann entfernen)
+      final Iterator<T> listIterator = points.get().iterator();
 
-      for (T pt : result) {
-        final Vector2D diffMax = pt.diff(area.getMax());
-        final Vector2D diffMin = area.getMin().diff(pt);
+      while (listIterator.hasNext()) {
+        final Point2D pt = listIterator.next();
 
-        if (diffMax.getX() >= 0 && diffMax.getY() >= 0 && diffMin.getX() >= 0
-            && diffMin.getY() >= 0) {
-          tmp.add(pt);
+        if (pt.getX() < area.getMin().getX() || pt.getX() > area.getMax().getX()
+            || pt.getY() < area.getMin().getY() || pt.getY() > area.getMax().getY()) {
+          listIterator.remove();
         }
       }
 
-      if (tmp.isEmpty()) {
+      if (points.get().isEmpty()) {
         return Optional.empty();
       }
 
-      return Optional.of(Collections.unmodifiableList(tmp));
+      return Optional.of(Collections.unmodifiableList(points.get()));
     }
     return Optional.empty();
   }

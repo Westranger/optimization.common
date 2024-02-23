@@ -2,6 +2,8 @@ package de.westranger.optimization.common.algorithm.tsp.sa;
 
 import de.westranger.optimization.common.algorithm.tsp.common.Order;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public final class RouteEvaluator {
 
@@ -15,7 +17,20 @@ public final class RouteEvaluator {
     this.roundtrip = roundtrip;
   }
 
-  public double scoreRoute(final VehicleRoute vr) {
+  public double scoreRouteFull(final VehicleRoute vr) {
+    final int len = vr.isRoundtrip() ? vr.route().size() + 1 : vr.route().size();
+    final List<Integer> idxList = IntStream.rangeClosed(0, len)
+        .boxed()
+        .collect(Collectors.toList());
+    return this.scoreRoutePartial(vr, idxList);
+  }
+
+  /**
+   * @param vr
+   * @param idx indices in the distanceScore List from these indices the position of the orders will be computed.
+   * @return
+   */
+  public double scoreRoutePartial(final VehicleRoute vr, List<Integer> idx) {
 
     if (vr.route().isEmpty()) {
       return 0.0;
@@ -32,18 +47,17 @@ public final class RouteEvaluator {
       score += vr.homePosition().distance(route.get(route.size() - 1).getTo());
     }
 
+
     return score;
   }
 
-  public double estimateSwap(final int idxA, final int idxB){
+  public double estimateSwap(final int idxA, final int idxB) {
     return 0.0;
   }
 
-  public double estimateReverse(final int idxA, final int idxB){
+  public double estimateReverse(final int idxA, final int idxB) {
     return 0.0;
   }
-
-
 
 
 }

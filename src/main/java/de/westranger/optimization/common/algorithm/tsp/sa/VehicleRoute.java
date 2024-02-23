@@ -6,7 +6,15 @@ import de.westranger.optimization.common.algorithm.tsp.common.Order;
 import java.util.ArrayList;
 import java.util.List;
 
-public record VehicleRoute(int id, Point2D homePosition, List<Order> route, double score)
+/**
+ * @param id
+ * @param homePosition
+ * @param route
+ * @param distanceScore
+ * @param score
+ */
+public record VehicleRoute(int id, Point2D homePosition, List<Order> route,
+                           List<Double> distanceScore, double score, boolean isRoundtrip)
     implements Cloneable {
 
   @Override
@@ -24,6 +32,7 @@ public record VehicleRoute(int id, Point2D homePosition, List<Order> route, doub
 
   @Override
   public VehicleRoute clone() {
-    return new VehicleRoute(this.id, this.homePosition, new ArrayList<>(this.route), this.score);
+    return new VehicleRoute(this.id, this.homePosition, new ArrayList<>(this.route),
+        new ArrayList<>(this.distanceScore), this.score, this.isRoundtrip);
   }
 }
