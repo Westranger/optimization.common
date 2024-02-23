@@ -39,7 +39,7 @@ public final class OptimizeParameter {
     input.put("tMax", List.of(0.0));
     input.put("initialAcceptanceRatio", Arrays.asList(0.9, 0.8, 0.7));
     input.put("gamma",
-        Arrays.asList(0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.96, 0.97 /*, 0.98, 0.99, 0.999*/));
+        Arrays.asList(0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.96, 0.97 , 0.98, 0.99, 0.999));
     input.put("tMin", Arrays.asList(0.001, 0.01, 0.1, 1.0, 10.0, 100.0, 1000.0));
     input.put("omegaMax",
         Arrays.asList(100.0, 250.0, 500.0, 1000.0, 2500.0, 5000.0, 10000.0, 25000.0, 50000.0,
@@ -48,10 +48,10 @@ public final class OptimizeParameter {
         Arrays.asList(2.0, 5.0, 10.0, 25.0, 50.0, 100.0, 250.0, 500.0));
 
     final InputStreamReader reader = new InputStreamReader(
-        SimulatedAnnealingTest.class.getResourceAsStream("/tsp/1_vehicle_980_orders.json"));
+        SimulatedAnnealingTest.class.getResourceAsStream("/tsp/1_vehicle_29_orders.json"));
     final Gson gson = new Gson();
     final ProblemFormulation problem = gson.fromJson(reader, ProblemFormulation.class);
-    final int threadPoolSize = 13;
+    final int threadPoolSize = 12;
     final int batchSize = 100;
     final CombinationIterator combinationIterator = new CombinationIterator(input);
     final ProgressTracker pt = new ProgressTracker(combinationIterator.getNumCombinations());

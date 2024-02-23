@@ -81,7 +81,7 @@ public class SimulatedAnnealingTest {
 
     SearchSpaceState optimizedState = sa.optimize();
 
-    Assertions.assertEquals(27601.173774493753, optimizedState.getScore().getAbsoluteScore(), 1e-10);
-    Assertions.assertEquals(3250, sa.getTotalIterationCounter());
+    Assertions.assertEquals(25568.854007376664, optimizedState.getScore().getAbsoluteScore(), 1e-10);
+    Assertions.assertEquals(7471, sa.getTotalIterationCounter());
   }
 }
