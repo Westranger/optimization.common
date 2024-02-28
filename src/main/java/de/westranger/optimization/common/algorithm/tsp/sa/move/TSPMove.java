@@ -26,6 +26,7 @@ public abstract class TSPMove {
     return Optional.empty();
   }
 
+  @Deprecated
   public List<Integer> generateValidCuts(final int listLength, final int numIndices,
                                          final int minSegmentLength, final Random rng) {
     if (listLength <= 0) {
@@ -65,6 +66,7 @@ public abstract class TSPMove {
     return result;
   }
 
+  @Deprecated
   public boolean isGenerateValidCutsAlwaysPossible(final int listLength, final int numIndices,
                                                    final int minSegmentLength) {
     double delta = listLength - 2 * minSegmentLength;

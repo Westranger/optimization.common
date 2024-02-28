@@ -55,6 +55,13 @@ public final class TSPNeighbourSelector implements NeighbourSelector {
       throw new IllegalStateException("there are still order which are not assigned to vehicles");
     }
 
+    /*
+     * TODO mann kann den swap ind insert teil auch so machen das bei 2 fahrzeugen nicht immer
+     * zwischen den Fahrzeugen geswapped oder remove uns geinserted wird, sonder auch das man in
+     * dem jeweiligen vehicle swapped oder remove und inserted, das erhöht die variabilität beim
+     * lösungsfinden
+     */
+
     // now we have two lists
     final int vehicleIdA = this.rng.nextInt(state.getOrderMapping().size()) + 1;
     final int vehicleIdB = this.rng.nextInt(state.getOrderMapping().size()) + 1;
