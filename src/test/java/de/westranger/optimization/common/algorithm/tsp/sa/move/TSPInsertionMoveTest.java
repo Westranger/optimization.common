@@ -823,45 +823,4 @@ class TSPInsertionMoveTest {
     expectedResultB = homeB.distance(orderD.getTo()) + orderD.getTo().distance(orderE.getTo());
     Assertions.assertEquals(expectedResultB, result.get().vehicles().get(1).getScore(), 1e-10);
   }
-
-  @Test
-  public void testGenerateValidIndexA() {
-    RouteEvaluator re = new RouteEvaluator();
-    TSPMove move = new TSPInsertionMove(rng, re);
-
-    Assertions.assertTrue(move.isGenerateValidCutsAlwaysPossible(2, 1, 1));
-
-    List<Integer> integers = move.generateValidCuts(2, 1, 1, rng);
-    Assertions.assertEquals(List.of(1), integers);
-  }
-
-  @Test
-  public void testGenerateValidIndexB() {
-    RouteEvaluator re = new RouteEvaluator();
-    TSPMove move = new TSPInsertionMove(rng, re);
-
-    Assertions.assertTrue(move.isGenerateValidCutsAlwaysPossible(7, 2, 2));
-
-    List<Integer> integers = move.generateValidCuts(6, 2, 2, rng);
-    Assertions.assertEquals(List.of(2, 4), integers);
-  }
-
-  @Test
-  public void testGenerateValidIndexNotPossible() {
-    RouteEvaluator re = new RouteEvaluator();
-    TSPMove move = new TSPInsertionMove(rng, re);
-
-    Assertions.assertFalse(move.isGenerateValidCutsAlwaysPossible(2, 3, 1));
-    Assertions.assertFalse(move.isGenerateValidCutsAlwaysPossible(6, 2, 4));
-    Assertions.assertFalse(move.isGenerateValidCutsAlwaysPossible(5, 2, 2));
-    Assertions.assertFalse(move.isGenerateValidCutsAlwaysPossible(6, 2, 3));
-  }
-
-  @Test
-  public void testGenerateValidPossible() {
-    RouteEvaluator re = new RouteEvaluator();
-    TSPMove move = new TSPInsertionMove(rng, re);
-
-    Assertions.assertTrue(move.isGenerateValidCutsAlwaysPossible(6, 2, 2));
-  }
 }

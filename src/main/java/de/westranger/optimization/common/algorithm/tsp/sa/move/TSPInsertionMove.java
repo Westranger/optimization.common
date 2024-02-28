@@ -15,38 +15,13 @@ public final class TSPInsertionMove extends TSPMove {
   }
 
   @Override
-  public Optional<TSPMoveResult> performMove(final List<VehicleRoute> vehicles) {
-    super.performMove(vehicles);
+  protected boolean checkOneVehicleOrderListLength(List<Order> orders) {
+    return orders.size() >= 2;
+  }
 
-    final List<VehicleRoute> vrl = new ArrayList<>(vehicles.size());
-    double score;
-
-    final VehicleRoute vrA = vehicles.get(0);
-    if (vehicles.size() == 1) {
-      if (vrA.getRoute().size() < 2) {
-        return Optional.empty();
-      }
-
-      VehicleRoute result = performMoveSingleVehicle(vrA);
-      vrl.add(result);
-      score = result.getScore();
-    } else {
-      final VehicleRoute vrB = vehicles.get(1);
-
-      if (vrA.getRoute().isEmpty() && vrB.getRoute().isEmpty()) {
-        return Optional.empty();
-      }
-
-      List<VehicleRoute> result = performMoveTwoVehicles(vrA, vrB);
-
-      vrl.add(result.get(0));
-      vrl.add(result.get(1));
-
-      score = Double.isNaN(result.get(0).getScore()) ? 0.0 : result.get(0).getScore();
-      score += Double.isNaN(result.get(1).getScore()) ? 0.0 : result.get(1).getScore();
-    }
-
-    return Optional.of(new TSPMoveResult(score, vrl));
+  @Override
+  protected boolean checkTwoVehiclesOrdersListLength(List<Order> ordersA, List<Order> ordersB) {
+    return !(ordersA.isEmpty() && ordersB.isEmpty());
   }
 
   private double removeAndInsertEmptyList(List<Order> lstA, List<Order> lstB,
@@ -164,7 +139,8 @@ public final class TSPInsertionMove extends TSPMove {
     }
   }
 
-  private VehicleRoute performMoveSingleVehicle(VehicleRoute vrA) {
+  @Override
+  protected VehicleRoute performMoveSingleVehicle(VehicleRoute vrA) {
     final List<Order> lstA = new ArrayList<>(vrA.getRoute());
     final List<Double> distanceScoreA = new ArrayList<>(vrA.getDistanceScore());
     List<Integer> idxToUpdate = new ArrayList<>(3);
@@ -179,7 +155,8 @@ public final class TSPInsertionMove extends TSPMove {
     return vrANew;
   }
 
-  private List<VehicleRoute> performMoveTwoVehicles(VehicleRoute vrA, VehicleRoute vrB) {
+  @Override
+  protected List<VehicleRoute> performMoveTwoVehicles(VehicleRoute vrA, VehicleRoute vrB) {
     final List<Order> lstA = new ArrayList<>(vrA.getRoute());
     final List<Order> lstB = new ArrayList<>(vrB.getRoute());
     final List<Double> distanceScoreA = new ArrayList<>(vrA.getDistanceScore());

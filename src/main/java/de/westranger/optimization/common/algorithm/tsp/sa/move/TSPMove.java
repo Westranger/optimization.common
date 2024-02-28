@@ -1,5 +1,6 @@
 package de.westranger.optimization.common.algorithm.tsp.sa.move;
 
+import de.westranger.optimization.common.algorithm.tsp.common.Order;
 import de.westranger.optimization.common.algorithm.tsp.sa.route.RouteEvaluator;
 import de.westranger.optimization.common.algorithm.tsp.sa.route.VehicleRoute;
 import java.util.ArrayList;
@@ -23,58 +24,44 @@ public abstract class TSPMove {
       throw new IllegalArgumentException(
           "list of vehicles must not be empty or must not contain more than two vehicles");
     }
-    return Optional.empty();
-  }
 
-  @Deprecated
-  public List<Integer> generateValidCuts(final int listLength, final int numIndices,
-                                         final int minSegmentLength, final Random rng) {
-    if (listLength <= 0) {
-      throw new IllegalArgumentException("invalid listLength");
-    }
+    final List<VehicleRoute> vrl = new ArrayList<>(vehicles.size());
+    double score;
 
-    if (minSegmentLength <= 0) {
-      throw new IllegalArgumentException("invalid minSegmentLength");
-    }
-
-    if (listLength - minSegmentLength < 1) {
-      throw new IllegalArgumentException("amount of indices to be generated must be larger than 1");
-    }
-
-    List<Integer> candidates = new LinkedList<>();
-    List<Integer> result = new ArrayList<>(listLength - minSegmentLength);
-    for (int i = minSegmentLength; i <= listLength - minSegmentLength; i++) {
-      candidates.add(i);
-    }
-
-    for (int idxCount = 0; idxCount < numIndices; idxCount++) {
-      List<Integer> toBeRemoved = new LinkedList<>();
-
-      if (candidates.isEmpty()) {
-        throw new IllegalStateException("could not draw enough candidates");
+    final VehicleRoute vrA = vehicles.get(0);
+    if (vehicles.size() == 1) {
+      if (!checkOneVehicleOrderListLength(vrA.getRoute())) {
+        return Optional.empty();
       }
 
-      final int idx = rng.nextInt(candidates.size());
-      final int value = candidates.get(idx);
-      result.add(value);
-      for (int i = value - minSegmentLength; i <= value + minSegmentLength - 1; i++) {
-        toBeRemoved.add(i);
+      VehicleRoute result = performMoveSingleVehicle(vrA);
+      vrl.add(result);
+      score = result.getScore();
+    } else {
+      final VehicleRoute vrB = vehicles.get(1);
+
+      if (!checkTwoVehiclesOrdersListLength(vrA.getRoute(), vrB.getRoute())) {
+        return Optional.empty();
       }
-      candidates.removeAll(toBeRemoved);
+
+      final List<VehicleRoute> result = performMoveTwoVehicles(vrA, vrB);
+      vrl.addAll(result);
+
+      score = Double.isNaN(result.get(0).getScore()) ? 0.0 : result.get(0).getScore();
+      score += Double.isNaN(result.get(1).getScore()) ? 0.0 : result.get(1).getScore();
     }
 
-    return result;
+    return Optional.of(new TSPMoveResult(score, vrl));
   }
 
-  @Deprecated
-  public boolean isGenerateValidCutsAlwaysPossible(final int listLength, final int numIndices,
-                                                   final int minSegmentLength) {
-    double delta = listLength - 2 * minSegmentLength;
-    if (delta < 0.0) {
-      return false;
-    }
-    final double frac = Math.floor(delta / (double) minSegmentLength);
-    return frac + 1 >= numIndices;
-  }
+  protected abstract boolean checkOneVehicleOrderListLength(List<Order> orders);
+
+  protected abstract boolean checkTwoVehiclesOrdersListLength(List<Order> ordersA,
+                                                              List<Order> ordersB);
+
+  protected abstract VehicleRoute performMoveSingleVehicle(final VehicleRoute vr);
+
+  protected abstract List<VehicleRoute> performMoveTwoVehicles(final VehicleRoute vrA,
+                                                               final VehicleRoute vrB);
 
 }

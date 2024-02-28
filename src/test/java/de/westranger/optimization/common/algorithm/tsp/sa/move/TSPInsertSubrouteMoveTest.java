@@ -84,7 +84,7 @@ public class TSPInsertSubrouteMoveTest {
         List.of(orderA, orderB, orderC), false);
 
     Optional<TSPMoveResult> result = move.performMove(List.of(vrA));
-    Assertions.assertFalse(result.isPresent());
+    Assertions.assertTrue(result.isEmpty());
   }
 
   @Test

@@ -15,43 +15,19 @@ public final class TSPSwapMove extends TSPMove {
   }
 
   @Override
-  public Optional<TSPMoveResult> performMove(final List<VehicleRoute> vehicles) {
-    super.performMove(vehicles);
-
-    final List<VehicleRoute> vrl = new ArrayList<>(vehicles.size());
-    double score = 0.0;
-
-    final VehicleRoute vrA = vehicles.get(0);
-    if (vehicles.size() == 1) {
-      if (vrA.getRoute().size() < 2) {
-        return Optional.empty();
-      }
-
-      VehicleRoute result = swapSingleVehicle(vrA);
-      vrl.add(result);
-
-      score += result.getScore();
-    } else {
-      final VehicleRoute vrB = vehicles.get(1);
-
-      if (vrA.getRoute().isEmpty() || vrB.getRoute().isEmpty()) {
-        return Optional.empty();
-      }
-
-      List<VehicleRoute> result = swapTwoVehicle(vrA, vrB);
-      vrl.add(result.get(0));
-      vrl.add(result.get(1));
-
-      score = result.get(0).getScore();
-      score += result.get(1).getScore();
-    }
-
-    return Optional.of(new TSPMoveResult(score, vrl));
+  protected boolean checkOneVehicleOrderListLength(List<Order> orders) {
+    return orders.size() >= 2;
   }
 
-  private VehicleRoute swapSingleVehicle(VehicleRoute vrA) {
-    final List<Order> lstA = new ArrayList<>(vrA.getRoute());
-    final List<Double> distanceScoreA = new ArrayList<>(vrA.getDistanceScore());
+  @Override
+  protected boolean checkTwoVehiclesOrdersListLength(List<Order> ordersA, List<Order> ordersB) {
+    return !ordersA.isEmpty() && !ordersB.isEmpty();
+  }
+
+  @Override
+  protected VehicleRoute performMoveSingleVehicle(VehicleRoute vr) {
+    final List<Order> lstA = new ArrayList<>(vr.getRoute());
+    final List<Double> distanceScoreA = new ArrayList<>(vr.getDistanceScore());
 
     final int removeIdxA = this.rng.nextInt(lstA.size());
     final Order orderA = lstA.remove(removeIdxA);
@@ -66,17 +42,19 @@ public final class TSPSwapMove extends TSPMove {
     }
 
     List<Integer> idxToUpdate = new ArrayList<>(2);
-    computeUpdateIndices(lstA, idxToUpdate, removeIdxA, removeIdxB, vrA.isRoundtrip());
+    computeUpdateIndices(lstA, idxToUpdate, removeIdxA, removeIdxB, vr.isRoundtrip());
 
     final VehicleRoute vrANew =
-        new VehicleRoute(vrA.getId(), vrA.getHomePosition(), lstA, distanceScoreA, vrA.getScore(),
-            vrA.isRoundtrip());
+        new VehicleRoute(vr.getId(), vr.getHomePosition(), lstA, distanceScoreA, vr.getScore(),
+            vr.isRoundtrip());
 
     routeEvaluator.scoreRoutePartial(vrANew, idxToUpdate);
     return vrANew;
   }
 
-  private List<VehicleRoute> swapTwoVehicle(VehicleRoute vrA, VehicleRoute vrB) {
+  @Override
+  protected List<VehicleRoute> performMoveTwoVehicles(VehicleRoute vrA,
+                                                      VehicleRoute vrB) {
     final List<Order> lstA = new ArrayList<>(vrA.getRoute());
     final List<Order> lstB = new ArrayList<>(vrB.getRoute());
     final List<Double> distanceScoreA = new ArrayList<>(vrA.getDistanceScore());
@@ -109,9 +87,8 @@ public final class TSPSwapMove extends TSPMove {
     return List.of(vrANew, vrBNew);
   }
 
-  private void computeUpdateIndices(List<Order> orderLst, List<Integer> updateEdgeIdxLst, int idxA,
-                                    int idxB,
-                                    boolean isRoundtrip) {
+  private void computeUpdateIndices(List<Order> orderLst, List<Integer> updateEdgeIdxLst,
+                                    int idxA, int idxB, boolean isRoundtrip) {
     final int idxMin = Math.min(idxA, idxB);
     final int idxMax = Math.max(idxA, idxB);
 
