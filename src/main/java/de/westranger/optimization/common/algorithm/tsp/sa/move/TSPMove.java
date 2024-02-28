@@ -1,7 +1,7 @@
 package de.westranger.optimization.common.algorithm.tsp.sa.move;
 
-import de.westranger.optimization.common.algorithm.tsp.sa.RouteEvaluator;
-import de.westranger.optimization.common.algorithm.tsp.sa.VehicleRoute;
+import de.westranger.optimization.common.algorithm.tsp.sa.route.RouteEvaluator;
+import de.westranger.optimization.common.algorithm.tsp.sa.route.VehicleRoute;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;

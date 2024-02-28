@@ -1,4 +1,4 @@
-package de.westranger.optimization.common.algorithm.tsp.sa;
+package de.westranger.optimization.common.algorithm.tsp.sa.route;
 
 import de.westranger.geometry.common.simple.Point2D;
 import de.westranger.optimization.common.algorithm.tsp.common.Order;
@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+@Deprecated
 public final class Route implements Cloneable {
 
   private final SortedMap<Integer, List<Order>> sortedOrdersByPriority;

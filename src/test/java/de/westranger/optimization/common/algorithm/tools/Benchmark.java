@@ -8,10 +8,10 @@ import de.westranger.optimization.common.algorithm.action.planning.solver.stocha
 import de.westranger.optimization.common.algorithm.tsp.common.Order;
 import de.westranger.optimization.common.algorithm.tsp.common.ProblemFormulation;
 import de.westranger.optimization.common.algorithm.tsp.common.State;
-import de.westranger.optimization.common.algorithm.tsp.sa.RouteEvaluator;
+import de.westranger.optimization.common.algorithm.tsp.sa.route.RouteEvaluator;
 import de.westranger.optimization.common.algorithm.tsp.sa.SimulatedAnnealingTest;
 import de.westranger.optimization.common.algorithm.tsp.sa.TSPNeighbourSelector;
-import de.westranger.optimization.common.algorithm.tsp.sa.VehicleRoute;
+import de.westranger.optimization.common.algorithm.tsp.sa.route.VehicleRoute;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -39,11 +39,12 @@ public class Benchmark {
     for (Map.Entry<Integer, Point2D> entry : problem.getVehicleStartPositions()
         .entrySet()) {
       if (entry.getKey() == 1) {
-        final VehicleRoute vr = new VehicleRoute(entry.getKey(), entry.getValue(), orders, 0.0);
+        final VehicleRoute vr =
+            new VehicleRoute(entry.getKey(), entry.getValue(), orders, false);
         orderMapping.put(entry.getKey(), vr);
       } else {
         final VehicleRoute vr =
-            new VehicleRoute(entry.getKey(), entry.getValue(), new ArrayList<>(), 0.0);
+            new VehicleRoute(entry.getKey(), entry.getValue(), new ArrayList<>(), false);
         orderMapping.put(entry.getKey(), vr);
       }
     }

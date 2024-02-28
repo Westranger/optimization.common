@@ -7,6 +7,8 @@ import de.westranger.optimization.common.algorithm.action.planning.solver.stocha
 import de.westranger.optimization.common.algorithm.tsp.common.Order;
 import de.westranger.optimization.common.algorithm.tsp.common.ProblemFormulation;
 import de.westranger.optimization.common.algorithm.tsp.common.State;
+import de.westranger.optimization.common.algorithm.tsp.sa.route.RouteEvaluator;
+import de.westranger.optimization.common.algorithm.tsp.sa.route.VehicleRoute;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,11 +34,12 @@ public class SimulatedAnnealingTest {
     List<Order> orders = new LinkedList<>(problem.getOrders());
     Collections.shuffle(orders, rng);
 
-    final VehicleRoute vr = new VehicleRoute(1, problem.getVehicleStartPositions().get(1), orders,0.0);
+    final VehicleRoute vr =
+        new VehicleRoute(1, problem.getVehicleStartPositions().get(1), orders, false);
     final RouteEvaluator re = new RouteEvaluator();
 
     State initialState =
-        new State(new ArrayList<>(), Map.of(vr.id(), vr), re);
+        new State(new ArrayList<>(), Map.of(vr.getId(), vr), re);
     SimulatedAnnealingParameter sap =
         new SimulatedAnnealingParameter(0, 1.0, 0.96, 250000, 100, 0.9);
 
@@ -63,11 +66,12 @@ public class SimulatedAnnealingTest {
 
     Collections.shuffle(orders, rng);
 
-    final VehicleRoute vr = new VehicleRoute(1, problem.getVehicleStartPositions().get(1), orders,0.0);
+    final VehicleRoute vr =
+        new VehicleRoute(1, problem.getVehicleStartPositions().get(1), orders, false);
     final RouteEvaluator re = new RouteEvaluator();
 
     State initialState =
-        new State(new ArrayList<>(), Map.of(vr.id(), vr), re);
+        new State(new ArrayList<>(), Map.of(vr.getId(), vr), re);
 
     SimulatedAnnealingParameter sap =
         new SimulatedAnnealingParameter(0, 0.001, 0.8, 100, 5, 0.9);
@@ -78,7 +82,8 @@ public class SimulatedAnnealingTest {
 
     SearchSpaceState optimizedState = sa.optimize();
 
-    Assertions.assertEquals(27601.173774493753, optimizedState.getScore().getAbsoluteScore(), 1e-10);
+    Assertions.assertEquals(27601.173774493753, optimizedState.getScore().getAbsoluteScore(),
+        1e-10);
     Assertions.assertEquals(3250, sa.getTotalIterationCounter());
   }
 }

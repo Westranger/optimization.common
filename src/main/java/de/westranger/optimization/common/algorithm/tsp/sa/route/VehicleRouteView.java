@@ -1,8 +1,9 @@
-package de.westranger.optimization.common.algorithm.tsp.sa;
+package de.westranger.optimization.common.algorithm.tsp.sa.route;
 
 import java.util.Map;
 import java.util.TreeMap;
 
+@Deprecated
 public final class VehicleRouteView {
 
   private final VehicleRoute vehicleRoute;

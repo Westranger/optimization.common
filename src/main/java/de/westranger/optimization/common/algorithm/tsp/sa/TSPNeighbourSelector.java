@@ -8,6 +8,8 @@ import de.westranger.optimization.common.algorithm.tsp.sa.move.TSPInsertionMove;
 import de.westranger.optimization.common.algorithm.tsp.sa.move.TSPMove;
 import de.westranger.optimization.common.algorithm.tsp.sa.move.TSPMoveResult;
 import de.westranger.optimization.common.algorithm.tsp.sa.move.TSPSwapMove;
+import de.westranger.optimization.common.algorithm.tsp.sa.route.RouteEvaluator;
+import de.westranger.optimization.common.algorithm.tsp.sa.route.VehicleRoute;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -104,7 +106,7 @@ public final class TSPNeighbourSelector implements NeighbourSelector {
 
     if (finalResult.isPresent()) {
       for (VehicleRoute vr : finalResult.get().vehicles()) {
-        newMapping.put(vr.id(), vr);
+        newMapping.put(vr.getId(), vr);
       }
     } else {
       // TODO der brnach hier ist auch nur um den case zu handeln 2 leer fahreuge

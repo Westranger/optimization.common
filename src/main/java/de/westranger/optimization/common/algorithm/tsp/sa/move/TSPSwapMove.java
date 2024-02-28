@@ -1,8 +1,8 @@
 package de.westranger.optimization.common.algorithm.tsp.sa.move;
 
 import de.westranger.optimization.common.algorithm.tsp.common.Order;
-import de.westranger.optimization.common.algorithm.tsp.sa.RouteEvaluator;
-import de.westranger.optimization.common.algorithm.tsp.sa.VehicleRoute;
+import de.westranger.optimization.common.algorithm.tsp.sa.route.RouteEvaluator;
+import de.westranger.optimization.common.algorithm.tsp.sa.route.VehicleRoute;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -24,11 +24,13 @@ public final class TSPSwapMove extends TSPMove {
     if (vehicles.size() == 1) {
       final VehicleRoute vrA = vehicles.get(0);
 
-      if (vrA.route().size() < 2) {
+      if (vrA.getRoute().size() < 2) {
         return Optional.empty();
       }
 
-      final List<Order> lstA = new ArrayList<>(vrA.route());
+      final List<Order> lstA = new ArrayList<>(vrA.getRoute());
+      final List<Double> distanceScoreA = new ArrayList<>(vrA.getDistanceScore());
+
       final int removeIdxA = this.rng.nextInt(lstA.size());
       final Order orderA = lstA.remove(removeIdxA);
 
@@ -38,38 +40,50 @@ public final class TSPSwapMove extends TSPMove {
       lstA.add(removeIdxB, orderA);
       lstA.add(removeIdxA, orderB);
 
-      final VehicleRoute vrANew = new VehicleRoute(vrA.id(), vrA.homePosition(), lstA, 0.0);
+      final VehicleRoute vrANew =
+          new VehicleRoute(vrA.getId(), vrA.getHomePosition(), lstA, distanceScoreA, 0.0,
+              vrA.isRoundtrip());
       vrl.add(vrANew);
 
-      score += routeEvaluator.scoreRoute(vrANew);
+      routeEvaluator.scoreRouteFull(vrANew);
+      score += vrANew.getScore();
     } else {
       final VehicleRoute vrA = vehicles.get(0);
       final VehicleRoute vrB = vehicles.get(1);
 
-      if (vrA.route().isEmpty() || vrB.route().isEmpty()) {
+      if (vrA.getRoute().isEmpty() || vrB.getRoute().isEmpty()) {
         return Optional.empty();
       }
 
-      final List<Order> lstA = new ArrayList<>(vrA.route());
-      final List<Order> lstB = new ArrayList<>(vrB.route());
+      final List<Order> lstA = new ArrayList<>(vrA.getRoute());
+      final List<Order> lstB = new ArrayList<>(vrB.getRoute());
+      final List<Double> distanceScoreA = new ArrayList<>(vrA.getDistanceScore());
+      final List<Double> distanceScoreB = new ArrayList<>(vrB.getDistanceScore());
 
-      final int removeIdxA = this.rng.nextInt(vrA.route().size());
+      final int removeIdxA = this.rng.nextInt(vrA.getRoute().size());
       final Order orderA = lstA.remove(removeIdxA);
 
-      final int removeIdxB = this.rng.nextInt(vrB.route().size());
+      final int removeIdxB = this.rng.nextInt(vrB.getRoute().size());
       final Order orderB = lstB.remove(removeIdxB);
 
       lstA.add(removeIdxA, orderB);
       lstB.add(removeIdxB, orderA);
 
-      final VehicleRoute vrANew = new VehicleRoute(vrA.id(), vrA.homePosition(), lstA, 0.0);
-      final VehicleRoute vrBNew = new VehicleRoute(vrB.id(), vrB.homePosition(), lstB, 0.0);
+      final VehicleRoute vrANew =
+          new VehicleRoute(vrA.getId(), vrA.getHomePosition(), lstA, distanceScoreA, 0.0,
+              vrA.isRoundtrip());
+      final VehicleRoute vrBNew =
+          new VehicleRoute(vrB.getId(), vrB.getHomePosition(), lstB, distanceScoreB, 0.0,
+              vrB.isRoundtrip());
 
       vrl.add(vrANew);
       vrl.add(vrBNew);
 
-      score += routeEvaluator.scoreRoute(vrANew);
-      score += routeEvaluator.scoreRoute(vrBNew);
+      routeEvaluator.scoreRouteFull(vrANew);
+      routeEvaluator.scoreRouteFull(vrBNew);
+
+      score += vrANew.getScore();
+      score += vrBNew.getScore();
     }
 
     return Optional.of(new TSPMoveResult(score, vrl));

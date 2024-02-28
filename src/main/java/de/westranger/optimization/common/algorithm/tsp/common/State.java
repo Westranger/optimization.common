@@ -5,8 +5,8 @@ import de.westranger.geometry.common.simple.Point2D;
 import de.westranger.optimization.common.algorithm.action.planning.Action;
 import de.westranger.optimization.common.algorithm.action.planning.SearchSpaceState;
 import de.westranger.optimization.common.algorithm.action.planning.solver.Score;
-import de.westranger.optimization.common.algorithm.tsp.sa.RouteEvaluator;
-import de.westranger.optimization.common.algorithm.tsp.sa.VehicleRoute;
+import de.westranger.optimization.common.algorithm.tsp.sa.route.RouteEvaluator;
+import de.westranger.optimization.common.algorithm.tsp.sa.route.VehicleRoute;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -36,7 +36,8 @@ public class State extends SearchSpaceState {
     //System.out.println("start score ");
     double score = 0.0;
     for (Map.Entry<Integer, VehicleRoute> entry : orderMapping.entrySet()) {
-      score += routeEval.scoreRoute(entry.getValue());
+      routeEval.scoreRouteFull(entry.getValue());
+      score += entry.getValue().getScore();
     }
     this.score = new TSPScore(score);
   }
@@ -111,7 +112,8 @@ public class State extends SearchSpaceState {
   private double computeFullScore() {
     double score = 0.0;
     for (Map.Entry<Integer, VehicleRoute> entry : orderMapping.entrySet()) {
-      score += this.routeEval.scoreRoute(entry.getValue());
+      this.routeEval.scoreRouteFull(entry.getValue());
+      score += entry.getValue().getScore();
     }
     return score;
   }
@@ -160,7 +162,7 @@ public class State extends SearchSpaceState {
     Point2D previousPoint = null;
     for (Map.Entry<Integer, VehicleRoute> entry : this.orderMapping.entrySet()) {
       String vehicleColor = colors.get(entry.getKey());
-      for (Order order : entry.getValue().route()) {
+      for (Order order : entry.getValue().getRoute()) {
         if (previousPoint != null) {
           svgBuilder.append('\t');
           svgBuilder.append(String.format(Locale.ENGLISH,
@@ -184,17 +186,17 @@ public class State extends SearchSpaceState {
       svgBuilder.append('\t');
       svgBuilder.append(String.format(Locale.ENGLISH,
           "<rect x=\"%f\" y=\"%f\" width=\"25\" height=\"25\" fill=\"%s\"/>",
-          entry.getValue().homePosition().getY(), entry.getValue().homePosition().getX(),
+          entry.getValue().getHomePosition().getY(), entry.getValue().getHomePosition().getX(),
           vehicleColor));
       svgBuilder.append('\n');
 
-      List<Order> orders = entry.getValue().route();
+      List<Order> orders = entry.getValue().getRoute();
       if (orders != null && !orders.isEmpty()) {
         final Point2D start = orders.get(0).getTo();
         svgBuilder.append('\t');
         svgBuilder.append(String.format(Locale.ENGLISH,
             "<line x1=\"%f\" y1=\"%f\" x2=\"%f\" y2=\"%f\" stroke=\"%s\"/>",
-            entry.getValue().homePosition().getY(), entry.getValue().homePosition().getX(),
+            entry.getValue().getHomePosition().getY(), entry.getValue().getHomePosition().getX(),
             start.getY(), start.getX(),
             vehicleColor));
         svgBuilder.append('\n');
@@ -220,14 +222,14 @@ public class State extends SearchSpaceState {
     }
 
     for (Map.Entry<Integer, VehicleRoute> entry : this.orderMapping.entrySet()) {
-      final Point2D src = entry.getValue().homePosition();
+      final Point2D src = entry.getValue().getHomePosition();
 
       minX = Math.min(minX, src.getX());
       maxX = Math.max(maxX, src.getX());
       minY = Math.min(minY, src.getY());
       maxY = Math.max(maxY, src.getY());
 
-      for (Order order : entry.getValue().route()) {
+      for (Order order : entry.getValue().getRoute()) {
         minX = Math.min(minX, order.getTo().getX());
         maxX = Math.max(maxX, order.getTo().getX());
         minY = Math.min(minY, order.getTo().getY());

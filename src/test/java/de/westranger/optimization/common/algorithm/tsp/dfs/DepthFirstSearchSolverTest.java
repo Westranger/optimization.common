@@ -10,8 +10,8 @@ import de.westranger.optimization.common.algorithm.tsp.common.Order;
 import de.westranger.optimization.common.algorithm.tsp.common.ProblemFormulation;
 import de.westranger.optimization.common.algorithm.tsp.common.State;
 import de.westranger.optimization.common.algorithm.tsp.common.TSPAction;
-import de.westranger.optimization.common.algorithm.tsp.sa.RouteEvaluator;
-import de.westranger.optimization.common.algorithm.tsp.sa.VehicleRoute;
+import de.westranger.optimization.common.algorithm.tsp.sa.route.RouteEvaluator;
+import de.westranger.optimization.common.algorithm.tsp.sa.route.VehicleRoute;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -35,9 +35,9 @@ class DepthFirstSearchSolverTest {
     orderList.add(new Order(6, new Point2D(1.0, 4.0), null));
 
     final Map<Integer, VehicleRoute> orderMapping = new TreeMap<>();
-    orderMapping.put(1, new VehicleRoute(1, new Point2D(1.0, 1.0), new ArrayList<>(),0.0));
-    orderMapping.put(2, new VehicleRoute(2, new Point2D(3.0, 1.0), new ArrayList<>(),0.0));
-    orderMapping.put(3, new VehicleRoute(3, new Point2D(5.0, 1.0), new ArrayList<>(),0.0));
+    orderMapping.put(1, new VehicleRoute(1, new Point2D(1.0, 1.0), new ArrayList<>(), false));
+    orderMapping.put(2, new VehicleRoute(2, new Point2D(3.0, 1.0), new ArrayList<>(), false));
+    orderMapping.put(3, new VehicleRoute(3, new Point2D(5.0, 1.0), new ArrayList<>(), false));
 
     final Map<Integer, Point2D> vehiclePositions = new TreeMap<>();
 
