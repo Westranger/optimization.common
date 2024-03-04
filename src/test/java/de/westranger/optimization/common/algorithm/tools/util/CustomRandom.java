@@ -22,7 +22,7 @@ public final class CustomRandom extends Random {
 
   @Override
   public int nextInt(final int bound) {
-    if (this.iData[this.iIdx] > bound) {
+    if (this.iData[this.iIdx] >= bound) {
       throw new IllegalStateException(
           "the value which has inserted into the testcase does exceed the provided bound");
     }

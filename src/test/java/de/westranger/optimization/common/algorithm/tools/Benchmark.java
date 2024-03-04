@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Assertions;
 public class Benchmark {
   public static void main(String[] args) {
     final InputStreamReader reader = new InputStreamReader(
-        SimulatedAnnealingTest.class.getResourceAsStream("/tsp/vrp_problem_3_39_PDE.json"));
+        SimulatedAnnealingTest.class.getResourceAsStream("/tmp/vrp_problem_50_650_PDE.json"));
     final Gson gson = new Gson();
     final ProblemFormulation problem = gson.fromJson(reader, ProblemFormulation.class);
 
@@ -52,6 +52,7 @@ public class Benchmark {
     final RouteEvaluator re = new RouteEvaluator();
     State initialState =
         new State(new ArrayList<>(), orderMapping, re);
+
     SimulatedAnnealingParameter sap =
         new SimulatedAnnealingParameter(0, 1.0, 0.96, 250000, 100, 0.9);
 

@@ -8,6 +8,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
+/*
+ * TODO methode zum entfernen ... wie wäre es wenn man der get points in are noch ein lambda (oder
+ * predicate?) geben kann und alle punkte die übereinstimmen werden zurückgeben und entfernt, dann
+ * weiss mann das diese schon benutzt wurden, allerdings muss dann auch der baum mit aufgeräumt
+ * werden.
+ */
+
+
 public final class QuadTree<T extends Point2D> {
 
   private QuadTreeNode<T> root;

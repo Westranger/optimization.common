@@ -203,7 +203,7 @@ public class TSPInsertSubrouteMoveTest {
   @Test
   public void test1Vehicle4OrdersInsertAtBeginReverse() {
     RouteEvaluator re = new RouteEvaluator();
-    Random rng = new CustomRandom(new int[] {1, 0, 0});
+    Random rng = new CustomRandom(new int[] {2, 0, 0});
     TSPMove move = new TSPInsertSubrouteMove(rng, re, true);
 
     Point2D home = new Point2D(0.5, 0.5);
@@ -240,7 +240,7 @@ public class TSPInsertSubrouteMoveTest {
   @Test
   public void test1Vehicle4OrdersInsertAtEndReverse() {
     RouteEvaluator re = new RouteEvaluator();
-    Random rng = new CustomRandom(new int[] {1, 0, 2});
+    Random rng = new CustomRandom(new int[] {2, 0, 2});
     TSPMove move = new TSPInsertSubrouteMove(rng, re, true);
 
     Point2D home = new Point2D(0.5, 0.5);
@@ -277,7 +277,7 @@ public class TSPInsertSubrouteMoveTest {
   @Test
   public void test1Vehicle4OrdersInsertAtMiddleReverse() {
     RouteEvaluator re = new RouteEvaluator();
-    Random rng = new CustomRandom(new int[] {0, 0, 1});
+    Random rng = new CustomRandom(new int[] {1, 0, 1});
     TSPMove move = new TSPInsertSubrouteMove(rng, re, true);
 
     Point2D home = new Point2D(0.5, 0.5);
@@ -306,8 +306,8 @@ public class TSPInsertSubrouteMoveTest {
     Assertions.assertEquals(2, result.get().vehicles().get(0).getRoute().get(2).getId());
     Assertions.assertEquals(4, result.get().vehicles().get(0).getRoute().get(3).getId());
 
-    expectedResult = home.distance(orderC.getTo()) + orderC.getTo().distance(orderB.getTo()) +
-        orderB.getTo().distance(orderA.getTo()) + orderA.getTo().distance(orderD.getTo());
+    expectedResult = home.distance(orderA.getTo()) + orderA.getTo().distance(orderC.getTo()) +
+        orderC.getTo().distance(orderB.getTo()) + orderB.getTo().distance(orderD.getTo());
     Assertions.assertEquals(expectedResult, result.get().score(), 1e-10);
   }
 

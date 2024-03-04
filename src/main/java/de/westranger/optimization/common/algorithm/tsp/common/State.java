@@ -37,7 +37,8 @@ public class State extends SearchSpaceState {
     double score = 0.0;
     for (Map.Entry<Integer, VehicleRoute> entry : orderMapping.entrySet()) {
       routeEval.scoreRouteFull(entry.getValue());
-      score += entry.getValue().getScore();
+      double tmp = entry.getValue().getScore();
+      score += !Double.isNaN(tmp) ? tmp : 0.0;
     }
     this.score = new TSPScore(score);
   }
