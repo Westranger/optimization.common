@@ -141,9 +141,9 @@ public final class SimulatedAnnealing {
         iterAtTemperature++;
       }
 
-      System.out.println(this.totalIterationCounter + ";" + currentTemp + ";"
-          + bestScore.getAbsoluteScore() + ";" + currentScore.getAbsoluteScore()
-          + ";" + gamma + ";" + improved);
+      //System.out.println(this.totalIterationCounter + ";" + currentTemp + ";"
+      //    + bestScore.getAbsoluteScore() + ";" + currentScore.getAbsoluteScore()
+      //    + ";" + gamma + ";" + improved);
 
       currentTemp = computeTemperature(currentTemp);
       currentTemp = Math.max(this.sap.tMin(), currentTemp);

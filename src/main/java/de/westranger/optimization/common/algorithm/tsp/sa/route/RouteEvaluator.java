@@ -2,6 +2,7 @@ package de.westranger.optimization.common.algorithm.tsp.sa.route;
 
 import de.westranger.optimization.common.algorithm.tsp.common.Order;
 import java.util.List;
+import java.util.Optional;
 
 public final class RouteEvaluator {
 
@@ -64,4 +65,31 @@ public final class RouteEvaluator {
     }
     vr.setScore(score);
   }
+
+  public Optional<Double> scoreRouteFullFull(final VehicleRoute vr) {
+    final List<Order> route = vr.getRoute();
+    double dist = vr.getHomePosition().distance(route.get(0).getTo());
+    double score = dist;
+    boolean wehaveDisc = false;
+    for (int i = 1; i < route.size(); i++) {
+      dist = route.get(i).getTo().distance(route.get(i - 1).getTo());
+      double valueA = vr.getDistanceScoreAt(i);
+      double valueB = vr.getDistanceScoreAt(i) - dist;
+      if (Math.abs(valueB) > 1e-6) {
+        wehaveDisc = true;
+        System.out.println("disc " + dist + " " + vr.getDistanceScoreAt(i) + " at " + i);
+      }
+      score += dist + valueB;
+    }
+
+    if (vr.isRoundtrip()) {
+      dist = vr.getHomePosition().distance(route.get(route.size() - 1).getTo());
+      score += dist;
+    }
+    if (!wehaveDisc) {
+      return Optional.of(score);
+    }
+    return Optional.empty();
+  }
+
 }

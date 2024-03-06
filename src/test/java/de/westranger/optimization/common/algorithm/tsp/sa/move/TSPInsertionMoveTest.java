@@ -1,14 +1,19 @@
 package de.westranger.optimization.common.algorithm.tsp.sa.move;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import de.westranger.geometry.common.simple.Point2D;
 import de.westranger.optimization.common.algorithm.tools.util.CustomRandom;
 import de.westranger.optimization.common.algorithm.tsp.common.Order;
 import de.westranger.optimization.common.algorithm.tsp.sa.route.RouteEvaluator;
 import de.westranger.optimization.common.algorithm.tsp.sa.route.VehicleRoute;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
+import java.util.TreeMap;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,11 +21,38 @@ import org.junit.jupiter.api.Test;
 class TSPInsertionMoveTest {
 
   private Random rng;
+  private RouteEvaluator re;
+  private Point2D homeA;
+  private Point2D homeB;
+
+  private Map<Integer, Order> orderMap;
 
   @BeforeEach
   public void setup() {
     rng = new Random(47110815L);
+    this.re = new RouteEvaluator();
+    this.homeA = new Point2D(0.5, 0.5);
+    this.homeB = new Point2D(2.0, 0.5);
+    Order orderA = new Order(1, new Point2D(1.0, 1.0), null);
+    Order orderB = new Order(2, new Point2D(2.0, 2.0), null);
+    Order orderC = new Order(3, new Point2D(3.0, 3.0), null);
+    Order orderD = new Order(4, new Point2D(4.0, 4.0), null);
+    Order orderE = new Order(5, new Point2D(5.0, 5.0), null);
+    Order orderF = new Order(6, new Point2D(6.0, 6.0), null);
+    Order orderG = new Order(7, new Point2D(7.0, 7.0), null);
+    Order orderH = new Order(8, new Point2D(8.0, 8.0), null);
+
+    this.orderMap = new TreeMap<>();
+    orderMap.put(orderA.getId(), orderA);
+    orderMap.put(orderB.getId(), orderB);
+    orderMap.put(orderC.getId(), orderC);
+    orderMap.put(orderD.getId(), orderD);
+    orderMap.put(orderE.getId(), orderE);
+    orderMap.put(orderF.getId(), orderF);
+    orderMap.put(orderG.getId(), orderG);
+    orderMap.put(orderH.getId(), orderH);
   }
+
 
   @Test
   public void testNoVehicle() {
@@ -77,27 +109,7 @@ class TSPInsertionMoveTest {
     Random rng = new CustomRandom(new int[] {0, 0});
     TSPMove move = new TSPInsertionMove(rng, re);
 
-    Point2D home = new Point2D(0.5, 0.5);
-    Order orderA = new Order(1, new Point2D(1.0, 1.0), null);
-    Order orderB = new Order(2, new Point2D(2.0, 2.0), null);
-
-    VehicleRoute vrA = new VehicleRoute(1, home, List.of(orderA, orderB), false);
-    re.scoreRouteFull(vrA);
-
-    double expectedResult = home.distance(orderA.getTo()) + orderA.getTo().distance(orderB.getTo());
-    Assertions.assertEquals(expectedResult, vrA.getScore(), 1e-10);
-
-    Optional<TSPMoveResult> result = move.performMove(List.of(vrA));
-    Assertions.assertTrue(result.isPresent());
-
-    Assertions.assertEquals(1, result.get().vehicles().size());
-    Assertions.assertEquals(2, result.get().vehicles().get(0).getRoute().size());
-
-    Assertions.assertEquals(2, result.get().vehicles().get(0).getRoute().get(0).getId());
-    Assertions.assertEquals(1, result.get().vehicles().get(0).getRoute().get(1).getId());
-
-    expectedResult = home.distance(orderB.getTo()) + orderB.getTo().distance(orderA.getTo());
-    Assertions.assertEquals(expectedResult, result.get().score(), 1e-10);
+    evaluateMoveOneVehicle(move, List.of(1, 2), List.of(2, 1), false);
   }
 
   @Test
@@ -106,30 +118,7 @@ class TSPInsertionMoveTest {
     Random rng = new CustomRandom(new int[] {0, 0});
     TSPMove move = new TSPInsertionMove(rng, re);
 
-    Point2D home = new Point2D(0.5, 0.5);
-    Order orderA = new Order(1, new Point2D(1.0, 1.0), null);
-    Order orderB = new Order(2, new Point2D(2.0, 2.0), null);
-
-    VehicleRoute vrA = new VehicleRoute(1, home, List.of(orderA, orderB), true);
-    re.scoreRouteFull(vrA);
-
-    double expectedResult =
-        home.distance(orderA.getTo()) + orderA.getTo().distance(orderB.getTo()) +
-            orderB.getTo().distance(home);
-    Assertions.assertEquals(expectedResult, vrA.getScore(), 1e-10);
-
-    Optional<TSPMoveResult> result = move.performMove(List.of(vrA));
-    Assertions.assertTrue(result.isPresent());
-
-    Assertions.assertEquals(1, result.get().vehicles().size());
-    Assertions.assertEquals(2, result.get().vehicles().get(0).getRoute().size());
-
-    Assertions.assertEquals(2, result.get().vehicles().get(0).getRoute().get(0).getId());
-    Assertions.assertEquals(1, result.get().vehicles().get(0).getRoute().get(1).getId());
-
-    expectedResult = home.distance(orderB.getTo()) + orderB.getTo().distance(orderA.getTo()) +
-        orderA.getTo().distance(home);
-    Assertions.assertEquals(expectedResult, result.get().score(), 1e-10);
+    evaluateMoveOneVehicle(move, List.of(1, 2), List.of(2, 1), true);
   }
 
   @Test
@@ -138,34 +127,25 @@ class TSPInsertionMoveTest {
     Random rng = new CustomRandom(new int[] {0, 1});
     TSPMove move = new TSPInsertionMove(rng, re);
 
-    Point2D home = new Point2D(0.5, 0.5);
-    Order orderA = new Order(1, new Point2D(1.0, 1.0), null);
-    Order orderB = new Order(2, new Point2D(2.0, 2.0), null);
-    Order orderC = new Order(3, new Point2D(3.0, 3.0), null);
-    Order orderD = new Order(4, new Point2D(4.0, 4.0), null);
+    evaluateMoveOneVehicle(move, List.of(1, 2, 3, 4), List.of(2, 3, 1, 4), false);
+  }
 
-    VehicleRoute vrA = new VehicleRoute(1, home, List.of(orderA, orderB, orderC, orderD), false);
-    re.scoreRouteFull(vrA);
+  @Test
+  public void test1Vehicle4OrdersRemoveEndInsertMiddle() {
+    RouteEvaluator re = new RouteEvaluator();
+    Random rng = new CustomRandom(new int[] {3, 2});
+    TSPMove move = new TSPInsertionMove(rng, re);
 
-    double expectedResult =
-        home.distance(orderA.getTo()) + orderA.getTo().distance(orderB.getTo()) +
-            orderB.getTo().distance(orderC.getTo()) + orderC.getTo().distance(orderD.getTo());
-    Assertions.assertEquals(expectedResult, vrA.getScore(), 1e-10);
+    evaluateMoveOneVehicle(move, List.of(1, 2, 3, 4), List.of(1,2,4,3), false);
+  }
 
-    Optional<TSPMoveResult> result = move.performMove(List.of(vrA));
-    Assertions.assertTrue(result.isPresent());
+  @Test
+  public void test1Vehicle4OrdersRemoveEndInsertMiddleRoundtrip() {
+    RouteEvaluator re = new RouteEvaluator();
+    Random rng = new CustomRandom(new int[] {3, 2});
+    TSPMove move = new TSPInsertionMove(rng, re);
 
-    Assertions.assertEquals(1, result.get().vehicles().size());
-    Assertions.assertEquals(4, result.get().vehicles().get(0).getRoute().size());
-
-    Assertions.assertEquals(2, result.get().vehicles().get(0).getRoute().get(0).getId());
-    Assertions.assertEquals(3, result.get().vehicles().get(0).getRoute().get(1).getId());
-    Assertions.assertEquals(1, result.get().vehicles().get(0).getRoute().get(2).getId());
-    Assertions.assertEquals(4, result.get().vehicles().get(0).getRoute().get(3).getId());
-
-    expectedResult = home.distance(orderB.getTo()) + orderB.getTo().distance(orderC.getTo()) +
-        orderC.getTo().distance(orderA.getTo()) + orderA.getTo().distance(orderD.getTo());
-    Assertions.assertEquals(expectedResult, result.get().score(), 1e-10);
+    evaluateMoveOneVehicle(move, List.of(1, 2, 3, 4), List.of(1,2,4,3), true);
   }
 
   @Test
@@ -174,27 +154,7 @@ class TSPInsertionMoveTest {
     Random rng = new CustomRandom(new int[] {1, 0});
     TSPMove move = new TSPInsertionMove(rng, re);
 
-    Point2D home = new Point2D(0.5, 0.5);
-    Order orderA = new Order(1, new Point2D(1.0, 1.0), null);
-    Order orderB = new Order(2, new Point2D(2.0, 2.0), null);
-
-    VehicleRoute vrA = new VehicleRoute(1, home, List.of(orderA, orderB), false);
-    re.scoreRouteFull(vrA);
-
-    double expectedResult = home.distance(orderA.getTo()) + orderA.getTo().distance(orderB.getTo());
-    Assertions.assertEquals(expectedResult, vrA.getScore(), 1e-10);
-
-    Optional<TSPMoveResult> result = move.performMove(List.of(vrA));
-    Assertions.assertTrue(result.isPresent());
-
-    Assertions.assertEquals(1, result.get().vehicles().size());
-    Assertions.assertEquals(2, result.get().vehicles().get(0).getRoute().size());
-
-    Assertions.assertEquals(2, result.get().vehicles().get(0).getRoute().get(0).getId());
-    Assertions.assertEquals(1, result.get().vehicles().get(0).getRoute().get(1).getId());
-
-    expectedResult = home.distance(orderB.getTo()) + orderB.getTo().distance(orderA.getTo());
-    Assertions.assertEquals(expectedResult, result.get().score(), 1e-10);
+    evaluateMoveOneVehicle(move, List.of(1, 2), List.of(2, 1), false);
   }
 
   @Test
@@ -203,32 +163,7 @@ class TSPInsertionMoveTest {
     Random rng = new CustomRandom(new int[] {1, 0}, new boolean[] {true});
     TSPMove move = new TSPInsertionMove(rng, re);
 
-    Point2D home = new Point2D(0.5, 0.5);
-    Order orderA = new Order(1, new Point2D(1.0, 1.0), null);
-    Order orderB = new Order(2, new Point2D(2.0, 2.0), null);
-    Order orderC = new Order(3, new Point2D(3.0, 3.0), null);
-
-    VehicleRoute vrA = new VehicleRoute(1, home, List.of(orderA, orderB, orderC), false);
-    re.scoreRouteFull(vrA);
-
-    double expectedResult =
-        home.distance(orderA.getTo()) + orderA.getTo().distance(orderB.getTo()) +
-            orderB.getTo().distance(orderC.getTo());
-    Assertions.assertEquals(expectedResult, vrA.getScore(), 1e-10);
-
-    Optional<TSPMoveResult> result = move.performMove(List.of(vrA));
-    Assertions.assertTrue(result.isPresent());
-
-    Assertions.assertEquals(1, result.get().vehicles().size());
-    Assertions.assertEquals(3, result.get().vehicles().get(0).getRoute().size());
-
-    Assertions.assertEquals(2, result.get().vehicles().get(0).getRoute().get(0).getId());
-    Assertions.assertEquals(1, result.get().vehicles().get(0).getRoute().get(1).getId());
-    Assertions.assertEquals(3, result.get().vehicles().get(0).getRoute().get(2).getId());
-
-    expectedResult = home.distance(orderB.getTo()) + orderB.getTo().distance(orderA.getTo()) +
-        orderA.getTo().distance(orderC.getTo());
-    Assertions.assertEquals(expectedResult, result.get().score(), 1e-10);
+    evaluateMoveOneVehicle(move, List.of(1, 2, 3), List.of(2, 1, 3), false);
   }
 
   @Test
@@ -237,32 +172,7 @@ class TSPInsertionMoveTest {
     Random rng = new CustomRandom(new int[] {1, 0}, new boolean[] {false});
     TSPMove move = new TSPInsertionMove(rng, re);
 
-    Point2D home = new Point2D(0.5, 0.5);
-    Order orderA = new Order(1, new Point2D(1.0, 1.0), null);
-    Order orderB = new Order(2, new Point2D(2.0, 2.0), null);
-    Order orderC = new Order(3, new Point2D(3.0, 3.0), null);
-
-    VehicleRoute vrA = new VehicleRoute(1, home, List.of(orderA, orderB, orderC), false);
-    re.scoreRouteFull(vrA);
-
-    double expectedResult =
-        home.distance(orderA.getTo()) + orderA.getTo().distance(orderB.getTo()) +
-            orderB.getTo().distance(orderC.getTo());
-    Assertions.assertEquals(expectedResult, vrA.getScore(), 1e-10);
-
-    Optional<TSPMoveResult> result = move.performMove(List.of(vrA));
-    Assertions.assertTrue(result.isPresent());
-
-    Assertions.assertEquals(1, result.get().vehicles().size());
-    Assertions.assertEquals(3, result.get().vehicles().get(0).getRoute().size());
-
-    Assertions.assertEquals(1, result.get().vehicles().get(0).getRoute().get(0).getId());
-    Assertions.assertEquals(3, result.get().vehicles().get(0).getRoute().get(1).getId());
-    Assertions.assertEquals(2, result.get().vehicles().get(0).getRoute().get(2).getId());
-
-    expectedResult = home.distance(orderA.getTo()) + orderA.getTo().distance(orderC.getTo()) +
-        orderC.getTo().distance(orderB.getTo());
-    Assertions.assertEquals(expectedResult, result.get().score(), 1e-10);
+    evaluateMoveOneVehicle(move, List.of(1, 2, 3), List.of(1, 3, 2), false);
   }
 
   @Test
@@ -271,40 +181,8 @@ class TSPInsertionMoveTest {
     Random rng = new CustomRandom(new int[] {1, 0});
     TSPMove move = new TSPInsertionMove(rng, re);
 
-    Point2D homeA = new Point2D(0.5, 0.5);
-    Point2D homeB = new Point2D(2.0, 0.5);
-    Order orderA = new Order(1, new Point2D(1.0, 1.0), null);
-    Order orderB = new Order(2, new Point2D(2.0, 2.0), null);
-    Order orderC = new Order(3, new Point2D(3.0, 3.0), null);
-
-    VehicleRoute vrA = new VehicleRoute(1, homeA, new LinkedList<>(), false);
-    VehicleRoute vrB = new VehicleRoute(2, homeB, List.of(orderA, orderB, orderC), false);
-
-    re.scoreRouteFull(vrA);
-    re.scoreRouteFull(vrB);
-
-    double expectedResultA = Double.NaN;
-    double expectedResultB =
-        homeB.distance(orderA.getTo()) + orderA.getTo().distance(orderB.getTo()) +
-            orderB.getTo().distance(orderC.getTo());
-
-    Assertions.assertEquals(expectedResultA, vrA.getScore(), 1e-10);
-    Assertions.assertEquals(expectedResultB, vrB.getScore(), 1e-10);
-
-    Optional<TSPMoveResult> result = move.performMove(List.of(vrA, vrB));
-
-    Assertions.assertEquals(2, result.get().vehicles().size());
-    Assertions.assertEquals(1, result.get().vehicles().get(0).getRoute().size());
-    Assertions.assertEquals(2, result.get().vehicles().get(1).getRoute().size());
-
-    Assertions.assertEquals(2, result.get().vehicles().get(0).getRoute().get(0).getId());
-    Assertions.assertEquals(1, result.get().vehicles().get(1).getRoute().get(0).getId());
-    Assertions.assertEquals(3, result.get().vehicles().get(1).getRoute().get(1).getId());
-
-    expectedResultA = homeA.distance(orderB.getTo());
-    Assertions.assertEquals(expectedResultA, result.get().vehicles().get(0).getScore(), 1e-10);
-    expectedResultB = homeB.distance(orderA.getTo()) + orderA.getTo().distance(orderC.getTo());
-    Assertions.assertEquals(expectedResultB, result.get().vehicles().get(1).getScore(), 1e-10);
+    evaluateMoveTwoVehicles(move, List.of(), List.of(1, 2, 3),
+        List.of(2), List.of(1, 3), false);
   }
 
   @Test
@@ -313,34 +191,8 @@ class TSPInsertionMoveTest {
     Random rng = new CustomRandom(new int[] {0, 0});
     TSPMove move = new TSPInsertionMove(rng, re);
 
-    Point2D homeA = new Point2D(0.5, 0.5);
-    Point2D homeB = new Point2D(2.0, 0.5);
-    Order orderA = new Order(1, new Point2D(1.0, 1.0), null);
-
-    VehicleRoute vrA = new VehicleRoute(1, homeA, List.of(orderA), false);
-    VehicleRoute vrB = new VehicleRoute(2, homeB, new LinkedList<>(), false);
-
-    re.scoreRouteFull(vrA);
-    re.scoreRouteFull(vrB);
-
-    double expectedResultA = homeA.distance(orderA.getTo());
-    double expectedResultB = Double.NaN;
-
-    Assertions.assertEquals(expectedResultA, vrA.getScore(), 1e-10);
-    Assertions.assertEquals(expectedResultB, vrB.getScore(), 1e-10);
-
-    Optional<TSPMoveResult> result = move.performMove(List.of(vrA, vrB));
-
-    Assertions.assertEquals(2, result.get().vehicles().size());
-    Assertions.assertEquals(0, result.get().vehicles().get(0).getRoute().size());
-    Assertions.assertEquals(1, result.get().vehicles().get(1).getRoute().size());
-
-    Assertions.assertEquals(1, result.get().vehicles().get(1).getRoute().get(0).getId());
-
-    expectedResultA = Double.NaN;
-    Assertions.assertEquals(expectedResultA, result.get().vehicles().get(0).getScore(), 1e-10);
-    expectedResultB = homeB.distance(orderA.getTo());
-    Assertions.assertEquals(expectedResultB, result.get().vehicles().get(1).getScore(), 1e-10);
+    evaluateMoveTwoVehicles(move, List.of(1), List.of(),
+        List.of(), List.of(1), false);
   }
 
   @Test
@@ -349,34 +201,8 @@ class TSPInsertionMoveTest {
     Random rng = new CustomRandom(new int[] {0, 0});
     TSPMove move = new TSPInsertionMove(rng, re);
 
-    Point2D homeA = new Point2D(0.5, 0.5);
-    Point2D homeB = new Point2D(2.0, 0.5);
-    Order orderA = new Order(1, new Point2D(1.0, 1.0), null);
-
-    VehicleRoute vrA = new VehicleRoute(1, homeA, List.of(orderA), true);
-    VehicleRoute vrB = new VehicleRoute(2, homeB, new LinkedList<>(), true);
-
-    re.scoreRouteFull(vrA);
-    re.scoreRouteFull(vrB);
-
-    double expectedResultA = homeA.distance(orderA.getTo()) + orderA.getTo().distance(homeA);
-    double expectedResultB = Double.NaN;
-
-    Assertions.assertEquals(expectedResultA, vrA.getScore(), 1e-10);
-    Assertions.assertEquals(expectedResultB, vrB.getScore(), 1e-10);
-
-    Optional<TSPMoveResult> result = move.performMove(List.of(vrA, vrB));
-
-    Assertions.assertEquals(2, result.get().vehicles().size());
-    Assertions.assertEquals(0, result.get().vehicles().get(0).getRoute().size());
-    Assertions.assertEquals(1, result.get().vehicles().get(1).getRoute().size());
-
-    Assertions.assertEquals(1, result.get().vehicles().get(1).getRoute().get(0).getId());
-
-    expectedResultA = Double.NaN;
-    Assertions.assertEquals(expectedResultA, result.get().vehicles().get(0).getScore(), 1e-10);
-    expectedResultB = homeB.distance(orderA.getTo()) + orderA.getTo().distance(homeB);
-    Assertions.assertEquals(expectedResultB, result.get().vehicles().get(1).getScore(), 1e-10);
+    evaluateMoveTwoVehicles(move, List.of(1), List.of(),
+        List.of(), List.of(1), true);
   }
 
   @Test
@@ -385,34 +211,8 @@ class TSPInsertionMoveTest {
     Random rng = new CustomRandom(new int[] {0, 0});
     TSPMove move = new TSPInsertionMove(rng, re);
 
-    Point2D homeA = new Point2D(0.5, 0.5);
-    Point2D homeB = new Point2D(2.0, 0.5);
-    Order orderA = new Order(1, new Point2D(1.0, 1.0), null);
-
-    VehicleRoute vrA = new VehicleRoute(1, homeA, new LinkedList<>(), false);
-    VehicleRoute vrB = new VehicleRoute(2, homeB, List.of(orderA), false);
-
-    re.scoreRouteFull(vrA);
-    re.scoreRouteFull(vrB);
-
-    double expectedResultA = Double.NaN;
-    double expectedResultB = homeB.distance(orderA.getTo());
-
-    Assertions.assertEquals(expectedResultA, vrA.getScore(), 1e-10);
-    Assertions.assertEquals(expectedResultB, vrB.getScore(), 1e-10);
-
-    Optional<TSPMoveResult> result = move.performMove(List.of(vrA, vrB));
-
-    Assertions.assertEquals(2, result.get().vehicles().size());
-    Assertions.assertEquals(1, result.get().vehicles().get(0).getRoute().size());
-    Assertions.assertEquals(0, result.get().vehicles().get(1).getRoute().size());
-
-    Assertions.assertEquals(1, result.get().vehicles().get(0).getRoute().get(0).getId());
-
-    expectedResultA = homeA.distance(orderA.getTo());
-    Assertions.assertEquals(expectedResultA, result.get().vehicles().get(0).getScore(), 1e-10);
-    expectedResultB = Double.NaN;
-    Assertions.assertEquals(expectedResultB, result.get().vehicles().get(1).getScore(), 1e-10);
+    evaluateMoveTwoVehicles(move, List.of(), List.of(1),
+        List.of(1), List.of(), false);
   }
 
   @Test
@@ -421,40 +221,8 @@ class TSPInsertionMoveTest {
     Random rng = new CustomRandom(new int[] {1, 0});
     TSPMove move = new TSPInsertionMove(rng, re);
 
-    Point2D homeA = new Point2D(0.5, 0.5);
-    Point2D homeB = new Point2D(2.0, 0.5);
-    Order orderA = new Order(1, new Point2D(1.0, 1.0), null);
-    Order orderB = new Order(2, new Point2D(2.0, 2.0), null);
-    Order orderC = new Order(3, new Point2D(3.0, 3.0), null);
-
-    VehicleRoute vrA = new VehicleRoute(1, homeA, List.of(orderA, orderB, orderC), false);
-    VehicleRoute vrB = new VehicleRoute(2, homeB, new LinkedList<>(), false);
-
-    re.scoreRouteFull(vrA);
-    re.scoreRouteFull(vrB);
-
-    double expectedResultA =
-        homeA.distance(orderA.getTo()) + orderA.getTo().distance(orderB.getTo()) +
-            orderB.getTo().distance(orderC.getTo());
-    double expectedResultB = Double.NaN;
-
-    Assertions.assertEquals(expectedResultA, vrA.getScore(), 1e-10);
-    Assertions.assertEquals(expectedResultB, vrB.getScore(), 1e-10);
-
-    Optional<TSPMoveResult> result = move.performMove(List.of(vrA, vrB));
-
-    Assertions.assertEquals(2, result.get().vehicles().size());
-    Assertions.assertEquals(2, result.get().vehicles().get(0).getRoute().size());
-    Assertions.assertEquals(1, result.get().vehicles().get(1).getRoute().size());
-
-    Assertions.assertEquals(1, result.get().vehicles().get(0).getRoute().get(0).getId());
-    Assertions.assertEquals(3, result.get().vehicles().get(0).getRoute().get(1).getId());
-    Assertions.assertEquals(2, result.get().vehicles().get(1).getRoute().get(0).getId());
-
-    expectedResultA = homeA.distance(orderA.getTo()) + orderA.getTo().distance(orderC.getTo());
-    Assertions.assertEquals(expectedResultA, result.get().vehicles().get(0).getScore(), 1e-10);
-    expectedResultB = homeB.distance(orderB.getTo());
-    Assertions.assertEquals(expectedResultB, result.get().vehicles().get(1).getScore(), 1e-10);
+    evaluateMoveTwoVehicles(move, List.of(1, 2, 3), List.of(),
+        List.of(1, 3), List.of(2), false);
   }
 
   @Test
@@ -463,50 +231,8 @@ class TSPInsertionMoveTest {
     Random rng = new CustomRandom(new int[] {1, 3}, new boolean[] {true});
     TSPMove move = new TSPInsertionMove(rng, re);
 
-    Point2D homeA = new Point2D(0.5, 0.5);
-    Point2D homeB = new Point2D(2.0, 0.5);
-    Order orderA = new Order(1, new Point2D(1.0, 1.0), null);
-    Order orderB = new Order(2, new Point2D(2.0, 2.0), null);
-    Order orderC = new Order(3, new Point2D(3.0, 3.0), null);
-    Order orderD = new Order(4, new Point2D(4.0, 4.0), null);
-    Order orderE = new Order(5, new Point2D(5.0, 5.0), null);
-    Order orderF = new Order(6, new Point2D(6.0, 6.0), null);
-
-    VehicleRoute vrA = new VehicleRoute(1, homeA, List.of(orderA, orderB, orderC), false);
-    VehicleRoute vrB = new VehicleRoute(2, homeB, List.of(orderD, orderE, orderF), false);
-
-    re.scoreRouteFull(vrA);
-    re.scoreRouteFull(vrB);
-
-    double expectedResultA =
-        homeA.distance(orderA.getTo()) + orderA.getTo().distance(orderB.getTo()) +
-            orderB.getTo().distance(orderC.getTo());
-    double expectedResultB =
-        homeB.distance(orderD.getTo()) + orderD.getTo().distance(orderE.getTo()) +
-            orderE.getTo().distance(orderF.getTo());
-
-    Assertions.assertEquals(expectedResultA, vrA.getScore(), 1e-10);
-    Assertions.assertEquals(expectedResultB, vrB.getScore(), 1e-10);
-
-    Optional<TSPMoveResult> result = move.performMove(List.of(vrA, vrB));
-
-    Assertions.assertEquals(2, result.get().vehicles().size());
-    Assertions.assertEquals(2, result.get().vehicles().get(0).getRoute().size());
-    Assertions.assertEquals(4, result.get().vehicles().get(1).getRoute().size());
-
-    Assertions.assertEquals(1, result.get().vehicles().get(0).getRoute().get(0).getId());
-    Assertions.assertEquals(3, result.get().vehicles().get(0).getRoute().get(1).getId());
-
-    Assertions.assertEquals(4, result.get().vehicles().get(1).getRoute().get(0).getId());
-    Assertions.assertEquals(5, result.get().vehicles().get(1).getRoute().get(1).getId());
-    Assertions.assertEquals(6, result.get().vehicles().get(1).getRoute().get(2).getId());
-    Assertions.assertEquals(2, result.get().vehicles().get(1).getRoute().get(3).getId());
-
-    expectedResultA = homeA.distance(orderA.getTo()) + orderA.getTo().distance(orderC.getTo());
-    Assertions.assertEquals(expectedResultA, result.get().vehicles().get(0).getScore(), 1e-10);
-    expectedResultB = homeB.distance(orderD.getTo()) + orderD.getTo().distance(orderE.getTo()) +
-        orderE.getTo().distance(orderF.getTo()) + orderF.getTo().distance(orderB.getTo());
-    Assertions.assertEquals(expectedResultB, result.get().vehicles().get(1).getScore(), 1e-10);
+    evaluateMoveTwoVehicles(move, List.of(1, 2, 3), List.of(4, 5, 6),
+        List.of(1, 3), List.of(4, 5, 6, 2), false);
   }
 
   @Test
@@ -515,52 +241,8 @@ class TSPInsertionMoveTest {
     Random rng = new CustomRandom(new int[] {1, 3}, new boolean[] {true});
     TSPMove move = new TSPInsertionMove(rng, re);
 
-    Point2D homeA = new Point2D(0.5, 0.5);
-    Point2D homeB = new Point2D(2.0, 0.5);
-    Order orderA = new Order(1, new Point2D(1.0, 1.0), null);
-    Order orderB = new Order(2, new Point2D(2.0, 2.0), null);
-    Order orderC = new Order(3, new Point2D(3.0, 3.0), null);
-    Order orderD = new Order(4, new Point2D(4.0, 4.0), null);
-    Order orderE = new Order(5, new Point2D(5.0, 5.0), null);
-    Order orderF = new Order(6, new Point2D(6.0, 6.0), null);
-
-    VehicleRoute vrA = new VehicleRoute(1, homeA, List.of(orderA, orderB, orderC), true);
-    VehicleRoute vrB = new VehicleRoute(2, homeB, List.of(orderD, orderE, orderF), true);
-
-    re.scoreRouteFull(vrA);
-    re.scoreRouteFull(vrB);
-
-    double expectedResultA =
-        homeA.distance(orderA.getTo()) + orderA.getTo().distance(orderB.getTo()) +
-            orderB.getTo().distance(orderC.getTo()) + orderC.getTo().distance(homeA);
-    double expectedResultB =
-        homeB.distance(orderD.getTo()) + orderD.getTo().distance(orderE.getTo()) +
-            orderE.getTo().distance(orderF.getTo()) + orderF.getTo().distance(homeB);
-
-    Assertions.assertEquals(expectedResultA, vrA.getScore(), 1e-10);
-    Assertions.assertEquals(expectedResultB, vrB.getScore(), 1e-10);
-
-    Optional<TSPMoveResult> result = move.performMove(List.of(vrA, vrB));
-
-    Assertions.assertEquals(2, result.get().vehicles().size());
-    Assertions.assertEquals(2, result.get().vehicles().get(0).getRoute().size());
-    Assertions.assertEquals(4, result.get().vehicles().get(1).getRoute().size());
-
-    Assertions.assertEquals(1, result.get().vehicles().get(0).getRoute().get(0).getId());
-    Assertions.assertEquals(3, result.get().vehicles().get(0).getRoute().get(1).getId());
-
-    Assertions.assertEquals(4, result.get().vehicles().get(1).getRoute().get(0).getId());
-    Assertions.assertEquals(5, result.get().vehicles().get(1).getRoute().get(1).getId());
-    Assertions.assertEquals(6, result.get().vehicles().get(1).getRoute().get(2).getId());
-    Assertions.assertEquals(2, result.get().vehicles().get(1).getRoute().get(3).getId());
-
-    expectedResultA = homeA.distance(orderA.getTo()) + orderA.getTo().distance(orderC.getTo()) +
-        orderC.getTo().distance(homeA);
-    Assertions.assertEquals(expectedResultA, result.get().vehicles().get(0).getScore(), 1e-10);
-    expectedResultB = homeB.distance(orderD.getTo()) + orderD.getTo().distance(orderE.getTo()) +
-        orderE.getTo().distance(orderF.getTo()) + orderF.getTo().distance(orderB.getTo()) +
-        orderB.getTo().distance(homeB);
-    Assertions.assertEquals(expectedResultB, result.get().vehicles().get(1).getScore(), 1e-10);
+    evaluateMoveTwoVehicles(move, List.of(1, 2, 3), List.of(4, 5, 6),
+        List.of(1, 3), List.of(4, 5, 6, 2), true);
   }
 
 
@@ -570,50 +252,8 @@ class TSPInsertionMoveTest {
     Random rng = new CustomRandom(new int[] {1, 0}, new boolean[] {true});
     TSPMove move = new TSPInsertionMove(rng, re);
 
-    Point2D homeA = new Point2D(0.5, 0.5);
-    Point2D homeB = new Point2D(2.0, 0.5);
-    Order orderA = new Order(1, new Point2D(1.0, 1.0), null);
-    Order orderB = new Order(2, new Point2D(2.0, 2.0), null);
-    Order orderC = new Order(3, new Point2D(3.0, 3.0), null);
-    Order orderD = new Order(4, new Point2D(4.0, 4.0), null);
-    Order orderE = new Order(5, new Point2D(5.0, 5.0), null);
-    Order orderF = new Order(6, new Point2D(6.0, 6.0), null);
-
-    VehicleRoute vrA = new VehicleRoute(1, homeA, List.of(orderA, orderB, orderC), false);
-    VehicleRoute vrB = new VehicleRoute(2, homeB, List.of(orderD, orderE, orderF), false);
-
-    re.scoreRouteFull(vrA);
-    re.scoreRouteFull(vrB);
-
-    double expectedResultA =
-        homeA.distance(orderA.getTo()) + orderA.getTo().distance(orderB.getTo()) +
-            orderB.getTo().distance(orderC.getTo());
-    double expectedResultB =
-        homeB.distance(orderD.getTo()) + orderD.getTo().distance(orderE.getTo()) +
-            orderE.getTo().distance(orderF.getTo());
-
-    Assertions.assertEquals(expectedResultA, vrA.getScore(), 1e-10);
-    Assertions.assertEquals(expectedResultB, vrB.getScore(), 1e-10);
-
-    Optional<TSPMoveResult> result = move.performMove(List.of(vrA, vrB));
-
-    Assertions.assertEquals(2, result.get().vehicles().size());
-    Assertions.assertEquals(2, result.get().vehicles().get(0).getRoute().size());
-    Assertions.assertEquals(4, result.get().vehicles().get(1).getRoute().size());
-
-    Assertions.assertEquals(1, result.get().vehicles().get(0).getRoute().get(0).getId());
-    Assertions.assertEquals(3, result.get().vehicles().get(0).getRoute().get(1).getId());
-
-    Assertions.assertEquals(2, result.get().vehicles().get(1).getRoute().get(0).getId());
-    Assertions.assertEquals(4, result.get().vehicles().get(1).getRoute().get(1).getId());
-    Assertions.assertEquals(5, result.get().vehicles().get(1).getRoute().get(2).getId());
-    Assertions.assertEquals(6, result.get().vehicles().get(1).getRoute().get(3).getId());
-
-    expectedResultA = homeA.distance(orderA.getTo()) + orderA.getTo().distance(orderC.getTo());
-    Assertions.assertEquals(expectedResultA, result.get().vehicles().get(0).getScore(), 1e-10);
-    expectedResultB = homeB.distance(orderB.getTo()) + orderB.getTo().distance(orderD.getTo()) +
-        orderD.getTo().distance(orderE.getTo()) + orderE.getTo().distance(orderF.getTo());
-    Assertions.assertEquals(expectedResultB, result.get().vehicles().get(1).getScore(), 1e-10);
+    evaluateMoveTwoVehicles(move, List.of(1, 2, 3), List.of(4, 5, 6),
+        List.of(1, 3), List.of(2, 4, 5, 6), false);
   }
 
   @Test
@@ -622,50 +262,8 @@ class TSPInsertionMoveTest {
     Random rng = new CustomRandom(new int[] {2, 0}, new boolean[] {true});
     TSPMove move = new TSPInsertionMove(rng, re);
 
-    Point2D homeA = new Point2D(0.5, 0.5);
-    Point2D homeB = new Point2D(2.0, 0.5);
-    Order orderA = new Order(1, new Point2D(1.0, 1.0), null);
-    Order orderB = new Order(2, new Point2D(2.0, 2.0), null);
-    Order orderC = new Order(3, new Point2D(3.0, 3.0), null);
-    Order orderD = new Order(4, new Point2D(4.0, 4.0), null);
-    Order orderE = new Order(5, new Point2D(5.0, 5.0), null);
-    Order orderF = new Order(6, new Point2D(6.0, 6.0), null);
-
-    VehicleRoute vrA = new VehicleRoute(1, homeA, List.of(orderA, orderB, orderC), false);
-    VehicleRoute vrB = new VehicleRoute(2, homeB, List.of(orderD, orderE, orderF), false);
-
-    re.scoreRouteFull(vrA);
-    re.scoreRouteFull(vrB);
-
-    double expectedResultA =
-        homeA.distance(orderA.getTo()) + orderA.getTo().distance(orderB.getTo()) +
-            orderB.getTo().distance(orderC.getTo());
-    double expectedResultB =
-        homeB.distance(orderD.getTo()) + orderD.getTo().distance(orderE.getTo()) +
-            orderE.getTo().distance(orderF.getTo());
-
-    Assertions.assertEquals(expectedResultA, vrA.getScore(), 1e-10);
-    Assertions.assertEquals(expectedResultB, vrB.getScore(), 1e-10);
-
-    Optional<TSPMoveResult> result = move.performMove(List.of(vrA, vrB));
-
-    Assertions.assertEquals(2, result.get().vehicles().size());
-    Assertions.assertEquals(2, result.get().vehicles().get(0).getRoute().size());
-    Assertions.assertEquals(4, result.get().vehicles().get(1).getRoute().size());
-
-    Assertions.assertEquals(1, result.get().vehicles().get(0).getRoute().get(0).getId());
-    Assertions.assertEquals(2, result.get().vehicles().get(0).getRoute().get(1).getId());
-
-    Assertions.assertEquals(3, result.get().vehicles().get(1).getRoute().get(0).getId());
-    Assertions.assertEquals(4, result.get().vehicles().get(1).getRoute().get(1).getId());
-    Assertions.assertEquals(5, result.get().vehicles().get(1).getRoute().get(2).getId());
-    Assertions.assertEquals(6, result.get().vehicles().get(1).getRoute().get(3).getId());
-
-    expectedResultA = homeA.distance(orderA.getTo()) + orderA.getTo().distance(orderB.getTo());
-    Assertions.assertEquals(expectedResultA, result.get().vehicles().get(0).getScore(), 1e-10);
-    expectedResultB = homeB.distance(orderC.getTo()) + orderC.getTo().distance(orderD.getTo()) +
-        orderD.getTo().distance(orderE.getTo()) + orderE.getTo().distance(orderF.getTo());
-    Assertions.assertEquals(expectedResultB, result.get().vehicles().get(1).getScore(), 1e-10);
+    evaluateMoveTwoVehicles(move, List.of(1, 2, 3), List.of(4, 5, 6),
+        List.of(1, 2), List.of(3, 4, 5, 6), false);
   }
 
   @Test
@@ -674,50 +272,8 @@ class TSPInsertionMoveTest {
     Random rng = new CustomRandom(new int[] {1, 3}, new boolean[] {false});
     TSPMove move = new TSPInsertionMove(rng, re);
 
-    Point2D homeA = new Point2D(0.5, 0.5);
-    Point2D homeB = new Point2D(2.0, 0.5);
-    Order orderA = new Order(1, new Point2D(1.0, 1.0), null);
-    Order orderB = new Order(2, new Point2D(2.0, 2.0), null);
-    Order orderC = new Order(3, new Point2D(3.0, 3.0), null);
-    Order orderD = new Order(4, new Point2D(4.0, 4.0), null);
-    Order orderE = new Order(5, new Point2D(5.0, 5.0), null);
-    Order orderF = new Order(6, new Point2D(6.0, 6.0), null);
-
-    VehicleRoute vrA = new VehicleRoute(1, homeA, List.of(orderA, orderB, orderC), false);
-    VehicleRoute vrB = new VehicleRoute(2, homeB, List.of(orderD, orderE, orderF), false);
-
-    re.scoreRouteFull(vrA);
-    re.scoreRouteFull(vrB);
-
-    double expectedResultA =
-        homeA.distance(orderA.getTo()) + orderA.getTo().distance(orderB.getTo()) +
-            orderB.getTo().distance(orderC.getTo());
-    double expectedResultB =
-        homeB.distance(orderD.getTo()) + orderD.getTo().distance(orderE.getTo()) +
-            orderE.getTo().distance(orderF.getTo());
-
-    Assertions.assertEquals(expectedResultA, vrA.getScore(), 1e-10);
-    Assertions.assertEquals(expectedResultB, vrB.getScore(), 1e-10);
-
-    Optional<TSPMoveResult> result = move.performMove(List.of(vrA, vrB));
-
-    Assertions.assertEquals(2, result.get().vehicles().size());
-    Assertions.assertEquals(4, result.get().vehicles().get(0).getRoute().size());
-    Assertions.assertEquals(2, result.get().vehicles().get(1).getRoute().size());
-
-    Assertions.assertEquals(1, result.get().vehicles().get(0).getRoute().get(0).getId());
-    Assertions.assertEquals(2, result.get().vehicles().get(0).getRoute().get(1).getId());
-    Assertions.assertEquals(3, result.get().vehicles().get(0).getRoute().get(2).getId());
-    Assertions.assertEquals(5, result.get().vehicles().get(0).getRoute().get(3).getId());
-
-    Assertions.assertEquals(4, result.get().vehicles().get(1).getRoute().get(0).getId());
-    Assertions.assertEquals(6, result.get().vehicles().get(1).getRoute().get(1).getId());
-
-    expectedResultA = homeA.distance(orderA.getTo()) + orderA.getTo().distance(orderB.getTo()) +
-        orderB.getTo().distance(orderC.getTo()) + orderC.getTo().distance(orderE.getTo());
-    Assertions.assertEquals(expectedResultA, result.get().vehicles().get(0).getScore(), 1e-10);
-    expectedResultB = homeB.distance(orderD.getTo()) + orderD.getTo().distance(orderF.getTo());
-    Assertions.assertEquals(expectedResultB, result.get().vehicles().get(1).getScore(), 1e-10);
+    evaluateMoveTwoVehicles(move, List.of(1, 2, 3), List.of(4, 5, 6),
+        List.of(1, 2, 3, 5), List.of(4, 6), false);
   }
 
   @Test
@@ -726,50 +282,8 @@ class TSPInsertionMoveTest {
     Random rng = new CustomRandom(new int[] {1, 0}, new boolean[] {false});
     TSPMove move = new TSPInsertionMove(rng, re);
 
-    Point2D homeA = new Point2D(0.5, 0.5);
-    Point2D homeB = new Point2D(2.0, 0.5);
-    Order orderA = new Order(1, new Point2D(1.0, 1.0), null);
-    Order orderB = new Order(2, new Point2D(2.0, 2.0), null);
-    Order orderC = new Order(3, new Point2D(3.0, 3.0), null);
-    Order orderD = new Order(4, new Point2D(4.0, 4.0), null);
-    Order orderE = new Order(5, new Point2D(5.0, 5.0), null);
-    Order orderF = new Order(6, new Point2D(6.0, 6.0), null);
-
-    VehicleRoute vrA = new VehicleRoute(1, homeA, List.of(orderA, orderB, orderC), false);
-    VehicleRoute vrB = new VehicleRoute(2, homeB, List.of(orderD, orderE, orderF), false);
-
-    re.scoreRouteFull(vrA);
-    re.scoreRouteFull(vrB);
-
-    double expectedResultA =
-        homeA.distance(orderA.getTo()) + orderA.getTo().distance(orderB.getTo()) +
-            orderB.getTo().distance(orderC.getTo());
-    double expectedResultB =
-        homeB.distance(orderD.getTo()) + orderD.getTo().distance(orderE.getTo()) +
-            orderE.getTo().distance(orderF.getTo());
-
-    Assertions.assertEquals(expectedResultA, vrA.getScore(), 1e-10);
-    Assertions.assertEquals(expectedResultB, vrB.getScore(), 1e-10);
-
-    Optional<TSPMoveResult> result = move.performMove(List.of(vrA, vrB));
-
-    Assertions.assertEquals(2, result.get().vehicles().size());
-    Assertions.assertEquals(4, result.get().vehicles().get(0).getRoute().size());
-    Assertions.assertEquals(2, result.get().vehicles().get(1).getRoute().size());
-
-    Assertions.assertEquals(5, result.get().vehicles().get(0).getRoute().get(0).getId());
-    Assertions.assertEquals(1, result.get().vehicles().get(0).getRoute().get(1).getId());
-    Assertions.assertEquals(2, result.get().vehicles().get(0).getRoute().get(2).getId());
-    Assertions.assertEquals(3, result.get().vehicles().get(0).getRoute().get(3).getId());
-
-    Assertions.assertEquals(4, result.get().vehicles().get(1).getRoute().get(0).getId());
-    Assertions.assertEquals(6, result.get().vehicles().get(1).getRoute().get(1).getId());
-
-    expectedResultA = homeA.distance(orderE.getTo()) + orderE.getTo().distance(orderA.getTo()) +
-        orderA.getTo().distance(orderB.getTo()) + orderB.getTo().distance(orderC.getTo());
-    Assertions.assertEquals(expectedResultA, result.get().vehicles().get(0).getScore(), 1e-10);
-    expectedResultB = homeB.distance(orderD.getTo()) + orderD.getTo().distance(orderF.getTo());
-    Assertions.assertEquals(expectedResultB, result.get().vehicles().get(1).getScore(), 1e-10);
+    evaluateMoveTwoVehicles(move, List.of(1, 2, 3), List.of(4, 5, 6),
+        List.of(5, 1, 2, 3), List.of(4, 6), false);
   }
 
   @Test
@@ -778,49 +292,100 @@ class TSPInsertionMoveTest {
     Random rng = new CustomRandom(new int[] {2, 0}, new boolean[] {false});
     TSPMove move = new TSPInsertionMove(rng, re);
 
-    Point2D homeA = new Point2D(0.5, 0.5);
-    Point2D homeB = new Point2D(2.0, 0.5);
-    Order orderA = new Order(1, new Point2D(1.0, 1.0), null);
-    Order orderB = new Order(2, new Point2D(2.0, 2.0), null);
-    Order orderC = new Order(3, new Point2D(3.0, 3.0), null);
-    Order orderD = new Order(4, new Point2D(4.0, 4.0), null);
-    Order orderE = new Order(5, new Point2D(5.0, 5.0), null);
-    Order orderF = new Order(6, new Point2D(6.0, 6.0), null);
+    evaluateMoveTwoVehicles(move, List.of(1, 2, 3), List.of(4, 5, 6),
+        List.of(6, 1, 2, 3), List.of(4, 5), false);
+  }
 
-    VehicleRoute vrA = new VehicleRoute(1, homeA, List.of(orderA, orderB, orderC), false);
-    VehicleRoute vrB = new VehicleRoute(2, homeB, List.of(orderD, orderE, orderF), false);
+
+  @Test
+  public void test2Vehicle6OrdersRemoveBEndInsertABeginVariation() {
+    RouteEvaluator re = new RouteEvaluator();
+    Random rng = new CustomRandom(new int[] {1, 0}, new boolean[] {false});
+    TSPMove move = new TSPInsertionMove(rng, re);
+
+    evaluateMoveTwoVehicles(move, List.of(), List.of(4, 5),
+        List.of(5), List.of(4), false);
+  }
+
+  private void evaluateMoveOneVehicle(TSPMove move, List<Integer> base, List<Integer> goal,
+                                      boolean isRoundtrip) {
+
+    VehicleRoute vrA = new VehicleRoute(1, homeA, createList(base), isRoundtrip);
+
+    re.scoreRouteFull(vrA);
+
+    double expectedResultA = scoreExpectedRoute(createList(base), homeA, isRoundtrip);
+
+    assertEquals(expectedResultA, vrA.getScore(), 1e-10);
+
+    Optional<TSPMoveResult> result = move.performMove(List.of(vrA));
+    Assertions.assertTrue(result.isPresent());
+
+    assertEquals(1, result.get().vehicles().size());
+    checkVehicle(result.get().vehicles().get(0), goal, homeA);
+  }
+
+  private void evaluateMoveTwoVehicles(TSPMove move, List<Integer> baseA, List<Integer> baseB,
+                                       List<Integer> goalA, List<Integer> goalB,
+                                       boolean isRoundtrip) {
+
+    VehicleRoute vrA = new VehicleRoute(1, homeA, createList(baseA), isRoundtrip);
+    VehicleRoute vrB = new VehicleRoute(2, homeB, createList(baseB), isRoundtrip);
 
     re.scoreRouteFull(vrA);
     re.scoreRouteFull(vrB);
 
-    double expectedResultA =
-        homeA.distance(orderA.getTo()) + orderA.getTo().distance(orderB.getTo()) +
-            orderB.getTo().distance(orderC.getTo());
-    double expectedResultB =
-        homeB.distance(orderD.getTo()) + orderD.getTo().distance(orderE.getTo()) +
-            orderE.getTo().distance(orderF.getTo());
+    double expectedResultA = scoreExpectedRoute(createList(baseA), homeA, isRoundtrip);
+    double expectedResultB = scoreExpectedRoute(createList(baseB), homeB, isRoundtrip);
 
-    Assertions.assertEquals(expectedResultA, vrA.getScore(), 1e-10);
-    Assertions.assertEquals(expectedResultB, vrB.getScore(), 1e-10);
+    assertEquals(expectedResultA, vrA.getScore(), 1e-10);
+    assertEquals(expectedResultB, vrB.getScore(), 1e-10);
 
     Optional<TSPMoveResult> result = move.performMove(List.of(vrA, vrB));
+    Assertions.assertTrue(result.isPresent());
 
-    Assertions.assertEquals(2, result.get().vehicles().size());
-    Assertions.assertEquals(4, result.get().vehicles().get(0).getRoute().size());
-    Assertions.assertEquals(2, result.get().vehicles().get(1).getRoute().size());
-
-    Assertions.assertEquals(6, result.get().vehicles().get(0).getRoute().get(0).getId());
-    Assertions.assertEquals(1, result.get().vehicles().get(0).getRoute().get(1).getId());
-    Assertions.assertEquals(2, result.get().vehicles().get(0).getRoute().get(2).getId());
-    Assertions.assertEquals(3, result.get().vehicles().get(0).getRoute().get(3).getId());
-
-    Assertions.assertEquals(4, result.get().vehicles().get(1).getRoute().get(0).getId());
-    Assertions.assertEquals(5, result.get().vehicles().get(1).getRoute().get(1).getId());
-
-    expectedResultA = homeA.distance(orderF.getTo()) + orderF.getTo().distance(orderA.getTo()) +
-        orderA.getTo().distance(orderB.getTo()) + orderB.getTo().distance(orderC.getTo());
-    Assertions.assertEquals(expectedResultA, result.get().vehicles().get(0).getScore(), 1e-10);
-    expectedResultB = homeB.distance(orderD.getTo()) + orderD.getTo().distance(orderE.getTo());
-    Assertions.assertEquals(expectedResultB, result.get().vehicles().get(1).getScore(), 1e-10);
+    assertEquals(2, result.get().vehicles().size());
+    checkVehicle(result.get().vehicles().get(0), goalA, homeA);
+    checkVehicle(result.get().vehicles().get(1), goalB, homeB);
   }
+
+  private void checkVehicle(VehicleRoute vr, List<Integer> expectedRoute, Point2D home) {
+    assertEquals(expectedRoute.size(), vr.getRoute().size());
+
+    if (!expectedRoute.isEmpty()) {
+      List<Order> orders = createList(expectedRoute);
+
+      for (int i = 0; i < expectedRoute.size(); i++) {
+        assertEquals(expectedRoute.get(i), vr.getRoute().get(i).getId());
+      }
+
+      double sum = scoreExpectedRoute(orders, home, vr.isRoundtrip());
+      assertEquals(sum, vr.getScore(), 1e-10);
+    }
+  }
+
+  private List<Order> createList(List<Integer> expectedRoute) {
+    List<Order> orders = new ArrayList<>(expectedRoute.size());
+    for (int id : expectedRoute) {
+      orders.add(orderMap.get(id));
+    }
+    return orders;
+  }
+
+  private double scoreExpectedRoute(List<Order> orders, Point2D home, boolean isRoundTrip) {
+    if (orders.isEmpty()) {
+      return Double.NaN;
+    }
+
+    double sum = home.distance(orders.get(0).getTo());
+    for (int i = 1; i < orders.size(); i++) {
+      sum += orders.get(i - 1).getTo().distance(orders.get(i).getTo());
+    }
+    if (isRoundTrip) {
+      sum += orders.get(orders.size() - 1).getTo().distance(home);
+    }
+    return sum;
+  }
+
+
 }

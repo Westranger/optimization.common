@@ -25,7 +25,8 @@ import org.junit.jupiter.api.Assertions;
 public class Benchmark {
   public static void main(String[] args) {
     final InputStreamReader reader = new InputStreamReader(
-        SimulatedAnnealingTest.class.getResourceAsStream("/tmp/vrp_problem_50_650_PDE.json"));
+        //SimulatedAnnealingTest.class.getResourceAsStream("/tmp/vrp_problem_50_650_PDE.json"));
+        SimulatedAnnealingTest.class.getResourceAsStream("/tsp/1_vehicle_194_orders.json"));
     final Gson gson = new Gson();
     final ProblemFormulation problem = gson.fromJson(reader, ProblemFormulation.class);
 
@@ -40,7 +41,7 @@ public class Benchmark {
         .entrySet()) {
       if (entry.getKey() == 1) {
         final VehicleRoute vr =
-            new VehicleRoute(entry.getKey(), entry.getValue(), orders, false);
+            new VehicleRoute(entry.getKey(), entry.getValue(), orders, true);
         orderMapping.put(entry.getKey(), vr);
       } else {
         final VehicleRoute vr =

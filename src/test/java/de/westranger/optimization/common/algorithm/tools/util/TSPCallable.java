@@ -25,11 +25,13 @@ public final class TSPCallable implements Callable<Map<String, Double>> {
 
   private final Map<String, Double> param;
   private final int numTries;
+  private final boolean idRoundtrip;
 
-  public TSPCallable(final ProblemFormulation pf, final Map<String, Double> param, int numTries) {
+  public TSPCallable(final ProblemFormulation pf, final Map<String, Double> param, int numTries, boolean idRoundtrip) {
     this.pf = pf;
     this.param = param;
     this.numTries = numTries;
+    this.idRoundtrip = idRoundtrip;
   }
 
   @Override
@@ -73,11 +75,11 @@ public final class TSPCallable implements Callable<Map<String, Double>> {
         .entrySet()) {
       if (entry.getKey() == 1) {
         final VehicleRoute vr =
-            new VehicleRoute(entry.getKey(), entry.getValue(), orders, false);
+            new VehicleRoute(entry.getKey(), entry.getValue(), orders, this.idRoundtrip);
         orderMapping.put(entry.getKey(), vr);
       } else {
         final VehicleRoute vr =
-            new VehicleRoute(entry.getKey(), entry.getValue(), new ArrayList<>(), false);
+            new VehicleRoute(entry.getKey(), entry.getValue(), new ArrayList<>(), this.idRoundtrip);
         orderMapping.put(entry.getKey(), vr);
       }
     }

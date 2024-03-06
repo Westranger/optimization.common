@@ -33,13 +33,22 @@ public class State extends SearchSpaceState {
     this.routeEval = routeEval;
     this.lastPerformedAction = Optional.empty();
 
-    //System.out.println("start score ");
     double score = 0.0;
     for (Map.Entry<Integer, VehicleRoute> entry : orderMapping.entrySet()) {
       routeEval.scoreRouteFull(entry.getValue());
       double tmp = entry.getValue().getScore();
       score += !Double.isNaN(tmp) ? tmp : 0.0;
     }
+
+    this.score = new TSPScore(score);
+  }
+
+  public State(final List<Order> orderList, final Map<Integer, VehicleRoute> orderMapping,
+               final RouteEvaluator routeEval, final double score) {
+    this.orderList = new LinkedList<>(orderList);
+    this.orderMapping = new TreeMap<>(orderMapping);
+    this.routeEval = routeEval;
+    this.lastPerformedAction = Optional.empty();
     this.score = new TSPScore(score);
   }
 
@@ -114,7 +123,9 @@ public class State extends SearchSpaceState {
     double score = 0.0;
     for (Map.Entry<Integer, VehicleRoute> entry : orderMapping.entrySet()) {
       this.routeEval.scoreRouteFull(entry.getValue());
-      score += entry.getValue().getScore();
+      if(!Double.isNaN(entry.getValue().getScore())){
+        score += entry.getValue().getScore();
+      }
     }
     return score;
   }

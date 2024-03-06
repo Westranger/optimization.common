@@ -17,6 +17,12 @@ public final class TSPScore extends Score {
 
   @Override
   public int compareTo(Score score) {
-    return Double.compare(this.value, score.getAbsoluteScore());
+    final double diff = this.value - score.getAbsoluteScore();
+    if (diff < -1e-6) {
+      return -1;
+    } else if (diff > 1e-6) {
+      return 1;
+    }
+    return 0;
   }
 }

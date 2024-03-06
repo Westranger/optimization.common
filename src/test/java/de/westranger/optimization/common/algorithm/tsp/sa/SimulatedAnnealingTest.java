@@ -35,7 +35,7 @@ public class SimulatedAnnealingTest {
     Collections.shuffle(orders, rng);
 
     final VehicleRoute vr =
-        new VehicleRoute(1, problem.getVehicleStartPositions().get(1), orders, false);
+        new VehicleRoute(1, problem.getVehicleStartPositions().get(1), orders, true);
     final RouteEvaluator re = new RouteEvaluator();
 
     State initialState =
@@ -56,6 +56,7 @@ public class SimulatedAnnealingTest {
   @Test
   void solve29citiesTSP() {
     final InputStreamReader reader = new InputStreamReader(
+        //SimulatedAnnealingTest.class.getResourceAsStream("/tsp/1vehicle_8_orders_rectangle.json"));
         SimulatedAnnealingTest.class.getResourceAsStream("/tsp/1_vehicle_29_orders.json"));
     final Gson gson = new Gson();
     final ProblemFormulation problem = gson.fromJson(reader, ProblemFormulation.class);
@@ -67,14 +68,14 @@ public class SimulatedAnnealingTest {
     Collections.shuffle(orders, rng);
 
     final VehicleRoute vr =
-        new VehicleRoute(1, problem.getVehicleStartPositions().get(1), orders, false);
+        new VehicleRoute(1, problem.getVehicleStartPositions().get(1), orders, true);
     final RouteEvaluator re = new RouteEvaluator();
 
     State initialState =
         new State(new ArrayList<>(), Map.of(vr.getId(), vr), re);
 
     SimulatedAnnealingParameter sap =
-        new SimulatedAnnealingParameter(0, 0.001, 0.8, 100, 5, 0.9);
+        new SimulatedAnnealingParameter(0, 0.001, 0.5, 100, 5, 0.9);
 
     TSPNeighbourSelector ns = new TSPNeighbourSelector(sap.tMax(), sap.tMin(), rng);
 
@@ -84,6 +85,6 @@ public class SimulatedAnnealingTest {
 
     Assertions.assertEquals(27601.173774493753, optimizedState.getScore().getAbsoluteScore(),
         1e-10);
-    Assertions.assertEquals(3250, sa.getTotalIterationCounter());
+    Assertions.assertEquals(2082, sa.getTotalIterationCounter());
   }
 }

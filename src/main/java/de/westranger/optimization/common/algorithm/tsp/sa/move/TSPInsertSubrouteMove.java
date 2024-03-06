@@ -5,6 +5,7 @@ import de.westranger.optimization.common.algorithm.tsp.sa.route.RouteEvaluator;
 import de.westranger.optimization.common.algorithm.tsp.sa.route.VehicleRoute;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 public final class TSPInsertSubrouteMove extends TSPMove {
@@ -33,20 +34,20 @@ public final class TSPInsertSubrouteMove extends TSPMove {
   protected VehicleRoute performMoveSingleVehicle(VehicleRoute vr) {
     final int startIdx = rng.nextInt(vr.getRoute().size() - 1);
     final int endIdx = startIdx + rng.nextInt(vr.getRoute().size() - startIdx - 1) + 1;
-    final List<Order> lstA = new ArrayList<>(vr.getRoute());
-    final List<Double> distanceScoreA = new ArrayList<>(vr.getDistanceScore());
-    final List<Integer> idxToUpdate = new ArrayList<>(2);
+    final int insertIdx = this.rng.nextInt(vr.getRoute().size() - (endIdx - startIdx + 1) + 1);
+    List<Order> lstA = new ArrayList<>(vr.getRoute());
+    List<Double> distanceScoreA = new ArrayList<>(vr.getDistanceScore());
+    List<Integer> idxToUpdate = new ArrayList<>(2);
     double newScore = vr.getScore();
 
-    newScore = extractSubrouteAndAdd(startIdx, endIdx, lstA, lstA, distanceScoreA, distanceScoreA,
-        idxToUpdate, idxToUpdate, newScore, vr.isRoundtrip(), vr.isRoundtrip());
+    newScore = extractSubrouteAndAdd(startIdx, endIdx, insertIdx, lstA, lstA, distanceScoreA,
+        distanceScoreA, idxToUpdate, idxToUpdate, newScore, vr.isRoundtrip(), vr.isRoundtrip());
 
     final VehicleRoute vrANew =
         new VehicleRoute(vr.getId(), vr.getHomePosition(), lstA, distanceScoreA, newScore,
             vr.isRoundtrip());
 
     routeEvaluator.scoreRoutePartial(vrANew, idxToUpdate);
-
     return vrANew;
   }
 
@@ -81,12 +82,13 @@ public final class TSPInsertSubrouteMove extends TSPMove {
 
     final int startIdx = rng.nextInt(srcRoute.size() - 1);
     final int endIdx = startIdx + rng.nextInt(srcRoute.size() - startIdx - 1) + 1;
+    final int insertIdx = this.rng.nextInt(dstRoute.size() + 1);
 
     double newSrcScore = useA ? vrA.getScore() : vrB.getScore();
 
-    newSrcScore = extractSubrouteAndAdd(startIdx, endIdx, srcRoute, dstRoute, srcScore, dstScore,
-        idxToUpdateSrc,
-        idxToUpdateDst, newSrcScore, isSrcRoundtrip, isDstRoundtrip);
+    newSrcScore =
+        extractSubrouteAndAdd(startIdx, endIdx, insertIdx, srcRoute, dstRoute, srcScore, dstScore,
+            idxToUpdateSrc, idxToUpdateDst, newSrcScore, isSrcRoundtrip, isDstRoundtrip);
 
     double newScoreA = useA ? newSrcScore : vrA.getScore();
     double newScoreB = useA ? vrB.getScore() : newSrcScore;
@@ -104,7 +106,8 @@ public final class TSPInsertSubrouteMove extends TSPMove {
     return List.of(vrANew, vrBNew);
   }
 
-  private double extractSubrouteAndAdd(int min, int max, List<Order> srcRoute, List<Order> dstRoute,
+  private double extractSubrouteAndAdd(int min, int max, int insertIdx, List<Order> srcRoute,
+                                       List<Order> dstRoute,
                                        List<Double> srcScoreLst, List<Double> dstScoreLst,
                                        List<Integer> idxToUpdateSrc, List<Integer> idxToUpdateDst,
                                        double srcScore,
@@ -115,24 +118,20 @@ public final class TSPInsertSubrouteMove extends TSPMove {
 
     double scoreSum = 0.0;
     double updatedSrcScore = srcScore;
+    double reverseScoreParry = 0.0;
 
     if (reverseSubroute) {
       for (int i = max; i >= min; i--) {
         subRoute.add(srcRoute.remove(i));
-
         double tmp = srcScoreLst.remove(i);
-        scoreSum += tmp;
-        subScore.add(0, tmp);
-      }
 
-      if (min < srcRoute.size() - 1 || isSrcRoundtrip && min == srcRoute.size() - 1) {
-        idxToUpdateSrc.add(min);
-      }
-
-      if (max < srcRoute.size() || isSrcRoundtrip) {
-        srcScoreLst.set(min, srcScoreLst.get(min) + scoreSum);
-      } else {
-        updatedSrcScore -= scoreSum;
+        if (i > min) {
+          scoreSum += tmp;
+          subScore.add(tmp);
+        } else {
+          reverseScoreParry = tmp;
+          subScore.add(0, 0.0);
+        }
       }
     } else {
       for (int i = min; i <= max; i++) {
@@ -142,19 +141,23 @@ public final class TSPInsertSubrouteMove extends TSPMove {
         scoreSum += tmp;
         subScore.add(tmp);
       }
+    }
 
-      if (min < srcRoute.size() - 1 || isSrcRoundtrip && min == srcRoute.size() - 1) {
+    if (min == srcRoute.size() && !isSrcRoundtrip) {
+      updatedSrcScore -= scoreSum + reverseScoreParry;
+    } else {
+      if (insertIdx <= min && srcRoute == dstRoute) {
+        idxToUpdateSrc.add(min + subRoute.size());
+      } else {
         idxToUpdateSrc.add(min);
-        srcScoreLst.set(min, srcScoreLst.get(min) + scoreSum);
       }
+
+      srcScoreLst.set(min, srcScoreLst.get(min) + scoreSum + reverseScoreParry);
     }
     subScore.set(0, subScore.get(0) - scoreSum);
 
-    final int insertIdx = this.rng.nextInt(dstRoute.size() + 1);
-    for (int i = 0; i < subRoute.size(); i++) {
-      dstRoute.add(insertIdx + i, subRoute.get(i));
-      dstScoreLst.add(insertIdx + i, subScore.get(i));
-    }
+    dstRoute.addAll(insertIdx, subRoute);
+    dstScoreLst.addAll(insertIdx, subScore);
 
     idxToUpdateDst.add(insertIdx);
     if (insertIdx + subRoute.size() < dstRoute.size() || isDstRoundtrip) {

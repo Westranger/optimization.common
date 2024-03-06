@@ -75,7 +75,7 @@ public final class TSPInsertionMove extends TSPMove {
     }
     distanceScoreA.add(0.0);
 
-    if (!lstB.isEmpty()) {
+    if (!lstB.isEmpty() && removeIdx != distanceScoreB.size()) {
       idxToUpdateB.add(removeIdx);
     }
     idxToUpdateA.add(0);
@@ -94,34 +94,34 @@ public final class TSPInsertionMove extends TSPMove {
     final double oldRemoveScore = distanceScoreA.remove(removeIdx);
     int insertIdx = computeInsertIdxSingleVehicle(lstA, removeIdx);
 
-    if (insertIdx == lstA.size()) {
-      lstA.add(order);
-      distanceScoreA.add(oldRemoveScore);
-
-      idxToUpdate.add(insertIdx);
+    if (removeIdx != lstA.size() || isRoundtrip) {
       idxToUpdate.add(removeIdx);
+    }
 
-      if (isRoundtrip) {
-        idxToUpdate.add(insertIdx + 1);
+    lstA.add(insertIdx, order);
+    distanceScoreA.add(insertIdx, oldRemoveScore);
+
+    if (insertIdx < removeIdx) {
+      for (int i = 0; i < idxToUpdate.size(); i++) {
+        idxToUpdate.set(i, idxToUpdate.get(i) + 1);
       }
-    } else {
-      lstA.add(insertIdx, order);
-      distanceScoreA.add(insertIdx, oldRemoveScore);
 
       idxToUpdate.add(insertIdx);
-      if (insertIdx < removeIdx) {
-        if (distanceScoreA.size() == 2) {
-          idxToUpdate.add(removeIdx);
-        } else {
+      idxToUpdate.add(insertIdx + 1);
+    } else {
+      if (insertIdx == lstA.size() - 1) {
+        idxToUpdate.add(insertIdx);
+
+        if (isRoundtrip) {
           idxToUpdate.add(insertIdx + 1);
-          idxToUpdate.add(removeIdx + 1);
         }
       } else {
+        idxToUpdate.add(insertIdx);
         idxToUpdate.add(insertIdx + 1);
-        idxToUpdate.add(removeIdx);
       }
     }
   }
+
 
   private int computeInsertIdxSingleVehicle(List<Order> lstA, int removeIdx) {
     if (removeIdx != 0 && removeIdx != lstA.size()) {

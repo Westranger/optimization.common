@@ -103,6 +103,7 @@ public final class TSPNeighbourSelector implements NeighbourSelector {
     }
 
     if (moveSRRResult.isPresent() && moveSRRResult.get().score() < min) {
+      min = moveSRRResult.get().score();
       finalResult = moveSRRResult;
     }
 
@@ -123,14 +124,13 @@ public final class TSPNeighbourSelector implements NeighbourSelector {
       }
     }
 
-
     for (Map.Entry<Integer, VehicleRoute> entry : state.getOrderMapping().entrySet()) {
       if (!newMapping.containsKey(entry.getKey())) {
         newMapping.put(entry.getKey(), entry.getValue());
       }
     }
 
-    return new State(new ArrayList<>(), newMapping, state.getRouteEval());
+    return new State(new ArrayList<>(), newMapping, state.getRouteEval(), min);
   }
 
 
