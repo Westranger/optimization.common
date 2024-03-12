@@ -48,7 +48,7 @@ public class SimulatedAnnealingTest {
     SimulatedAnnealing sa = new SimulatedAnnealing(initialState, ns, rng, sap);
 
     SearchSpaceState optimizedState = sa.optimize();
-
+ // {avg_score=9358.20705989015, gamma=0.9, initialAcceptanceRatio=0.9, iter=2.0250528E7, maxImprovementPerTemperature=100.0, omegaMax=250000.0, score=9358.20705989015, tMax=0.0, tMin=1.0}
     Assertions.assertEquals(9353.678079851821, optimizedState.getScore().getAbsoluteScore(), 1e-10);
     Assertions.assertEquals(5.2500528E7, sa.getTotalIterationCounter());
   }

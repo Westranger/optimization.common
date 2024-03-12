@@ -1,6 +1,7 @@
 package de.westranger.optimization.common.algorithm.tools;
 
 import com.google.gson.Gson;
+import de.westranger.optimization.common.algorithm.tools.util.TSPCallable;
 import de.westranger.optimization.common.algorithm.tsp.common.ProblemFormulation;
 import de.westranger.optimization.common.algorithm.tsp.sa.SimulatedAnnealingTest;
 import de.westranger.optimization.common.util.CombinationIterator;
@@ -20,7 +21,6 @@ import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import de.westranger.optimization.common.algorithm.tools.util.TSPCallable;
 
 public final class OptimizeParameter {
 
@@ -37,13 +37,14 @@ public final class OptimizeParameter {
     final int numTries = 1;
 
     input.put("tMax", List.of(0.0));
-    input.put("initialAcceptanceRatio", Arrays.asList(0.9, 0.8, 0.7));
+    input.put("initialAcceptanceRatio", Arrays.asList(0.8, 0.8, 0.7));
     input.put("gamma",
         Arrays.asList(0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.96, 0.97, 0.98, 0.99, 0.999));
-    input.put("tMin", Arrays.asList(0.001, 0.01, 0.1, 1.0, 10.0, 100.0, 1000.0));
+    input.put("tMin",
+        Arrays.asList(1.0e-5, 1.0e-4, 1.0e-3, 1.0e-2, 1.0e-1, 1.0, 10.0, 100.0, 1000.0));
     input.put("omegaMax",
         Arrays.asList(100.0, 250.0, 500.0, 1000.0, 2500.0, 5000.0, 10000.0, 25000.0, 50000.0,
-            100000.0, 250000.0));
+            100000.0/*, 250000.0, 500000.0*/));
     input.put("maxImprovementPerTemperature",
         Arrays.asList(2.0, 5.0, 10.0, 25.0, 50.0, 100.0, 250.0, 500.0));
 
@@ -51,7 +52,7 @@ public final class OptimizeParameter {
         SimulatedAnnealingTest.class.getResourceAsStream("/tsp/1_vehicle_194_orders.json"));
     final Gson gson = new Gson();
     final ProblemFormulation problem = gson.fromJson(reader, ProblemFormulation.class);
-    final int threadPoolSize = 10;
+    final int threadPoolSize = 15;
     final int batchSize = 100;
     final CombinationIterator combinationIterator = new CombinationIterator(input);
     final ProgressTracker pt = new ProgressTracker(combinationIterator.getNumCombinations());

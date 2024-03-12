@@ -13,12 +13,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.TreeMap;
 
 public class State extends SearchSpaceState {
 
   private final List<Order> orderList;
-  private final Map<Integer, VehicleRoute> orderMapping;
+
+  private final List<VehicleRoute> emptyVehicles;
+  private final List<VehicleRoute> nonEmptyVehicles;
 
   private final RouteEvaluator routeEval;
 
@@ -26,44 +27,63 @@ public class State extends SearchSpaceState {
 
   private Optional<Action> lastPerformedAction;
 
-  public State(final List<Order> orderList, final Map<Integer, VehicleRoute> orderMapping,
-               final RouteEvaluator routeEval) {
+  public State(final List<Order> orderList, final List<VehicleRoute> emptyVehicles,
+               final List<VehicleRoute> nonEmptyVehicles, final RouteEvaluator routeEval) {
     this.orderList = new LinkedList<>(orderList);
-    this.orderMapping = new TreeMap<>(orderMapping);
     this.routeEval = routeEval;
     this.lastPerformedAction = Optional.empty();
 
+    this.emptyVehicles = emptyVehicles;
+    this.nonEmptyVehicles = nonEmptyVehicles;
+
+    for (VehicleRoute vr : emptyVehicles) {
+      if (!vr.getRoute().isEmpty()) {
+        throw new IllegalArgumentException(
+            "the route of the provided vehicle " + vr.getId() + " is not empty");
+      }
+    }
+
+    for (VehicleRoute vr : nonEmptyVehicles) {
+      if (!vr.getRoute().isEmpty()) {
+        throw new IllegalArgumentException(
+            "the route of the provided vehicle " + vr.getId() + " is empty");
+      }
+    }
+
     double score = 0.0;
-    for (Map.Entry<Integer, VehicleRoute> entry : orderMapping.entrySet()) {
-      routeEval.scoreRouteFull(entry.getValue());
-      double tmp = entry.getValue().getScore();
+    for (VehicleRoute vr : emptyVehicles) {
+      routeEval.scoreRouteFull(vr);
+      double tmp = vr.getScore();
       score += !Double.isNaN(tmp) ? tmp : 0.0;
     }
 
     this.score = new TSPScore(score);
   }
 
-  public State(final List<Order> orderList, final Map<Integer, VehicleRoute> orderMapping,
-               final RouteEvaluator routeEval, final double score) {
+  public State(final List<Order> orderList, final List<VehicleRoute> emptyVehicles,
+               final List<VehicleRoute> nonEmptyVehicles, final RouteEvaluator routeEval,
+               final double score) {
     this.orderList = new LinkedList<>(orderList);
-    this.orderMapping = new TreeMap<>(orderMapping);
+    this.emptyVehicles = emptyVehicles;
+    this.nonEmptyVehicles = nonEmptyVehicles;
     this.routeEval = routeEval;
     this.lastPerformedAction = Optional.empty();
     this.score = new TSPScore(score);
   }
 
-  private State(final List<Order> orderList, final Map<Integer, VehicleRoute> orderMapping,
-                final RouteEvaluator routeEval, final TSPScore score) {
-    this(orderList, orderMapping, routeEval);
+  private State(final List<Order> orderList, final List<VehicleRoute> emptyVehicles,
+                final List<VehicleRoute> nonEmptyVehicles, final RouteEvaluator routeEval,
+                final TSPScore score) {
+    this(orderList, emptyVehicles, nonEmptyVehicles, routeEval);
     this.score = score;
   }
 
   @Override
   public List<Action> getPossibleActions() {
     final List<Action> result = new LinkedList<>();
-    for (int i : this.orderMapping.keySet()) {
+    for (VehicleRoute vr : this.emptyVehicles) {
       for (Order order : this.orderList) {
-        result.add(new TSPAction(i, order));
+        result.add(new TSPAction(vr.getId(), order));
       }
     }
     return result;
@@ -90,15 +110,19 @@ public class State extends SearchSpaceState {
 
   @Override
   public State clone() {
-    final List<Order> orderList = new ArrayList<>(this.orderList.size());
-    orderList.addAll(this.orderList);
+    final List<Order> orderList = new ArrayList<>(this.orderList);
+    final List<VehicleRoute> emptyVehicles = new ArrayList<>(this.emptyVehicles.size());
+    final List<VehicleRoute> nonEmptyVehicles = new ArrayList<>(this.nonEmptyVehicles.size());
 
-    final Map<Integer, VehicleRoute> orderMapping = new TreeMap<>();
-    for (Map.Entry<Integer, VehicleRoute> entry : this.orderMapping.entrySet()) {
-      orderMapping.put(entry.getKey(), entry.getValue().clone());
+    for (VehicleRoute vr : this.emptyVehicles) {
+      emptyVehicles.add(vr.clone());
     }
 
-    return new State(orderList, orderMapping, this.routeEval, this.score);
+    for (VehicleRoute vr : this.nonEmptyVehicles) {
+      nonEmptyVehicles.add(vr.clone());
+    }
+
+    return new State(orderList, emptyVehicles, nonEmptyVehicles, this.routeEval, this.score);
   }
 
   @Override
@@ -123,7 +147,7 @@ public class State extends SearchSpaceState {
     double score = 0.0;
     for (Map.Entry<Integer, VehicleRoute> entry : orderMapping.entrySet()) {
       this.routeEval.scoreRouteFull(entry.getValue());
-      if(!Double.isNaN(entry.getValue().getScore())){
+      if (!Double.isNaN(entry.getValue().getScore())) {
         score += entry.getValue().getScore();
       }
     }
