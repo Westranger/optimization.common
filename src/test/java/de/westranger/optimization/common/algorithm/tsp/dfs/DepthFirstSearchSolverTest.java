@@ -34,16 +34,14 @@ class DepthFirstSearchSolverTest {
     orderList.add(new Order(5, new Point2D(1.0, 3.0), null));
     orderList.add(new Order(6, new Point2D(1.0, 4.0), null));
 
-    final Map<Integer, VehicleRoute> orderMapping = new TreeMap<>();
-    orderMapping.put(1, new VehicleRoute(1, new Point2D(1.0, 1.0), new ArrayList<>(), false));
-    orderMapping.put(2, new VehicleRoute(2, new Point2D(3.0, 1.0), new ArrayList<>(), false));
-    orderMapping.put(3, new VehicleRoute(3, new Point2D(5.0, 1.0), new ArrayList<>(), false));
-
-    final Map<Integer, Point2D> vehiclePositions = new TreeMap<>();
+    List<VehicleRoute> vrl = new ArrayList<>();
+    vrl.add(new VehicleRoute(1, new Point2D(1.0, 1.0), new ArrayList<>(), false));
+    vrl.add(new VehicleRoute(2, new Point2D(3.0, 1.0), new ArrayList<>(), false));
+    vrl.add(new VehicleRoute(3, new Point2D(5.0, 1.0), new ArrayList<>(), false));
 
     final RouteEvaluator re = new RouteEvaluator();
 
-    State initialState = new State(orderList, orderMapping, re);
+    State initialState = new State(orderList, new ArrayList<>(), vrl, re);
     ActionPlanningSolver aps = new DepthFirstSearchSolver(true);
     aps.setInitialState(initialState);
 
@@ -53,7 +51,7 @@ class DepthFirstSearchSolverTest {
     Assertions.assertEquals(1, solve.get().size());
 
     for (ActionPlanningSolution solution : solve.get()) {
-      Assertions.assertEquals(6.0, solution.getScore().getAbsoluteScore(), 1e-6);
+      Assertions.assertEquals(6.0, solution.getScore().getValue(0), 1e-6);
       Assertions.assertEquals(6, solution.getActions().size());
 
       Map<Integer, Integer> map = new TreeMap<>();

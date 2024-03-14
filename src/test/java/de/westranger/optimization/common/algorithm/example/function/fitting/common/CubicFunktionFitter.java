@@ -8,7 +8,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public final class CubicFunktionFitter extends SearchSpaceState {
+public final class CubicFunktionFitter extends SearchSpaceState<DoubleScore> {
 
   private final CubicFunktion func;
 
@@ -64,7 +64,7 @@ public final class CubicFunktionFitter extends SearchSpaceState {
   }
 
   @Override
-  public Score getScore() {
+  public DoubleScore getScore() {
     return new DoubleScore(this.score);
   }
 
@@ -89,7 +89,7 @@ public final class CubicFunktionFitter extends SearchSpaceState {
   }
 
   @Override
-  public int compareTo(SearchSpaceState searchSpaceState) {
+  public int compareTo(SearchSpaceState<DoubleScore> searchSpaceState) {
     return (new DoubleScore(this.score)).compareTo(searchSpaceState.getScore());
   }
 

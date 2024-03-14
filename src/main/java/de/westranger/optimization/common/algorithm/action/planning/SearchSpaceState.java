@@ -5,18 +5,18 @@ import de.westranger.optimization.common.algorithm.action.planning.solver.Visual
 import java.util.List;
 import java.util.Optional;
 
-public abstract class SearchSpaceState
-    implements Comparable<SearchSpaceState>, Cloneable, Visualizable {
+public abstract class SearchSpaceState<T extends Score>
+    implements Comparable<SearchSpaceState<T>>, Cloneable, Visualizable {
 
   public abstract List<Action> getPossibleActions();
 
   @Deprecated
   public abstract boolean perform(Action action);
 
-  public abstract Score getScore();
+  public abstract T getScore();
 
   @Override
-  public abstract SearchSpaceState clone();
+  public abstract SearchSpaceState<T> clone();
 
   public abstract Optional<Action> getLastPerformedAction();
 

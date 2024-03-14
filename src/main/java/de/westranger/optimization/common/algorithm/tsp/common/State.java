@@ -8,13 +8,14 @@ import de.westranger.optimization.common.algorithm.action.planning.solver.Score;
 import de.westranger.optimization.common.algorithm.tsp.sa.route.RouteEvaluator;
 import de.westranger.optimization.common.algorithm.tsp.sa.route.VehicleRoute;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-public class State extends SearchSpaceState {
+public class State extends SearchSpaceState<TSPScore> {
 
   private final List<Order> orderList;
 
@@ -95,7 +96,7 @@ public class State extends SearchSpaceState {
   }
 
   @Override
-  public Score getScore() {
+  public TSPScore getScore() {
     return this.score;
   }
 
@@ -139,16 +140,20 @@ public class State extends SearchSpaceState {
     return orderList;
   }
 
-  public Map<Integer, VehicleRoute> getOrderMapping() {
-    return orderMapping;
+  public List<VehicleRoute> getEmptyVehicles() {
+    return Collections.unmodifiableList(emptyVehicles);
+  }
+
+  public List<VehicleRoute> getNonEmptyVehicles() {
+    return Collections.unmodifiableList(nonEmptyVehicles);
   }
 
   private double computeFullScore() {
     double score = 0.0;
-    for (Map.Entry<Integer, VehicleRoute> entry : orderMapping.entrySet()) {
-      this.routeEval.scoreRouteFull(entry.getValue());
-      if (!Double.isNaN(entry.getValue().getScore())) {
-        score += entry.getValue().getScore();
+    for (VehicleRoute vr : this.getNonEmptyVehicles()) {
+      this.routeEval.scoreRouteFull(vr);
+      if (!Double.isNaN(vr.getScore())) {
+        score += vr.getScore();
       }
     }
     return score;
@@ -161,7 +166,7 @@ public class State extends SearchSpaceState {
     sb.append(computeFullScore());
     sb.append(' ');
     if (this.score != null) {
-      sb.append(this.score.getAbsoluteScore());
+      sb.append(this.score);
     } else {
       sb.append('x');
     }
@@ -196,9 +201,9 @@ public class State extends SearchSpaceState {
     }
 
     Point2D previousPoint = null;
-    for (Map.Entry<Integer, VehicleRoute> entry : this.orderMapping.entrySet()) {
-      String vehicleColor = colors.get(entry.getKey());
-      for (Order order : entry.getValue().getRoute()) {
+    for (VehicleRoute vr : this.nonEmptyVehicles) {
+      String vehicleColor = colors.get(vr.getId());
+      for (Order order : vr.getRoute()) {
         if (previousPoint != null) {
           svgBuilder.append('\t');
           svgBuilder.append(String.format(Locale.ENGLISH,
@@ -217,27 +222,24 @@ public class State extends SearchSpaceState {
       previousPoint = null;
     }
 
-    for (Map.Entry<Integer, VehicleRoute> entry : this.orderMapping.entrySet()) {
-      String vehicleColor = colors.get(entry.getKey());
+    for (VehicleRoute vr : this.nonEmptyVehicles) {
+      String vehicleColor = colors.get(vr.getId());
       svgBuilder.append('\t');
       svgBuilder.append(String.format(Locale.ENGLISH,
           "<rect x=\"%f\" y=\"%f\" width=\"25\" height=\"25\" fill=\"%s\"/>",
-          entry.getValue().getHomePosition().getY(), entry.getValue().getHomePosition().getX(),
-          vehicleColor));
+          vr.getHomePosition().getY(), vr.getHomePosition().getX(), vehicleColor));
       svgBuilder.append('\n');
 
-      List<Order> orders = entry.getValue().getRoute();
+      List<Order> orders = vr.getRoute();
       if (orders != null && !orders.isEmpty()) {
         final Point2D start = orders.get(0).getTo();
         svgBuilder.append('\t');
         svgBuilder.append(String.format(Locale.ENGLISH,
             "<line x1=\"%f\" y1=\"%f\" x2=\"%f\" y2=\"%f\" stroke=\"%s\"/>",
-            entry.getValue().getHomePosition().getY(), entry.getValue().getHomePosition().getX(),
-            start.getY(), start.getX(),
+            vr.getHomePosition().getY(), vr.getHomePosition().getX(), start.getY(), start.getX(),
             vehicleColor));
         svgBuilder.append('\n');
       }
-
     }
 
     svgBuilder.append("</svg>");
@@ -257,15 +259,15 @@ public class State extends SearchSpaceState {
       maxY = Math.max(maxY, order.getTo().getY());
     }
 
-    for (Map.Entry<Integer, VehicleRoute> entry : this.orderMapping.entrySet()) {
-      final Point2D src = entry.getValue().getHomePosition();
+    for (VehicleRoute vr : this.nonEmptyVehicles) {
+      final Point2D src = vr.getHomePosition();
 
       minX = Math.min(minX, src.getX());
       maxX = Math.max(maxX, src.getX());
       minY = Math.min(minY, src.getY());
       maxY = Math.max(maxY, src.getY());
 
-      for (Order order : entry.getValue().getRoute()) {
+      for (Order order : vr.getRoute()) {
         minX = Math.min(minX, order.getTo().getX());
         maxX = Math.max(maxX, order.getTo().getX());
         minY = Math.min(minY, order.getTo().getY());

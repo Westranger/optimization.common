@@ -14,9 +14,9 @@ import java.util.Random;
 
 // TODO Warnung einfügen, wenn Verhältnis E_max - E_min / T initial kleiner als 0,8 ist
 
-public final class SimulatedAnnealing {
+public final class SimulatedAnnealing<T extends Score> {
 
-  private final SearchSpaceState initialSolution;
+  private final SearchSpaceState<T> initialSolution;
   private final NeighbourSelector ns;
   private final Random rng;
   private final SimulatedAnnealingParameter sap;
@@ -24,7 +24,7 @@ public final class SimulatedAnnealing {
 
   private long totalIterationCounter;
 
-  public SimulatedAnnealing(final SearchSpaceState initialSolution, final NeighbourSelector ns,
+  public SimulatedAnnealing(final SearchSpaceState<T> initialSolution, final NeighbourSelector ns,
                             final Random rng, final SimulatedAnnealingParameter sap,
                             final File telemetryFolder) {
     this.initialSolution = initialSolution;
@@ -35,20 +35,17 @@ public final class SimulatedAnnealing {
     this.telemetryFolder = telemetryFolder;
   }
 
-  public SimulatedAnnealing(final SearchSpaceState initialSolution, final NeighbourSelector ns,
+  public SimulatedAnnealing(final SearchSpaceState<T> initialSolution, final NeighbourSelector ns,
                             final Random rng, final SimulatedAnnealingParameter sap) {
     this(initialSolution, ns, rng, sap, null);
   }
 
   public SearchSpaceState optimize(final boolean loggingEnabled) {
-  public SearchSpaceState optimize() {
-    SearchSpaceState bestSolution = this.initialSolution;
-    Score bestScore = bestSolution.getScore();
+    SearchSpaceState<T> bestSolution = this.initialSolution;
+    T bestScore = bestSolution.getScore();
 
-    SearchSpaceState currentSolution = this.initialSolution;
-    Score currentScore = bestSolution.getScore();
-
-    double gamma = this.sap.gamma();
+    SearchSpaceState<T> currentSolution = this.initialSolution;
+    T currentScore = bestSolution.getScore();
 
     BufferedWriter bwData = null;
     if (telemetryFolder != null) {
@@ -61,35 +58,46 @@ public final class SimulatedAnnealing {
     }
 
     final int numDeltaValues = 500;
-    double sum = 0.0;
     // estimate initial temperature
+    double[] sums = new double[bestScore.getDimensions()];
     for (int i = 0; i < numDeltaValues; i++) {
-      final SearchSpaceState solution = this.ns.select(currentSolution, sap.tMax());
-      final double score = solution.getScore().getAbsoluteScore();
-      sum += Math.abs(currentScore.getAbsoluteScore() - score);
+      final SearchSpaceState<T> solution = this.ns.select(currentSolution, sap.tMax());
+      final Score score = currentScore.difference(solution.getScore());
 
-      if (score < bestScore.getAbsoluteScore()) {
+      for (int j = 0; j < sums.length; j++) {
+        sums[j] += Math.abs(currentScore.getValue(j) - score.getValue(j));
+      }
+
+      if (bestScore.compareTo(score) == -1) {
         bestSolution = solution;
         bestScore = solution.getScore();
       }
     }
 
-    sum /= numDeltaValues;
-    double currentTemp = -sum / Math.log(sap.initialAcceptanceRatio());
+    for (int j = 0; j < sums.length; j++) {
+      sums[j] /= numDeltaValues;
+    }
+
+    double[] currentTemps = new double[bestScore.getDimensions()];
+    for (int j = 0; j < sums.length; j++) {
+      currentTemps[j] = -sums[j] / Math.log(sap.initialAcceptanceRatio());
+    }
 
     // main loop
-    while (currentTemp > this.sap.tMin()) {
+    while (currentTemps[0] >
+        this.sap.tMin()) { // TODO das main loop wird über die temperatur der 1. dimension der score gestuert ... sollte man das ändern ?
       int improved = 0;
       int iterAtTemperature = 0;
 
       while (iterAtTemperature < sap.omegaMax()
           && improved <= sap.maxImprovementPerTemperature()) {
         this.totalIterationCounter++;
-        final SearchSpaceState solutionCandidate =
-            this.ns.select(currentSolution, currentTemp);
-        final Score candidateScore = solutionCandidate.getScore();
+        final SearchSpaceState<T> solutionCandidate =
+            this.ns.select(currentSolution,
+                currentTemps[0]); // TODO hier wird immer eine nachbar selectirt anhand der temperatur der 1. dimension, ist das gut oder schlecht ?
+        final T candidateScore = solutionCandidate.getScore();
 
-        if (candidateScore.compareTo(bestScore) < 0) {
+        if (candidateScore.compareTo(bestScore) == -1) {
           bestScore = candidateScore;
           bestSolution = solutionCandidate;
           improved++;
@@ -111,8 +119,11 @@ public final class SimulatedAnnealing {
           currentScore = candidateScore;
           currentSolution = solutionCandidate;
         } else if (candidateScore.compareTo(currentScore) > 0) {
-          final double ex = -(Math.abs(solutionCandidate.getScore().getAbsoluteScore()
-              - currentScore.getAbsoluteScore()) / currentTemp);
+          final int dim = this.rng.nextInt(
+              currentScore.getDimensions()); // select a radom dimension and computes on this if the bad solution will be accepted
+
+          final double ex = -(Math.abs(solutionCandidate.getScore().getValue(dim)
+              - currentScore.getValue(dim)) / currentTemps[dim]);
           final double probability = Math.exp(ex);
 
           if (probability <= 1.0 && probability
@@ -126,11 +137,13 @@ public final class SimulatedAnnealing {
           final StringBuilder sb = new StringBuilder();
           sb.append(this.totalIterationCounter);
           sb.append(';');
-          sb.append(currentTemp);
+          for (int j = 0; j < currentTemps.length; j++) {
+            sb.append(currentTemps[j]);
+            sb.append(';');
+          }
+          sb.append(candidateScore);
           sb.append(';');
-          sb.append(candidateScore.getAbsoluteScore());
-          sb.append(';');
-          sb.append(bestScore.getAbsoluteScore());
+          sb.append(bestScore);
           sb.append('\n');
           try {
             bwData.write(sb.toString());
@@ -142,20 +155,34 @@ public final class SimulatedAnnealing {
       }
 
       if (loggingEnabled) {
-      //    + bestScore.getAbsoluteScore() + ";" + currentScore.getAbsoluteScore()
-      //    + ";" + gamma + ";" + improved);
-
-      currentTemp = computeTemperature(currentTemp);
-      currentTemp = Math.max(this.sap.tMin(), currentTemp);
+        final StringBuilder sb = new StringBuilder();
+        sb.append(this.totalIterationCounter);
+        sb.append(';');
+        for (int j = 0; j < currentTemps.length; j++) {
+          sb.append(currentTemps[j]);
+          sb.append(';');
+        }
+        sb.append(bestScore);
+        sb.append(';');
+        sb.append(currentScore);
+        sb.append(';');
+        sb.append(sap.gamma());
+        sb.append(';');
+        sb.append(improved);
+        System.out.println(sb.toString());
       }
 
-      if (Double.isInfinite(bestScore.getAbsoluteScore())) {
+      for (int j = 0; j < currentTemps.length; j++) {
+        currentTemps[j] = computeTemperature(currentTemps[j]);
+        currentTemps[j] = Math.max(this.sap.tMin(), currentTemps[j]);
+
+        if (Double.isInfinite(currentTemps[j])) {
+          throw new IllegalStateException("the temperature is infinity");
+        }
       }
+
+      if (bestScore.isInfinite()) {
         throw new IllegalStateException("the score is infinity");
-      }
-
-      if (Double.isInfinite(currentTemp)) {
-        throw new IllegalStateException("the temperature is infinity");
       }
     }
 

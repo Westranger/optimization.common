@@ -8,9 +8,10 @@ import de.westranger.optimization.common.algorithm.action.planning.solver.stocha
 import de.westranger.optimization.common.algorithm.tsp.common.Order;
 import de.westranger.optimization.common.algorithm.tsp.common.ProblemFormulation;
 import de.westranger.optimization.common.algorithm.tsp.common.State;
-import de.westranger.optimization.common.algorithm.tsp.sa.route.RouteEvaluator;
+import de.westranger.optimization.common.algorithm.tsp.common.TSPScore;
 import de.westranger.optimization.common.algorithm.tsp.sa.SimulatedAnnealingTest;
 import de.westranger.optimization.common.algorithm.tsp.sa.TSPNeighbourSelector;
+import de.westranger.optimization.common.algorithm.tsp.sa.route.RouteEvaluator;
 import de.westranger.optimization.common.algorithm.tsp.sa.route.VehicleRoute;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -19,7 +20,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.TreeMap;
 import org.junit.jupiter.api.Assertions;
 
 public class Benchmark {
@@ -35,24 +35,27 @@ public class Benchmark {
     List<Order> orders = new LinkedList<>(problem.getOrders());
     Collections.shuffle(orders, rng);
 
-    Map<Integer, VehicleRoute> orderMapping = new TreeMap<>();
+    boolean isRoundtrip = problem.getVehicleStartPositions().size() == 1;
+    List<VehicleRoute> emptyVehicle = new ArrayList<>();
+    List<VehicleRoute> nonEmptyVehicle = new ArrayList<>();
 
     for (Map.Entry<Integer, Point2D> entry : problem.getVehicleStartPositions()
         .entrySet()) {
+
       if (entry.getKey() == 1) {
         final VehicleRoute vr =
-            new VehicleRoute(entry.getKey(), entry.getValue(), orders, true);
-        orderMapping.put(entry.getKey(), vr);
+            new VehicleRoute(entry.getKey(), entry.getValue(), orders, isRoundtrip);
+        nonEmptyVehicle.add(vr);
       } else {
         final VehicleRoute vr =
-            new VehicleRoute(entry.getKey(), entry.getValue(), new ArrayList<>(), false);
-        orderMapping.put(entry.getKey(), vr);
+            new VehicleRoute(entry.getKey(), entry.getValue(), new ArrayList<>(), isRoundtrip);
+        emptyVehicle.add(vr);
       }
     }
 
     final RouteEvaluator re = new RouteEvaluator();
     State initialState =
-        new State(new ArrayList<>(), orderMapping, re);
+        new State(new ArrayList<>(), emptyVehicle, nonEmptyVehicle, re);
 
     SimulatedAnnealingParameter sap =
         new SimulatedAnnealingParameter(0, 1.0, 0.96, 250000, 100, 0.9);
@@ -61,9 +64,12 @@ public class Benchmark {
 
     SimulatedAnnealing sa = new SimulatedAnnealing(initialState, ns, rng, sap);
 
-    SearchSpaceState optimizedState = sa.optimize();
+    SearchSpaceState optimizedState = sa.optimize(true);
 
-    Assertions.assertEquals(9353.678079851821, optimizedState.getScore().getAbsoluteScore(), 1e-10);
+    TSPScore expectedScore = new TSPScore(9353.678079851821);
+    for (int i = 0; i < expectedScore.getDimensions(); i++) {
+      Assertions.assertEquals(expectedScore.getValue(i), optimizedState.getScore().getValue(i), 1e-10);
+    }
     Assertions.assertEquals(5.2500528E7, sa.getTotalIterationCounter());
   }
 
