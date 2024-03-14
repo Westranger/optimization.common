@@ -44,7 +44,7 @@ public class State extends SearchSpaceState {
     }
 
     for (VehicleRoute vr : nonEmptyVehicles) {
-      if (!vr.getRoute().isEmpty()) {
+      if (vr.getRoute().isEmpty()) {
         throw new IllegalArgumentException(
             "the route of the provided vehicle " + vr.getId() + " is empty");
       }

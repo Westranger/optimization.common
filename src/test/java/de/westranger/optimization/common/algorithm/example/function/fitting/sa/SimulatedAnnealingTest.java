@@ -37,7 +37,7 @@ class SimulatedAnnealingTest {
     final NeighbourSelector ns = new NormalDistributionSelector(rng);
 
     final SimulatedAnnealing sa = new SimulatedAnnealing(initial, ns, rng, sap);
-    final SearchSpaceState optimizedResult = sa.optimize();
+    final SearchSpaceState optimizedResult = sa.optimize(false);
 
     assertNotNull(optimizedResult);
     assertTrue(optimizedResult instanceof CubicFunktionFitter);

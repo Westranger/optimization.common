@@ -40,7 +40,7 @@ public final class SimulatedAnnealing {
     this(initialSolution, ns, rng, sap, null);
   }
 
-
+  public SearchSpaceState optimize(final boolean loggingEnabled) {
   public SearchSpaceState optimize() {
     SearchSpaceState bestSolution = this.initialSolution;
     Score bestScore = bestSolution.getScore();
@@ -141,14 +141,16 @@ public final class SimulatedAnnealing {
         iterAtTemperature++;
       }
 
-      //System.out.println(this.totalIterationCounter + ";" + currentTemp + ";"
+      if (loggingEnabled) {
       //    + bestScore.getAbsoluteScore() + ";" + currentScore.getAbsoluteScore()
       //    + ";" + gamma + ";" + improved);
 
       currentTemp = computeTemperature(currentTemp);
       currentTemp = Math.max(this.sap.tMin(), currentTemp);
+      }
 
       if (Double.isInfinite(bestScore.getAbsoluteScore())) {
+      }
         throw new IllegalStateException("the score is infinity");
       }
 

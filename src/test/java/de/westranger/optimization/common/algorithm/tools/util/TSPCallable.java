@@ -27,7 +27,8 @@ public final class TSPCallable implements Callable<Map<String, Double>> {
   private final int numTries;
   private final boolean idRoundtrip;
 
-  public TSPCallable(final ProblemFormulation pf, final Map<String, Double> param, int numTries, boolean idRoundtrip) {
+  public TSPCallable(final ProblemFormulation pf, final Map<String, Double> param, int numTries,
+                     boolean idRoundtrip) {
     this.pf = pf;
     this.param = param;
     this.numTries = numTries;
@@ -48,7 +49,7 @@ public final class TSPCallable implements Callable<Map<String, Double>> {
               this.param.get("initialAcceptanceRatio"));
       final Random rng = new Random(seed);
       final SimulatedAnnealing sa = initializeSA(sap, rng);
-      final SearchSpaceState optimizedResult = sa.optimize();
+      final SearchSpaceState optimizedResult = sa.optimize(false);
 
       iter += sa.getTotalIterationCounter();
       sum += optimizedResult.getScore().getAbsoluteScore();
@@ -67,26 +68,28 @@ public final class TSPCallable implements Callable<Map<String, Double>> {
   private SimulatedAnnealing initializeSA(final SimulatedAnnealingParameter sap,
                                           final Random rng) {
     List<Order> orders = new LinkedList<>(this.pf.getOrders());
-
     Collections.shuffle(orders, rng);
 
-    Map<Integer, VehicleRoute> orderMapping = new TreeMap<>();
+    List<VehicleRoute> emptyVehicle = new ArrayList<>();
+    List<VehicleRoute> nonEmptyVehicle = new ArrayList<>();
+
     for (Map.Entry<Integer, Point2D> entry : this.pf.getVehicleStartPositions()
         .entrySet()) {
-      if (entry.getKey() == 1) {
+
+      if (this.pf.getVehicleStartPositions().size() == 1) {
         final VehicleRoute vr =
             new VehicleRoute(entry.getKey(), entry.getValue(), orders, this.idRoundtrip);
-        orderMapping.put(entry.getKey(), vr);
+        nonEmptyVehicle.add(vr);
       } else {
         final VehicleRoute vr =
             new VehicleRoute(entry.getKey(), entry.getValue(), new ArrayList<>(), this.idRoundtrip);
-        orderMapping.put(entry.getKey(), vr);
+        emptyVehicle.add(vr);
       }
     }
 
     RouteEvaluator re = new RouteEvaluator();
     State initialState =
-        new State(new ArrayList<>(), orderMapping, re);
+        new State(new ArrayList<>(), emptyVehicle, nonEmptyVehicle, re);
     TSPNeighbourSelector ns = new TSPNeighbourSelector(sap.tMax(), sap.tMin(), rng);
 
     return new SimulatedAnnealing(initialState, ns, rng, sap);

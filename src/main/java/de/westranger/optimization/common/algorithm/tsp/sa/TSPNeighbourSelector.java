@@ -13,10 +13,8 @@ import de.westranger.optimization.common.algorithm.tsp.sa.route.VehicleRoute;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
-import java.util.TreeMap;
 
 public final class TSPNeighbourSelector implements NeighbourSelector {
 
@@ -31,7 +29,6 @@ public final class TSPNeighbourSelector implements NeighbourSelector {
 
   public TSPNeighbourSelector(final double maxTemperature, final double minTemperature,
                               final Random rng) {
-
     this.maxTemperature = maxTemperature;
     this.minTemperature = minTemperature;
     this.rng = rng;
@@ -59,24 +56,32 @@ public final class TSPNeighbourSelector implements NeighbourSelector {
      * TODO mann kann den swap ind insert teil auch so machen das bei 2 fahrzeugen nicht immer
      * zwischen den Fahrzeugen geswapped oder remove uns geinserted wird, sonder auch das man in
      * dem jeweiligen vehicle swapped oder remove und inserted, das erhöht die variabilität beim
-     * lösungsfinden
+     * lösungsfinden (update: ich weiss nicht ob es mehr bring 2 fahrzeige jeweils einzeln zu
+     * modifizieren oder einfach nur zu warten bis der zufallsgenerator ein fahrzeug auswählt. Es
+     * kann schon sein das wenn 2 fahrzeuge selektiert werden und man sich entscheidet jedes einzel
+     * zu modifizieren, das man schneller zu einer lösung kommt
      */
 
-    // now we have two lists
-    final int vehicleIdA = this.rng.nextInt(state.getOrderMapping().size()) + 1;
-    final int vehicleIdB = this.rng.nextInt(state.getOrderMapping().size()) + 1;
-
-    final Map<Integer, VehicleRoute> newMapping = new TreeMap<>();
-
     final List<VehicleRoute> vrl = new LinkedList<>();
-    if (vehicleIdA == vehicleIdB) {
-      final VehicleRoute vrA = state.getOrderMapping().get(vehicleIdA);
-      vrl.add(vrA);
+    final List<VehicleRoute> emptyVehicles = new ArrayList(state.getEmptyVehicles());
+    final List<VehicleRoute> nonEmptyVehicles = new ArrayList(state.getNonEmptyVehicles());
+
+    if (state.getEmptyVehicles().isEmpty()) {
+      final int vehicleIdA = this.rng.nextInt(nonEmptyVehicles.size());
+      final int vehicleIdB = this.rng.nextInt(nonEmptyVehicles.size());
+
+      if (vehicleIdA == vehicleIdB) {
+        vrl.add(nonEmptyVehicles.remove(vehicleIdA));
+      } else {
+        vrl.add(nonEmptyVehicles.remove(vehicleIdA));
+        vrl.add(nonEmptyVehicles.remove(vehicleIdB));
+      }
     } else {
-      final VehicleRoute vrA = state.getOrderMapping().get(vehicleIdA);
-      final VehicleRoute vrB = state.getOrderMapping().get(vehicleIdB);
-      vrl.add(vrA);
-      vrl.add(vrB);
+      final int vehicleIdA = this.rng.nextInt(state.getNonEmptyVehicles().size());
+      final int vehicleIdB = this.rng.nextInt(state.getEmptyVehicles().size());
+
+      vrl.add(nonEmptyVehicles.remove(vehicleIdA));
+      vrl.add(emptyVehicles.remove(vehicleIdB));
     }
 
     final Optional<TSPMoveResult> moveInsertResult = this.moveInsert.performMove(vrl);
@@ -107,30 +112,29 @@ public final class TSPNeighbourSelector implements NeighbourSelector {
       finalResult = moveSRRResult;
     }
 
-    // TODO es kann passieren das zwei fahrzeuge selectiert werden die beide keine order haben, dann wäre das hier ein noop aber vielleicht kann man das so schrieben das immer ein Fahrzeug mit order gezogen wird
-    //if (finalResult.isEmpty()) {
-    //  throw new IllegalStateException("none of the moves came up with an result");
-    //}
-
     if (finalResult.isPresent()) {
       for (VehicleRoute vr : finalResult.get().vehicles()) {
-        newMapping.put(vr.getId(), vr);
+        if (vr.getRoute().isEmpty()) {
+          emptyVehicles.add(vr);
+        } else {
+          nonEmptyVehicles.add(vr);
+        }
       }
     } else {
-      // TODO der brnach hier ist auch nur um den case zu handeln 2 leer fahreuge
-      for (Map.Entry<Integer, VehicleRoute> entry : state.getOrderMapping()
-          .entrySet()) {
-        newMapping.put(entry.getKey(), entry.getValue());
+      for (VehicleRoute vr : vrl) {
+        if (vr.getRoute().isEmpty()) {
+          emptyVehicles.add(vr);
+        } else {
+          nonEmptyVehicles.add(vr);
+        }
       }
     }
 
-    for (Map.Entry<Integer, VehicleRoute> entry : state.getOrderMapping().entrySet()) {
-      if (!newMapping.containsKey(entry.getKey())) {
-        newMapping.put(entry.getKey(), entry.getValue());
-      }
+    if(Double.isInfinite(min)){
+      System.out.println("ups");
     }
 
-    return new State(new ArrayList<>(), newMapping, state.getRouteEval(), min);
+    return new State(new ArrayList<>(), emptyVehicles, nonEmptyVehicles, state.getRouteEval(), min);
   }
 
 
