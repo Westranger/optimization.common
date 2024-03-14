@@ -52,7 +52,7 @@ public final class TSPCallable implements Callable<Map<String, Double>> {
       final SearchSpaceState optimizedResult = sa.optimize(false);
 
       iter += sa.getTotalIterationCounter();
-      sum += optimizedResult.getScore().getAbsoluteScore();
+      sum += optimizedResult.getScore().getValue(0);
     }
 
     sum /= this.numTries;
@@ -76,7 +76,7 @@ public final class TSPCallable implements Callable<Map<String, Double>> {
     for (Map.Entry<Integer, Point2D> entry : this.pf.getVehicleStartPositions()
         .entrySet()) {
 
-      if (this.pf.getVehicleStartPositions().size() == 1) {
+      if (entry.getKey() == 1) {
         final VehicleRoute vr =
             new VehicleRoute(entry.getKey(), entry.getValue(), orders, this.idRoundtrip);
         nonEmptyVehicle.add(vr);

@@ -97,7 +97,7 @@ public final class SimulatedAnnealing<T extends Score> {
                 currentTemps[0]); // TODO hier wird immer eine nachbar selectirt anhand der temperatur der 1. dimension, ist das gut oder schlecht ?
         final T candidateScore = solutionCandidate.getScore();
 
-        if (candidateScore.compareTo(bestScore) == -1) {
+        if (candidateScore.compareTo(bestScore) == 1) {
           bestScore = candidateScore;
           bestSolution = solutionCandidate;
           improved++;
@@ -115,10 +115,10 @@ public final class SimulatedAnnealing<T extends Score> {
           }
         }
 
-        if (candidateScore.compareTo(currentScore) < 0) {
+        if (candidateScore.compareTo(currentScore) > 0) {
           currentScore = candidateScore;
           currentSolution = solutionCandidate;
-        } else if (candidateScore.compareTo(currentScore) > 0) {
+        } else if (candidateScore.compareTo(currentScore) < 0) {
           final int dim = this.rng.nextInt(
               currentScore.getDimensions()); // select a radom dimension and computes on this if the bad solution will be accepted
 

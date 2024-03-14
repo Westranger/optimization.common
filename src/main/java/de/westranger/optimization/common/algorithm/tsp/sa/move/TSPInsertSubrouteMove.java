@@ -93,6 +93,10 @@ public final class TSPInsertSubrouteMove extends TSPMove {
     double newScoreA = useA ? newSrcScore : vrA.getScore();
     double newScoreB = useA ? vrB.getScore() : newSrcScore;
 
+    if (Double.isNaN(newScoreB) && vrB.getRoute().isEmpty()) {
+      newScoreB = 0.0;
+    }
+
     final VehicleRoute vrANew =
         new VehicleRoute(vrA.getId(), vrA.getHomePosition(), lstA, distanceScoreA, newScoreA,
             vrA.isRoundtrip());

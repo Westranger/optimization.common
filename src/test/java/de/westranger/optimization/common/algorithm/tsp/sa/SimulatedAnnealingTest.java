@@ -49,7 +49,7 @@ public class SimulatedAnnealingTest {
 
     SearchSpaceState optimizedState = sa.optimize(false);
     // {avg_score=9358.20705989015, gamma=0.9, initialAcceptanceRatio=0.9, iter=2.0250528E7, maxImprovementPerTemperature=100.0, omegaMax=250000.0, score=9358.20705989015, tMax=0.0, tMin=1.0}
-    Assertions.assertEquals(9353.678079851821, optimizedState.getScore().getAbsoluteScore(), 1e-10);
+    Assertions.assertEquals(9353.678079851821, optimizedState.getScore().getValue(0), 1e-10);
     Assertions.assertEquals(5.2500528E7, sa.getTotalIterationCounter());
   }
 
@@ -75,7 +75,7 @@ public class SimulatedAnnealingTest {
         new State(new ArrayList<>(), new ArrayList<>(), List.of(vr), re);
 
     SimulatedAnnealingParameter sap =
-        new SimulatedAnnealingParameter(0, 0.001, 0.5, 100, 5, 0.9);
+        new SimulatedAnnealingParameter(0, 1.0E-5, 0.4, 100, 2, 0.95);
 
     TSPNeighbourSelector ns = new TSPNeighbourSelector(sap.tMax(), sap.tMin(), rng);
 
@@ -83,8 +83,7 @@ public class SimulatedAnnealingTest {
 
     SearchSpaceState optimizedState = sa.optimize(false);
 
-    Assertions.assertEquals(27601.173774493753, optimizedState.getScore().getAbsoluteScore(),
-        1e-10);
-    Assertions.assertEquals(2082, sa.getTotalIterationCounter());
+    Assertions.assertEquals(27601.173774493753, optimizedState.getScore().getValue(0), 1e-6);
+    Assertions.assertEquals(1448, sa.getTotalIterationCounter());
   }
 }

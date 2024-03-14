@@ -10,6 +10,7 @@ public final class ProblemFormulation {
   private Map<Integer, Point2D> vehicleStartPositions;
 
   private Map<Integer, List<Order>> finalOrderMapping;
+  private double expectedScore;
 
   public ProblemFormulation(final List<Order> orders,
                             final Map<Integer, Point2D> vehicleStartPositions,
@@ -18,6 +19,7 @@ public final class ProblemFormulation {
     this.orders = orders;
     this.vehicleStartPositions = vehicleStartPositions;
     this.finalOrderMapping = finalOrderMapping;
+    this.expectedScore = expectedScore;
   }
 
   public List<Order> getOrders() {
@@ -42,5 +44,13 @@ public final class ProblemFormulation {
 
   public void setFinalOrderMapping(Map<Integer, List<Order>> finalOrderMapping) {
     this.finalOrderMapping = finalOrderMapping;
+  }
+
+  public double getExpectedScore() {
+    return expectedScore;
+  }
+
+  public void setExpectedScore(double expectedScore) {
+    this.expectedScore = expectedScore;
   }
 }

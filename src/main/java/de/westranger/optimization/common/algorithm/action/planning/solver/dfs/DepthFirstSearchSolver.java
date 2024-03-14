@@ -37,7 +37,7 @@ public final class DepthFirstSearchSolver
 
       if (useBranchAndBound && this.uppperBound != null) {
         final long scoreDiff = currentScore.compareTo(this.uppperBound);
-        if (scoreDiff >= 0) {
+        if (scoreDiff <= 0) {
           currentNode.clearParent(); // unlink parent to enabled cleanup for GC
           continue;
         }
@@ -49,12 +49,12 @@ public final class DepthFirstSearchSolver
         if (this.uppperBound != null) {
           final long scoreDiff = currentScore.compareTo(this.uppperBound);
 
-          if (scoreDiff < 0) { // we found a better solution
+          if (scoreDiff > 0) { // we found a better solution
             result.clear();
             this.uppperBound = currentNode.getState().getScore();
           }
 
-          if (scoreDiff < 0) { // we want to store the better or equal scored solution
+          if (scoreDiff > 0) { // we want to store the better or equal scored solution
             final ActionPlanningSolution solution =
                 new ActionPlanningSolution(currentNode.getState(),
                     computeActionList(currentNode), currentScore);
@@ -96,7 +96,7 @@ public final class DepthFirstSearchSolver
               "there is no action available in the current state, this should not be possible");
         }
       } else {
-        result.addFirst(currentNode.get().getState().getLastPerformedAction().get());
+        result.addFirst((Action) currentNode.get().getState().getLastPerformedAction().get());
       }
       currentNode = currentNode.get().getParent();
     }

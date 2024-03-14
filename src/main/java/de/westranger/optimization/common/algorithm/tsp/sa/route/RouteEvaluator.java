@@ -47,8 +47,10 @@ public final class RouteEvaluator {
     }
 
     double score = vr.getScore();
+
     for (int i : idx) {
       score -= vr.getDistanceScoreAt(i);
+
       if (i == 0) {
         final double dist = vr.getHomePosition().distance(vr.getLocationAt(i).getTo());
         vr.updateDistanceScoreAt(0, dist);
@@ -59,6 +61,7 @@ public final class RouteEvaluator {
         score += dist;
       } else {
         final double dist = vr.getLocationAt(i - 1).getTo().distance(vr.getLocationAt(i).getTo());
+
         vr.updateDistanceScoreAt(i, dist);
         score += dist;
       }

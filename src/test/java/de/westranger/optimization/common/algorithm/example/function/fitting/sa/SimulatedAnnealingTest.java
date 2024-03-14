@@ -48,7 +48,7 @@ class SimulatedAnnealingTest {
       assertTrue(actions.get(i) instanceof CubicFittingAction);
     }
 
-    assertEquals(0.003682319440971411, qff.getScore().getAbsoluteScore(), 1e-4);
+    assertEquals(0.003682319440971411, qff.getScore().getValue(0), 1e-4);
 
     CubicFittingAction qfa = (CubicFittingAction) actions.get(0);
     assertEquals(CubicFittingAction.FunctionParameter.ParamA1, qfa.fp());

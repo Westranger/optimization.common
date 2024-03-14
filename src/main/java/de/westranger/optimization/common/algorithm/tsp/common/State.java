@@ -52,7 +52,7 @@ public class State extends SearchSpaceState<TSPScore> {
     }
 
     double score = 0.0;
-    for (VehicleRoute vr : emptyVehicles) {
+    for (VehicleRoute vr : nonEmptyVehicles) {
       routeEval.scoreRouteFull(vr);
       double tmp = vr.getScore();
       score += !Double.isNaN(tmp) ? tmp : 0.0;

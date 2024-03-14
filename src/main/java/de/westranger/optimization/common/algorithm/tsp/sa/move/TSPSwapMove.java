@@ -34,6 +34,11 @@ public final class TSPSwapMove extends TSPMove {
     int removeIdxB = this.rng.nextInt(lstA.size());
     final Order orderB = lstA.remove(removeIdxB);
 
+    if (vr.getScore() < 0) {
+      System.out.println("blubb");
+    }
+
+
     lstA.add(removeIdxB, orderA);
     lstA.add(removeIdxA, orderB);
 

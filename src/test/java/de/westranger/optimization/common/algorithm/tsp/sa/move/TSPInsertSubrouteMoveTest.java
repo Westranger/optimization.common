@@ -313,6 +313,17 @@ public class TSPInsertSubrouteMoveTest {
         List.of(1, 6, 7, 2), List.of(5, 8), false);
   }
 
+
+  @Test
+  public void test2Vehicle6OrdersRemoveMiddleInsertVehicleBEmpty() {
+    Random rng = new CustomRandom(new int[] {2, 0, 0}, new boolean[] {false});
+    TSPMove move = new TSPInsertSubrouteMove(rng, re, false);
+
+    evaluateMoveTwoVehicles(move, List.of(1, 2, 3, 4, 5), List.of(),
+        List.of(1, 2, 5), List.of(3, 4), false);
+  }
+
+
   private void evaluateMoveOneVehicle(TSPMove move, List<Integer> base, List<Integer> goal,
                                       boolean isRoundtrip) {
 
@@ -384,6 +395,9 @@ public class TSPInsertSubrouteMoveTest {
   }
 
   private double scoreExpectedRoute(List<Order> orders, Point2D home, boolean isRoundTrip) {
+    if (orders.isEmpty()) {
+      return Double.NaN;
+    }
     double sum = home.distance(orders.get(0).getTo());
     for (int i = 1; i < orders.size(); i++) {
       sum += orders.get(i - 1).getTo().distance(orders.get(i).getTo());

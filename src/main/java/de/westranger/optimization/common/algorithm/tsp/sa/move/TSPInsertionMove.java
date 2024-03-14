@@ -208,6 +208,11 @@ public final class TSPInsertionMove extends TSPMove {
 
     routeEvaluator.scoreRoutePartial(vrANew, idxToUpdateA);
     routeEvaluator.scoreRoutePartial(vrBNew, idxToUpdateB);
+
+    if ((vrANew.getScore() < 0 && !lstA.isEmpty()) || (vrBNew.getScore() < 0 && !lstB.isEmpty())) {
+      System.out.println("WTF");
+    }
+
     return List.of(vrANew, vrBNew);
   }
 

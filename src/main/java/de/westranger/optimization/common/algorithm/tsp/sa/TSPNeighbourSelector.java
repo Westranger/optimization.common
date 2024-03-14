@@ -68,7 +68,7 @@ public final class TSPNeighbourSelector implements NeighbourSelector {
 
     if (state.getEmptyVehicles().isEmpty()) {
       final int vehicleIdA = this.rng.nextInt(nonEmptyVehicles.size());
-      final int vehicleIdB = this.rng.nextInt(nonEmptyVehicles.size());
+      final int vehicleIdB = this.rng.nextInt(nonEmptyVehicles.size() - 1);
 
       if (vehicleIdA == vehicleIdB) {
         vrl.add(nonEmptyVehicles.remove(vehicleIdA));
@@ -112,12 +112,20 @@ public final class TSPNeighbourSelector implements NeighbourSelector {
       finalResult = moveSRRResult;
     }
 
+    double score = intermediateSolution.getScore().getValue(0);
+    for (VehicleRoute vr : vrl) {
+      if (!vr.getRoute().isEmpty()) {
+        score -= vr.getScore();
+      }
+    }
+
     if (finalResult.isPresent()) {
       for (VehicleRoute vr : finalResult.get().vehicles()) {
         if (vr.getRoute().isEmpty()) {
           emptyVehicles.add(vr);
         } else {
           nonEmptyVehicles.add(vr);
+          score += vr.getScore();
         }
       }
     } else {
@@ -126,15 +134,12 @@ public final class TSPNeighbourSelector implements NeighbourSelector {
           emptyVehicles.add(vr);
         } else {
           nonEmptyVehicles.add(vr);
+          score += vr.getScore();
         }
       }
     }
 
-    if(Double.isInfinite(min)){
-      System.out.println("ups");
-    }
-
-    return new State(new ArrayList<>(), emptyVehicles, nonEmptyVehicles, state.getRouteEval(), min);
+    return new State(new ArrayList<>(), emptyVehicles, nonEmptyVehicles, state.getRouteEval(), score);
   }
 
 
