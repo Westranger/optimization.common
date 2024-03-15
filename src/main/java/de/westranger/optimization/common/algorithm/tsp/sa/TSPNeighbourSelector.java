@@ -68,13 +68,13 @@ public final class TSPNeighbourSelector implements NeighbourSelector {
 
     if (state.getEmptyVehicles().isEmpty()) {
       final int vehicleIdA = this.rng.nextInt(nonEmptyVehicles.size());
-      final int vehicleIdB = this.rng.nextInt(nonEmptyVehicles.size() - 1);
+      final int vehicleIdB = this.rng.nextInt(nonEmptyVehicles.size());
 
       if (vehicleIdA == vehicleIdB) {
         vrl.add(nonEmptyVehicles.remove(vehicleIdA));
       } else {
-        vrl.add(nonEmptyVehicles.remove(vehicleIdA));
-        vrl.add(nonEmptyVehicles.remove(vehicleIdB));
+        vrl.add(nonEmptyVehicles.remove(Math.max(vehicleIdA, vehicleIdB)));
+        vrl.add(nonEmptyVehicles.remove(Math.min(vehicleIdA, vehicleIdB)));
       }
     } else {
       final int vehicleIdA = this.rng.nextInt(state.getNonEmptyVehicles().size());
@@ -139,7 +139,8 @@ public final class TSPNeighbourSelector implements NeighbourSelector {
       }
     }
 
-    return new State(new ArrayList<>(), emptyVehicles, nonEmptyVehicles, state.getRouteEval(), score);
+    return new State(new ArrayList<>(), emptyVehicles, nonEmptyVehicles, state.getRouteEval(),
+        score);
   }
 
 

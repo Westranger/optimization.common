@@ -27,12 +27,20 @@ public final class TSPCallable implements Callable<Map<String, Double>> {
   private final int numTries;
   private final boolean idRoundtrip;
 
+  private final String paramId;
+
   public TSPCallable(final ProblemFormulation pf, final Map<String, Double> param, int numTries,
-                     boolean idRoundtrip) {
+                     boolean idRoundtrip, String paramId) {
     this.pf = pf;
     this.param = param;
     this.numTries = numTries;
     this.idRoundtrip = idRoundtrip;
+    this.paramId = paramId;
+  }
+
+  public TSPCallable(final ProblemFormulation pf, final Map<String, Double> param, int numTries,
+                     boolean idRoundtrip) {
+    this(pf, param, numTries, idRoundtrip, "");
   }
 
   @Override
@@ -43,7 +51,7 @@ public final class TSPCallable implements Callable<Map<String, Double>> {
     for (long i = 0; i < this.numTries; i++) {
       final long seed = 47110815 + i * 10000;
       final SimulatedAnnealingParameter sap =
-          new SimulatedAnnealingParameter(this.param.get("tMax"), this.param.get("tMin"),
+          new SimulatedAnnealingParameter(0.0, this.param.get("tMin"),
               this.param.get("gamma"), this.param.get("omegaMax"),
               this.param.get("maxImprovementPerTemperature"),
               this.param.get("initialAcceptanceRatio"));
@@ -62,6 +70,7 @@ public final class TSPCallable implements Callable<Map<String, Double>> {
     result.put("score", sum);
     result.put("iter", iter);
     result.put("avg_score", sum);
+    result.put("param_id#" + this.paramId, 0.0);
     return result;
   }
 
@@ -94,9 +103,4 @@ public final class TSPCallable implements Callable<Map<String, Double>> {
 
     return new SimulatedAnnealing(initialState, ns, rng, sap);
   }
-
-  public Map<String, Double> getParam() {
-    return param;
-  }
-
 }

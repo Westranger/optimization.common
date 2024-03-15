@@ -195,7 +195,7 @@ public class State extends SearchSpaceState<TSPScore> {
     for (Order order : this.orderList) {
       svgBuilder.append('\t');
       svgBuilder.append(
-          String.format(Locale.ENGLISH, "<circle cx=\"%f\" cy=\"%f\" r=\"5\" fill=\"black\"/>",
+          String.format(Locale.ENGLISH, "<circle cx=\"%f\" cy=\"%f\" r=\"0.01\" fill=\"black\"/>",
               order.getTo().getY(), order.getTo().getX()));
       svgBuilder.append('\n');
     }
@@ -207,13 +207,13 @@ public class State extends SearchSpaceState<TSPScore> {
         if (previousPoint != null) {
           svgBuilder.append('\t');
           svgBuilder.append(String.format(Locale.ENGLISH,
-              "<line x1=\"%f\" y1=\"%f\" x2=\"%f\" y2=\"%f\" stroke=\"%s\"/>", previousPoint.getY(),
+              "<line x1=\"%f\" y1=\"%f\" x2=\"%f\" y2=\"%f\" stroke-width=\"0.1\" stroke=\"%s\"/>", previousPoint.getY(),
               previousPoint.getX(), order.getTo().getY(), order.getTo().getX(), vehicleColor));
           svgBuilder.append('\n');
         }
         svgBuilder.append('\t');
         svgBuilder.append(
-            String.format(Locale.ENGLISH, "<circle cx=\"%f\" cy=\"%f\" r=\"5\" fill=\"black\"/>",
+            String.format(Locale.ENGLISH, "<circle cx=\"%f\" cy=\"%f\" r=\"0.01\" fill=\"black\"/>",
                 order.getTo().getY(), order.getTo().getX()));
         svgBuilder.append('\n');
 
@@ -226,7 +226,7 @@ public class State extends SearchSpaceState<TSPScore> {
       String vehicleColor = colors.get(vr.getId());
       svgBuilder.append('\t');
       svgBuilder.append(String.format(Locale.ENGLISH,
-          "<rect x=\"%f\" y=\"%f\" width=\"25\" height=\"25\" fill=\"%s\"/>",
+          "<rect x=\"%f\" y=\"%f\" width=\"0.025\" height=\"0.025\" fill=\"%s\"/>",
           vr.getHomePosition().getY(), vr.getHomePosition().getX(), vehicleColor));
       svgBuilder.append('\n');
 
@@ -235,7 +235,7 @@ public class State extends SearchSpaceState<TSPScore> {
         final Point2D start = orders.get(0).getTo();
         svgBuilder.append('\t');
         svgBuilder.append(String.format(Locale.ENGLISH,
-            "<line x1=\"%f\" y1=\"%f\" x2=\"%f\" y2=\"%f\" stroke=\"%s\"/>",
+            "<line x1=\"%f\" y1=\"%f\" x2=\"%f\" y2=\"%f\" stroke-width=\"0.1\" stroke=\"%s\"/>",
             vr.getHomePosition().getY(), vr.getHomePosition().getX(), start.getY(), start.getX(),
             vehicleColor));
         svgBuilder.append('\n');

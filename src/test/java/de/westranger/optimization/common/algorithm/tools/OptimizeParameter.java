@@ -36,11 +36,10 @@ public final class OptimizeParameter {
 
     final int numTries = 1;
 
-    input.put("tMax", List.of(0.0));
-    input.put("initialAcceptanceRatio", Arrays.asList(0.95/*, 0.8, 0.7*/));
+    input.put("initialAcceptanceRatio", Arrays.asList(/*0.99,*/0.99/*, 0.8, 0.7*/));
     input.put("gamma",
-        Arrays.asList(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.96, 0.97, 0.98, 0.999));
-        //Arrays.asList(/*0.999, 0.99, 0.99, 0.98, 0.97, 0.96,*/ 0.95, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2));
+        //Arrays.asList(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.96, 0.97, 0.98, 0.999));
+    Arrays.asList(/*0.999, 0.99, 0.99, 0.98, 0.97, */0.96, 0.95, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2));
     input.put("tMin",
         Arrays.asList(1.0e-5, 1.0e-4, 1.0e-3, 1.0e-2, 1.0e-1, 1.0, 10.0, 100.0, 1000.0));
     input.put("omegaMax",
@@ -50,10 +49,15 @@ public final class OptimizeParameter {
         Arrays.asList(2.0, 5.0, 10.0, 25.0, 50.0, 100.0, 250.0, 500.0));
 
     final InputStreamReader reader = new InputStreamReader(
-        // SimulatedAnnealingTest.class.getResourceAsStream("/tsp/1_vehicle_194_orders.json"));
-        SimulatedAnnealingTest.class.getResourceAsStream("/tmp/vrp_problem_5_65_PDE.json"));
+        SimulatedAnnealingTest.class.getResourceAsStream("/tsp/1_vehicle_194_orders.json"));
+        //SimulatedAnnealingTest.class.getResourceAsStream("/tmp/vrp_problem_10_130_PDE.json"));
     final Gson gson = new Gson();
     final ProblemFormulation problem = gson.fromJson(reader, ProblemFormulation.class);
+
+    final double goalTolerance = 0.05; // percentile
+    final double goalScoreThreshold = problem.getExpectedScore() * (1.0 + goalTolerance);
+    boolean thresholdPassed = false;
+
     final int threadPoolSize = 11;
     final int batchSize = 100;
     final CombinationIterator combinationIterator = new CombinationIterator(input);
@@ -102,11 +106,20 @@ public final class OptimizeParameter {
           Map<String, Double> result = future.get();
           activeTaskCounter--;
           // TODO score berechnung umstellen das die SCore klasse verwendet wird
-          if (bestScore - result.get("score") >= 1e-3 ||
-              (Math.abs(bestScore - result.get("score")) < 1e-3 && minIter > result.get("iter"))) {
-            System.out.println('\t' + result.toString());
+
+          if ((bestScore - result.get("score") >= 1e-3 && !thresholdPassed) ||
+              (Math.abs(bestScore - result.get("score")) < 1e-3 && minIter > result.get("iter") &&
+                  !thresholdPassed)) {
+            if (result.get("score") < goalScoreThreshold) {
+              thresholdPassed = true;
+            }
+
+            System.out.println(
+                '\t' + result.toString() + " t:" + goalScoreThreshold + " " + thresholdPassed);
             bestScore = result.get("score");
             minIter = result.get("iter");
+
+
           }
         } catch (InterruptedException | ExecutionException e) {
           throw new RuntimeException(e);
