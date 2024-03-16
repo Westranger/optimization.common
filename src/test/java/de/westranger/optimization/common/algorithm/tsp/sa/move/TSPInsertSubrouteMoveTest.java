@@ -57,7 +57,7 @@ public class TSPInsertSubrouteMoveTest {
   @Test
   public void testNoVehicle() {
     RouteEvaluator re = new RouteEvaluator();
-    TSPMove move = new TSPInsertSubrouteMove(rng, re, false);
+    TSPMove move = new TSPInsertSubrouteMove(rng, re, false, false);
 
     Assertions.assertThrows(IllegalArgumentException.class,
         () -> move.performMove(new LinkedList<>()));
@@ -66,7 +66,7 @@ public class TSPInsertSubrouteMoveTest {
   @Test
   public void testThreeVehicle() {
     RouteEvaluator re = new RouteEvaluator();
-    TSPMove move = new TSPInsertSubrouteMove(rng, re, false);
+    TSPMove move = new TSPInsertSubrouteMove(rng, re, false, false);
 
     VehicleRoute
         vrA = new VehicleRoute(1, new Point2D(1.0, 1.0), new LinkedList<>(), false);
@@ -82,7 +82,7 @@ public class TSPInsertSubrouteMoveTest {
   @Test
   public void test1VehicleNoOrders() {
     RouteEvaluator re = new RouteEvaluator();
-    TSPMove move = new TSPInsertSubrouteMove(rng, re, false);
+    TSPMove move = new TSPInsertSubrouteMove(rng, re, false, false);
     VehicleRoute
         vrA = new VehicleRoute(1, new Point2D(1.0, 1.0), new LinkedList<>(), false);
 
@@ -93,7 +93,7 @@ public class TSPInsertSubrouteMoveTest {
   @Test
   public void test2VehiclesNoOrders() {
     RouteEvaluator re = new RouteEvaluator();
-    TSPMove move = new TSPInsertSubrouteMove(rng, re, false);
+    TSPMove move = new TSPInsertSubrouteMove(rng, re, false, false);
     VehicleRoute
         vrA = new VehicleRoute(1, new Point2D(1.0, 1.0), new LinkedList<>(), false);
     VehicleRoute
@@ -107,7 +107,7 @@ public class TSPInsertSubrouteMoveTest {
   public void test1VehicleNotEnoughOrders() {
     RouteEvaluator re = new RouteEvaluator();
     Random rng = new CustomRandom(new int[] {1, 0, 2});
-    TSPMove move = new TSPInsertSubrouteMove(rng, re, false);
+    TSPMove move = new TSPInsertSubrouteMove(rng, re, false, false);
 
     Order orderA = new Order(1, new Point2D(1.0, 1.0), null);
     Order orderB = new Order(2, new Point2D(2.0, 2.0), null);
@@ -124,7 +124,7 @@ public class TSPInsertSubrouteMoveTest {
   @Test
   public void test1Vehicle4OrdersRemoveMiddleInsertBegin() {
     Random rng = new CustomRandom(new int[] {1, 0, 0});
-    TSPMove move = new TSPInsertSubrouteMove(rng, re, false);
+    TSPMove move = new TSPInsertSubrouteMove(rng, re, false, false);
 
     evaluateMoveOneVehicle(move, List.of(1, 2, 3, 4), List.of(2, 3, 1, 4), false);
   }
@@ -132,7 +132,7 @@ public class TSPInsertSubrouteMoveTest {
   @Test
   public void test1Vehicle4OrdersRemoveMiddleInsertEnd() {
     Random rng = new CustomRandom(new int[] {1, 0, 2});
-    TSPMove move = new TSPInsertSubrouteMove(rng, re, false);
+    TSPMove move = new TSPInsertSubrouteMove(rng, re, false, false);
 
     evaluateMoveOneVehicle(move, List.of(1, 2, 3, 4), List.of(1, 4, 2, 3), false);
   }
@@ -140,7 +140,7 @@ public class TSPInsertSubrouteMoveTest {
   @Test
   public void test1Vehicle4OrdersRemoveMiddleInsertMiddle() {
     Random rng = new CustomRandom(new int[] {0, 0, 1});
-    TSPMove move = new TSPInsertSubrouteMove(rng, re, false);
+    TSPMove move = new TSPInsertSubrouteMove(rng, re, false, false);
 
     evaluateMoveOneVehicle(move, List.of(1, 2, 3, 4), List.of(3, 1, 2, 4), false);
   }
@@ -148,7 +148,7 @@ public class TSPInsertSubrouteMoveTest {
   @Test
   public void test1Vehicle4OrdersRemoveMiddleInsertBeginReverse() {
     Random rng = new CustomRandom(new int[] {2, 0, 0});
-    TSPMove move = new TSPInsertSubrouteMove(rng, re, true);
+    TSPMove move = new TSPInsertSubrouteMove(rng, re, true , false);
 
     evaluateMoveOneVehicle(move, List.of(1, 2, 3, 4), List.of(4, 3, 1, 2), false);
   }
@@ -156,7 +156,7 @@ public class TSPInsertSubrouteMoveTest {
   @Test
   public void test1Vehicle4OrdersRemoveMiddleInsertEndReverse() {
     Random rng = new CustomRandom(new int[] {2, 0, 2});
-    TSPMove move = new TSPInsertSubrouteMove(rng, re, true);
+    TSPMove move = new TSPInsertSubrouteMove(rng, re, true , false);
 
     evaluateMoveOneVehicle(move, List.of(1, 2, 3, 4), List.of(1, 2, 4, 3), false);
   }
@@ -164,7 +164,7 @@ public class TSPInsertSubrouteMoveTest {
   @Test
   public void test1Vehicle4OrdersRemoveMiddleInsertAlmostEndRoundtrip() {
     Random rng = new CustomRandom(new int[] {1, 1, 2});
-    TSPMove move = new TSPInsertSubrouteMove(rng, re, false);
+    TSPMove move = new TSPInsertSubrouteMove(rng, re, false, false);
 
     evaluateMoveOneVehicle(move, List.of(1, 2, 3, 4, 5, 6), List.of(1, 5, 2, 3, 4, 6), true);
   }
@@ -173,7 +173,7 @@ public class TSPInsertSubrouteMoveTest {
   @Test
   public void test1Vehicle4OrdersRemoveMiddleInsertMiddleReverse() {
     Random rng = new CustomRandom(new int[] {1, 0, 1});
-    TSPMove move = new TSPInsertSubrouteMove(rng, re, true);
+    TSPMove move = new TSPInsertSubrouteMove(rng, re, true , false);
 
     evaluateMoveOneVehicle(move, List.of(1, 2, 3, 4), List.of(1, 3, 2, 4), false);
   }
@@ -181,7 +181,7 @@ public class TSPInsertSubrouteMoveTest {
   @Test
   public void test2Vehicle8OrdersRemoveMiddleInsertVehicleABegin() {
     Random rng = new CustomRandom(new int[] {1, 0, 0}, new boolean[] {true});
-    TSPMove move = new TSPInsertSubrouteMove(rng, re, false);
+    TSPMove move = new TSPInsertSubrouteMove(rng, re, false, false);
 
     evaluateMoveTwoVehicles(move, List.of(1, 2, 3, 4), List.of(5, 6, 7, 8),
         List.of(1, 4), List.of(2, 3, 5, 6, 7, 8), false);
@@ -190,7 +190,7 @@ public class TSPInsertSubrouteMoveTest {
   @Test
   public void test2Vehicle8OrdersRemoveMiddleInsertVehicleAEnd() {
     Random rng = new CustomRandom(new int[] {1, 0, 4}, new boolean[] {true});
-    TSPMove move = new TSPInsertSubrouteMove(rng, re, false);
+    TSPMove move = new TSPInsertSubrouteMove(rng, re, false, false);
 
     evaluateMoveTwoVehicles(move, List.of(1, 2, 3, 4), List.of(5, 6, 7, 8),
         List.of(1, 4), List.of(5, 6, 7, 8, 2, 3), false);
@@ -199,7 +199,7 @@ public class TSPInsertSubrouteMoveTest {
   @Test
   public void test2Vehicle8OrdersRemoveMiddleInsertVehicleAMiddle() {
     Random rng = new CustomRandom(new int[] {1, 0, 2}, new boolean[] {true});
-    TSPMove move = new TSPInsertSubrouteMove(rng, re, false);
+    TSPMove move = new TSPInsertSubrouteMove(rng, re, false, false);
 
     evaluateMoveTwoVehicles(move, List.of(1, 2, 3, 4), List.of(5, 6, 7, 8),
         List.of(1, 4), List.of(5, 6, 2, 3, 7, 8), false);
@@ -208,7 +208,7 @@ public class TSPInsertSubrouteMoveTest {
   @Test
   public void test2Vehicle8OrdersRemoveMiddleInsertVehicleBBegin() {
     Random rng = new CustomRandom(new int[] {1, 0, 0}, new boolean[] {false});
-    TSPMove move = new TSPInsertSubrouteMove(rng, re, false);
+    TSPMove move = new TSPInsertSubrouteMove(rng, re, false, false);
 
     evaluateMoveTwoVehicles(move, List.of(1, 2, 3, 4), List.of(5, 6, 7, 8),
         List.of(6, 7, 1, 2, 3, 4), List.of(5, 8), false);
@@ -217,7 +217,7 @@ public class TSPInsertSubrouteMoveTest {
   @Test
   public void test2Vehicle8OrdersRemoveMiddleInsertVehicleBEnd() {
     Random rng = new CustomRandom(new int[] {1, 0, 4}, new boolean[] {false});
-    TSPMove move = new TSPInsertSubrouteMove(rng, re, false);
+    TSPMove move = new TSPInsertSubrouteMove(rng, re, false, false);
 
     evaluateMoveTwoVehicles(move, List.of(1, 2, 3, 4), List.of(5, 6, 7, 8),
         List.of(1, 2, 3, 4, 6, 7), List.of(5, 8), false);
@@ -226,7 +226,7 @@ public class TSPInsertSubrouteMoveTest {
   @Test
   public void test2Vehicle8OrdersRemoveMiddleInsertVehicleBMiddle() {
     Random rng = new CustomRandom(new int[] {1, 0, 2}, new boolean[] {false});
-    TSPMove move = new TSPInsertSubrouteMove(rng, re, false);
+    TSPMove move = new TSPInsertSubrouteMove(rng, re, false, false);
 
     evaluateMoveTwoVehicles(move, List.of(1, 2, 3, 4), List.of(5, 6, 7, 8),
         List.of(1, 2, 6, 7, 3, 4), List.of(5, 8), false);
@@ -235,7 +235,7 @@ public class TSPInsertSubrouteMoveTest {
   @Test
   public void test2Vehicle8OrdersRemoveEndInsertVehicleBMiddle() {
     Random rng = new CustomRandom(new int[] {2, 0, 2}, new boolean[] {false});
-    TSPMove move = new TSPInsertSubrouteMove(rng, re, false);
+    TSPMove move = new TSPInsertSubrouteMove(rng, re, false, false);
 
     evaluateMoveTwoVehicles(move, List.of(1, 2, 3, 4), List.of(5, 6, 7, 8),
         List.of(1, 2, 7, 8, 3, 4), List.of(5, 6), false);
@@ -244,7 +244,7 @@ public class TSPInsertSubrouteMoveTest {
   @Test
   public void test2Vehicle8OrdersRemoveEndInsertVehicleBMiddleReverse() {
     Random rng = new CustomRandom(new int[] {2, 0, 2}, new boolean[] {false});
-    TSPMove move = new TSPInsertSubrouteMove(rng, re, true);
+    TSPMove move = new TSPInsertSubrouteMove(rng, re, true, false);
 
     evaluateMoveTwoVehicles(move, List.of(1, 2, 3, 4), List.of(5, 6, 7, 8),
         List.of(1, 2, 8, 7, 3, 4), List.of(5, 6), false);
@@ -253,7 +253,7 @@ public class TSPInsertSubrouteMoveTest {
   @Test
   public void test2Vehicle8OrdersRemoveBeginInsertVehicleBMiddleReverse() {
     Random rng = new CustomRandom(new int[] {0, 0, 2}, new boolean[] {false});
-    TSPMove move = new TSPInsertSubrouteMove(rng, re, true);
+    TSPMove move = new TSPInsertSubrouteMove(rng, re, true, false);
 
     evaluateMoveTwoVehicles(move, List.of(1, 2, 3, 4), List.of(5, 6, 7, 8),
         List.of(1, 2, 6, 5, 3, 4), List.of(7, 8), false);
@@ -262,7 +262,7 @@ public class TSPInsertSubrouteMoveTest {
   @Test
   public void test2Vehicle6OrdersRemoveMiddleInsertVehicleABegin() {
     Random rng = new CustomRandom(new int[] {1, 0, 0}, new boolean[] {true});
-    TSPMove move = new TSPInsertSubrouteMove(rng, re, false);
+    TSPMove move = new TSPInsertSubrouteMove(rng, re, false, false);
 
     evaluateMoveTwoVehicles(move, List.of(1, 2, 3, 4), List.of(5, 6),
         List.of(1, 4), List.of(2, 3, 5, 6), false);
@@ -271,7 +271,7 @@ public class TSPInsertSubrouteMoveTest {
   @Test
   public void test2Vehicle6OrdersRemoveMiddleInsertVehicleAEnd() {
     Random rng = new CustomRandom(new int[] {1, 0, 2}, new boolean[] {true});
-    TSPMove move = new TSPInsertSubrouteMove(rng, re, false);
+    TSPMove move = new TSPInsertSubrouteMove(rng, re, false, false);
 
     evaluateMoveTwoVehicles(move, List.of(1, 2, 3, 4), List.of(5, 6),
         List.of(1, 4), List.of(5, 6, 2, 3), false);
@@ -280,7 +280,7 @@ public class TSPInsertSubrouteMoveTest {
   @Test
   public void test2Vehicle6OrdersRemoveMiddleInsertVehicleAMiddle() {
     Random rng = new CustomRandom(new int[] {1, 0, 1}, new boolean[] {true});
-    TSPMove move = new TSPInsertSubrouteMove(rng, re, false);
+    TSPMove move = new TSPInsertSubrouteMove(rng, re, false, false);
 
     evaluateMoveTwoVehicles(move, List.of(1, 2, 3, 4), List.of(5, 6),
         List.of(1, 4), List.of(5, 2, 3, 6), false);
@@ -289,7 +289,7 @@ public class TSPInsertSubrouteMoveTest {
   @Test
   public void test2Vehicle6OrdersRemoveMiddleInsertVehicleBBegin() {
     Random rng = new CustomRandom(new int[] {1, 0, 0}, new boolean[] {false});
-    TSPMove move = new TSPInsertSubrouteMove(rng, re, false);
+    TSPMove move = new TSPInsertSubrouteMove(rng, re, false, false);
 
     evaluateMoveTwoVehicles(move, List.of(1, 2), List.of(5, 6, 7, 8),
         List.of(6, 7, 1, 2), List.of(5, 8), false);
@@ -298,7 +298,7 @@ public class TSPInsertSubrouteMoveTest {
   @Test
   public void test2Vehicle6OrdersRemoveMiddleInsertVehicleBEnd() {
     Random rng = new CustomRandom(new int[] {1, 0, 2}, new boolean[] {false});
-    TSPMove move = new TSPInsertSubrouteMove(rng, re, false);
+    TSPMove move = new TSPInsertSubrouteMove(rng, re, false, false);
 
     evaluateMoveTwoVehicles(move, List.of(1, 2), List.of(5, 6, 7, 8),
         List.of(1, 2, 6, 7), List.of(5, 8), false);
@@ -307,7 +307,7 @@ public class TSPInsertSubrouteMoveTest {
   @Test
   public void test2Vehicle6OrdersRemoveMiddleInsertVehicleBMiddle() {
     Random rng = new CustomRandom(new int[] {1, 0, 1}, new boolean[] {false});
-    TSPMove move = new TSPInsertSubrouteMove(rng, re, false);
+    TSPMove move = new TSPInsertSubrouteMove(rng, re, false, false);
 
     evaluateMoveTwoVehicles(move, List.of(1, 2), List.of(5, 6, 7, 8),
         List.of(1, 6, 7, 2), List.of(5, 8), false);
@@ -317,7 +317,7 @@ public class TSPInsertSubrouteMoveTest {
   @Test
   public void test2Vehicle6OrdersRemoveMiddleInsertVehicleBEmpty() {
     Random rng = new CustomRandom(new int[] {2, 0, 0}, new boolean[] {false});
-    TSPMove move = new TSPInsertSubrouteMove(rng, re, false);
+    TSPMove move = new TSPInsertSubrouteMove(rng, re, false, false);
 
     evaluateMoveTwoVehicles(move, List.of(1, 2, 3, 4, 5), List.of(),
         List.of(1, 2, 5), List.of(3, 4), false);

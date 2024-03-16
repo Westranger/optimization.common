@@ -1,6 +1,5 @@
 package de.westranger.optimization.common.util;
 
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -42,7 +41,6 @@ public class CombinationSearcher {
       return true;
     }
 
-    //System.out.println("generated new  set of params");
 
     int numCombinations = (int) Math.pow(2.0, this.inputMap.size());
     int numBits = this.inputMap.size();
@@ -95,6 +93,9 @@ public class CombinationSearcher {
         openIdxCandidates.put(id, newIdxMap);
       }
     }
+
+    System.out.println("generated new  set of params " + openIdxCandidates.size());
+
     return true;
   }
 

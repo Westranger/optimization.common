@@ -22,6 +22,7 @@ public final class TSPNeighbourSelector implements NeighbourSelector {
   private final TSPMove moveInsert;
   private final TSPMove moveInsertSubroute;
   private final TSPMove moveInsertSubrouteReverse;
+  private final TSPMove moveTwoOpt;
 
   private final double maxTemperature;
   private final double minTemperature;
@@ -35,8 +36,9 @@ public final class TSPNeighbourSelector implements NeighbourSelector {
     final RouteEvaluator re = new RouteEvaluator();
     moveSwap = new TSPSwapMove(rng, re);
     moveInsert = new TSPInsertionMove(rng, re);
-    moveInsertSubroute = new TSPInsertSubrouteMove(rng, re, false);
-    moveInsertSubrouteReverse = new TSPInsertSubrouteMove(rng, re, true);
+    moveInsertSubroute = new TSPInsertSubrouteMove(rng, re, false, false);
+    moveInsertSubrouteReverse = new TSPInsertSubrouteMove(rng, re, true, false);
+    moveTwoOpt = new TSPInsertSubrouteMove(rng, re, true, true);
   }
 
 
@@ -88,6 +90,7 @@ public final class TSPNeighbourSelector implements NeighbourSelector {
     final Optional<TSPMoveResult> moveSwapResult = this.moveSwap.performMove(vrl);
     final Optional<TSPMoveResult> moveSRResult = this.moveInsertSubroute.performMove(vrl);
     final Optional<TSPMoveResult> moveSRRResult = this.moveInsertSubrouteReverse.performMove(vrl);
+    final Optional<TSPMoveResult> moveTwoOptResult = this.moveTwoOpt.performMove(vrl);
 
     Optional<TSPMoveResult> finalResult = Optional.empty();
     double min = Double.POSITIVE_INFINITY;
@@ -110,6 +113,11 @@ public final class TSPNeighbourSelector implements NeighbourSelector {
     if (moveSRRResult.isPresent() && moveSRRResult.get().score() < min) {
       min = moveSRRResult.get().score();
       finalResult = moveSRRResult;
+    }
+
+    if (moveTwoOptResult.isPresent() && moveTwoOptResult.get().score() < min) {
+      min = moveTwoOptResult.get().score();
+      finalResult = moveTwoOptResult;
     }
 
     double score = intermediateSolution.getScore().getValue(0);

@@ -5,17 +5,18 @@ import de.westranger.optimization.common.algorithm.tsp.sa.route.RouteEvaluator;
 import de.westranger.optimization.common.algorithm.tsp.sa.route.VehicleRoute;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Random;
 
 public final class TSPInsertSubrouteMove extends TSPMove {
 
   private final boolean reverseSubroute;
+  private final boolean makeTwoOpt;
 
   public TSPInsertSubrouteMove(final Random rng, final RouteEvaluator routeEvaluator,
-                               final boolean reverseSubroute) {
+                               final boolean reverseSubroute, final boolean makeTwoOpt) {
     super(rng, routeEvaluator);
-    this.reverseSubroute = reverseSubroute;
+    this.makeTwoOpt = makeTwoOpt;
+    this.reverseSubroute = makeTwoOpt ? true : reverseSubroute;
   }
 
   @Override
@@ -34,7 +35,8 @@ public final class TSPInsertSubrouteMove extends TSPMove {
   protected VehicleRoute performMoveSingleVehicle(VehicleRoute vr) {
     final int startIdx = rng.nextInt(vr.getRoute().size() - 1);
     final int endIdx = startIdx + rng.nextInt(vr.getRoute().size() - startIdx - 1) + 1;
-    final int insertIdx = this.rng.nextInt(vr.getRoute().size() - (endIdx - startIdx + 1) + 1);
+    final int insertIdx = this.makeTwoOpt ? startIdx :
+        this.rng.nextInt(vr.getRoute().size() - (endIdx - startIdx + 1) + 1);
     List<Order> lstA = new ArrayList<>(vr.getRoute());
     List<Double> distanceScoreA = new ArrayList<>(vr.getDistanceScore());
     List<Integer> idxToUpdate = new ArrayList<>(2);
