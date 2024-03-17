@@ -1,7 +1,5 @@
 package de.westranger.optimization.common.util;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -20,17 +18,18 @@ class CombinationSearcherTest {
 
     Map<String, Integer> initIdx = Map.of("a", 0, "b", 0, "c", 0);
 
-    CombinationSearcher cs = new CombinationSearcher(values, initIdx, Double.POSITIVE_INFINITY);
+    CombinationSearcher cs =
+        new CombinationSearcher(values, initIdx, Double.POSITIVE_INFINITY, Integer.MAX_VALUE,5);
 
 
     while (cs.computeNextParameterList()) {
-      Map<String, Map<String, Double>> map = cs.getCandidates();
+      Map<String, Map<String, Double>> map = cs.getCandidates(3);
       for (Map.Entry<String, Map<String, Double>> mapEntry : map.entrySet()) {
         double sum = 0.0;
         for (Map.Entry<String, Double> tmp : mapEntry.getValue().entrySet()) {
           sum += tmp.getValue();
         }
-        cs.provideScore(mapEntry.getKey(), sum);
+        cs.provideScore(mapEntry.getKey(), sum, 1);
       }
     }
     System.out.println("done");

@@ -136,7 +136,7 @@ class TSPInsertionMoveTest {
     Random rng = new CustomRandom(new int[] {3, 2});
     TSPMove move = new TSPInsertionMove(rng, re);
 
-    evaluateMoveOneVehicle(move, List.of(1, 2, 3, 4), List.of(1,2,4,3), false);
+    evaluateMoveOneVehicle(move, List.of(1, 2, 3, 4), List.of(1, 2, 4, 3), false);
   }
 
   @Test
@@ -145,7 +145,7 @@ class TSPInsertionMoveTest {
     Random rng = new CustomRandom(new int[] {3, 2});
     TSPMove move = new TSPInsertionMove(rng, re);
 
-    evaluateMoveOneVehicle(move, List.of(1, 2, 3, 4), List.of(1,2,4,3), true);
+    evaluateMoveOneVehicle(move, List.of(1, 2, 3, 4), List.of(1, 2, 4, 3), true);
   }
 
   @Test
@@ -264,6 +264,17 @@ class TSPInsertionMoveTest {
 
     evaluateMoveTwoVehicles(move, List.of(1, 2, 3), List.of(4, 5, 6),
         List.of(1, 2), List.of(3, 4, 5, 6), false);
+  }
+
+
+  @Test
+  public void test2Vehicle6OrdersRemoveABeginInsertBBegin() {
+    RouteEvaluator re = new RouteEvaluator();
+    Random rng = new CustomRandom(new int[] {0, 0}, new boolean[] {true});
+    TSPMove move = new TSPInsertionMove(rng, re);
+
+    evaluateMoveTwoVehicles(move, List.of(1), List.of(4, 5, 6),
+        List.of(), List.of(1, 4, 5, 6), false);
   }
 
   @Test

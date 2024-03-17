@@ -13,8 +13,10 @@ import de.westranger.optimization.common.algorithm.tsp.sa.route.VehicleRoute;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
+import java.util.TreeMap;
 
 public final class TSPNeighbourSelector implements NeighbourSelector {
 
@@ -23,6 +25,8 @@ public final class TSPNeighbourSelector implements NeighbourSelector {
   private final TSPMove moveInsertSubroute;
   private final TSPMove moveInsertSubrouteReverse;
   private final TSPMove moveTwoOpt;
+
+  private Map<Integer, Integer> stats;
 
   private final double maxTemperature;
   private final double minTemperature;
@@ -39,6 +43,7 @@ public final class TSPNeighbourSelector implements NeighbourSelector {
     moveInsertSubroute = new TSPInsertSubrouteMove(rng, re, false, false);
     moveInsertSubrouteReverse = new TSPInsertSubrouteMove(rng, re, true, false);
     moveTwoOpt = new TSPInsertSubrouteMove(rng, re, true, true);
+    stats = new TreeMap<>();
   }
 
 
@@ -75,8 +80,20 @@ public final class TSPNeighbourSelector implements NeighbourSelector {
       if (vehicleIdA == vehicleIdB) {
         vrl.add(nonEmptyVehicles.remove(vehicleIdA));
       } else {
-        vrl.add(nonEmptyVehicles.remove(Math.max(vehicleIdA, vehicleIdB)));
-        vrl.add(nonEmptyVehicles.remove(Math.min(vehicleIdA, vehicleIdB)));
+        if (this.rng.nextBoolean()) {
+          if (this.rng.nextBoolean()) {
+            vrl.add(nonEmptyVehicles.remove(vehicleIdA));
+          } else {
+            vrl.add(nonEmptyVehicles.remove(vehicleIdB));
+          }
+        } else {
+          vrl.add(nonEmptyVehicles.remove(Math.max(vehicleIdA, vehicleIdB)));
+          vrl.add(nonEmptyVehicles.remove(Math.min(vehicleIdA, vehicleIdB)));
+
+          if (this.rng.nextBoolean()) {
+            vrl.add(vrl.remove(0));
+          }
+        }
       }
     } else {
       final int vehicleIdA = this.rng.nextInt(state.getNonEmptyVehicles().size());
@@ -84,6 +101,14 @@ public final class TSPNeighbourSelector implements NeighbourSelector {
 
       vrl.add(nonEmptyVehicles.remove(vehicleIdA));
       vrl.add(emptyVehicles.remove(vehicleIdB));
+    }
+
+    for (VehicleRoute vr : vrl) {
+      if (stats.containsKey(vr.getId())) {
+        stats.put(vr.getId(), stats.get(vr.getId()) + 1);
+      } else {
+        stats.put(vr.getId(), 1);
+      }
     }
 
     final Optional<TSPMoveResult> moveInsertResult = this.moveInsert.performMove(vrl);
@@ -127,6 +152,11 @@ public final class TSPNeighbourSelector implements NeighbourSelector {
       }
     }
 
+    if (vrl.get(0).getId() == 2 && vrl.size() == 2 && vrl.get(1).getId() == 3 //&&
+      /*vrl.get(0).getRoute().size() == 1*/) {
+      //System.out.println("got it");
+    }
+
     if (finalResult.isPresent()) {
       for (VehicleRoute vr : finalResult.get().vehicles()) {
         if (vr.getRoute().isEmpty()) {
@@ -151,5 +181,8 @@ public final class TSPNeighbourSelector implements NeighbourSelector {
         score);
   }
 
+  public Map<Integer, Integer> getStats() {
+    return this.stats;
+  }
 
 }
