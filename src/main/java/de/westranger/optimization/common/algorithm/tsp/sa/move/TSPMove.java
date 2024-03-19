@@ -3,8 +3,10 @@ package de.westranger.optimization.common.algorithm.tsp.sa.move;
 import de.westranger.optimization.common.algorithm.tsp.common.Order;
 import de.westranger.optimization.common.algorithm.tsp.sa.route.RouteEvaluator;
 import de.westranger.optimization.common.algorithm.tsp.sa.route.VehicleRoute;
+import de.westranger.optimization.common.util.SampleStatistics;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 
@@ -12,10 +14,13 @@ public abstract class TSPMove {
 
   protected final Random rng;
   protected final RouteEvaluator routeEvaluator;
+  private boolean collectStatistics;
 
-  public TSPMove(final Random rng, final RouteEvaluator routeEvaluator) {
+  public TSPMove(final Random rng, final RouteEvaluator routeEvaluator,
+                 final boolean collectStatistics) {
     this.rng = rng;
     this.routeEvaluator = routeEvaluator;
+    this.collectStatistics = collectStatistics;
   }
 
   public Optional<TSPMoveResult> performMove(final List<VehicleRoute> vehicles) {
@@ -62,5 +67,7 @@ public abstract class TSPMove {
 
   protected abstract List<VehicleRoute> performMoveTwoVehicles(final VehicleRoute vrA,
                                                                final VehicleRoute vrB);
+
+  public abstract Map<String, SampleStatistics> getSamplingStatistics();
 
 }

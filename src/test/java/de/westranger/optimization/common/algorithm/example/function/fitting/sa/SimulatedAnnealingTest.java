@@ -29,14 +29,15 @@ class SimulatedAnnealingTest {
       data.add(new DataPoint(x, qf.evaluate(x)));
     }
 
+    final long seed = 47110815L;
     final SimulatedAnnealingParameter sap =
         new SimulatedAnnealingParameter(10000, 0.001, 0.9, 100, 20000, 0.9);
-    final Random rng = new Random(47110815);
+    final Random rng = new Random(seed);
     final CubicFunktion tbf = new CubicFunktion(10000.0, 10000.0, 10000.0, 10000.0);
     final CubicFunktionFitter initial = new CubicFunktionFitter(tbf, data);
     final NeighbourSelector ns = new NormalDistributionSelector(rng);
 
-    final SimulatedAnnealing sa = new SimulatedAnnealing(initial, ns, rng, sap);
+    final SimulatedAnnealing sa = new SimulatedAnnealing(initial, ns, seed, sap);
     final SearchSpaceState optimizedResult = sa.optimize(false);
 
     assertNotNull(optimizedResult);

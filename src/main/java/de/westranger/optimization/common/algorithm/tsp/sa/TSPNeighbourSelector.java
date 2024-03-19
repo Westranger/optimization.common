@@ -10,8 +10,8 @@ import de.westranger.optimization.common.algorithm.tsp.sa.move.TSPMoveResult;
 import de.westranger.optimization.common.algorithm.tsp.sa.move.TSPSwapMove;
 import de.westranger.optimization.common.algorithm.tsp.sa.route.RouteEvaluator;
 import de.westranger.optimization.common.algorithm.tsp.sa.route.VehicleRoute;
+import de.westranger.optimization.common.util.SampleStatistics;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -26,24 +26,28 @@ public final class TSPNeighbourSelector implements NeighbourSelector {
   private final TSPMove moveInsertSubrouteReverse;
   private final TSPMove moveTwoOpt;
 
-  private Map<Integer, Integer> stats;
+  private SampleStatistics<Integer> samplingStatsVehicleID;
+  private SampleStatistics<Integer> samplingStatsNumVehicle;
+  private SampleStatistics<String> samplingStatsFirstVehicle;
 
   private final double maxTemperature;
   private final double minTemperature;
   private final Random rng;
 
   public TSPNeighbourSelector(final double maxTemperature, final double minTemperature,
-                              final Random rng) {
+                              final long seed, boolean collectStatistics) {
     this.maxTemperature = maxTemperature;
     this.minTemperature = minTemperature;
-    this.rng = rng;
+    this.rng = new Random(seed);
     final RouteEvaluator re = new RouteEvaluator();
-    moveSwap = new TSPSwapMove(rng, re);
-    moveInsert = new TSPInsertionMove(rng, re);
-    moveInsertSubroute = new TSPInsertSubrouteMove(rng, re, false, false);
-    moveInsertSubrouteReverse = new TSPInsertSubrouteMove(rng, re, true, false);
-    moveTwoOpt = new TSPInsertSubrouteMove(rng, re, true, true);
-    stats = new TreeMap<>();
+    this.moveSwap = new TSPSwapMove(new Random(seed), re);
+    this.moveInsert = new TSPInsertionMove(new Random(seed), re, collectStatistics);
+    this.moveInsertSubroute = new TSPInsertSubrouteMove(new Random(seed), re, false, false);
+    this.moveInsertSubrouteReverse = new TSPInsertSubrouteMove(new Random(seed), re, true, false);
+    this.moveTwoOpt = new TSPInsertSubrouteMove(new Random(seed), re, true, true);
+    this.samplingStatsVehicleID = new SampleStatistics<>(collectStatistics);
+    this.samplingStatsNumVehicle = new SampleStatistics<>(collectStatistics);
+    this.samplingStatsFirstVehicle = new SampleStatistics<>(collectStatistics);
   }
 
 
@@ -69,47 +73,8 @@ public final class TSPNeighbourSelector implements NeighbourSelector {
      * zu modifizieren, das man schneller zu einer lösung kommt
      */
 
-    final List<VehicleRoute> vrl = new LinkedList<>();
-    final List<VehicleRoute> emptyVehicles = new ArrayList(state.getEmptyVehicles());
-    final List<VehicleRoute> nonEmptyVehicles = new ArrayList(state.getNonEmptyVehicles());
-
-    if (state.getEmptyVehicles().isEmpty()) {
-      final int vehicleIdA = this.rng.nextInt(nonEmptyVehicles.size());
-      final int vehicleIdB = this.rng.nextInt(nonEmptyVehicles.size());
-
-      if (vehicleIdA == vehicleIdB) {
-        vrl.add(nonEmptyVehicles.remove(vehicleIdA));
-      } else {
-        if (this.rng.nextBoolean()) {
-          if (this.rng.nextBoolean()) {
-            vrl.add(nonEmptyVehicles.remove(vehicleIdA));
-          } else {
-            vrl.add(nonEmptyVehicles.remove(vehicleIdB));
-          }
-        } else {
-          vrl.add(nonEmptyVehicles.remove(Math.max(vehicleIdA, vehicleIdB)));
-          vrl.add(nonEmptyVehicles.remove(Math.min(vehicleIdA, vehicleIdB)));
-
-          if (this.rng.nextBoolean()) {
-            vrl.add(vrl.remove(0));
-          }
-        }
-      }
-    } else {
-      final int vehicleIdA = this.rng.nextInt(state.getNonEmptyVehicles().size());
-      final int vehicleIdB = this.rng.nextInt(state.getEmptyVehicles().size());
-
-      vrl.add(nonEmptyVehicles.remove(vehicleIdA));
-      vrl.add(emptyVehicles.remove(vehicleIdB));
-    }
-
-    for (VehicleRoute vr : vrl) {
-      if (stats.containsKey(vr.getId())) {
-        stats.put(vr.getId(), stats.get(vr.getId()) + 1);
-      } else {
-        stats.put(vr.getId(), 1);
-      }
-    }
+    final Map<Integer, VehicleRoute> vehicles = new TreeMap<>(state.getVehicles());
+    final List<VehicleRoute> vrl = sampleVehicles(vehicles);
 
     final Optional<TSPMoveResult> moveInsertResult = this.moveInsert.performMove(vrl);
     final Optional<TSPMoveResult> moveSwapResult = this.moveSwap.performMove(vrl);
@@ -159,30 +124,97 @@ public final class TSPNeighbourSelector implements NeighbourSelector {
 
     if (finalResult.isPresent()) {
       for (VehicleRoute vr : finalResult.get().vehicles()) {
-        if (vr.getRoute().isEmpty()) {
-          emptyVehicles.add(vr);
-        } else {
-          nonEmptyVehicles.add(vr);
-          score += vr.getScore();
-        }
+        vehicles.put(vr.getId(), vr);
+        score += vr.getScore();
       }
     } else {
       for (VehicleRoute vr : vrl) {
-        if (vr.getRoute().isEmpty()) {
-          emptyVehicles.add(vr);
-        } else {
-          nonEmptyVehicles.add(vr);
-          score += vr.getScore();
-        }
+        vehicles.put(vr.getId(), vr);
+        score += vr.getScore();
       }
     }
 
-    return new State(new ArrayList<>(), emptyVehicles, nonEmptyVehicles, state.getRouteEval(),
+    return new State(new ArrayList<>(), vehicles, state.getRouteEval(),
         score);
   }
 
-  public Map<Integer, Integer> getStats() {
-    return this.stats;
+  private List<VehicleRoute> sampleVehicles(Map<Integer, VehicleRoute> vehicles) {
+    List<Integer> keys = new ArrayList<>(vehicles.size());
+    List<VehicleRoute> vrl = new ArrayList<>(1);
+
+    for (int key : vehicles.keySet()) {
+      keys.add(key);
+    }
+
+    final int maxSamplingIter = 10000;
+    for (int i = 0; i < maxSamplingIter; i++) {
+      final int vehicleIdA = this.rng.nextInt(keys.size());
+      final int vehicleIdB = this.rng.nextInt(keys.size());
+      final boolean single = this.rng.nextBoolean();
+
+      this.samplingStatsNumVehicle.add(single ? 1 : 2);
+      VehicleRoute vrA = vehicles.get(keys.get(vehicleIdA));
+      VehicleRoute vrB = vehicles.get(keys.get(vehicleIdB));
+
+      this.samplingStatsVehicleID.add(vrA.getId());
+      this.samplingStatsVehicleID.add(vrB.getId());
+
+      if (!vrA.getRoute().isEmpty() && vrB.getRoute().isEmpty()) {
+        vrl.add(vrA);
+        if (!single) {
+          vrl.add(vrB);
+        }
+        break;
+      }
+      if (vrA.getRoute().isEmpty() && !vrB.getRoute().isEmpty()) {
+        vrl.add(vrB);
+        if (!single) {
+          vrl.add(vrA);
+        }
+        break;
+      } else if (!vrA.getRoute().isEmpty() && !vrB.getRoute().isEmpty()) {
+        if (vehicleIdA == vehicleIdB) {
+          vrl.add(vrA);
+        } else if (single) {
+          if (this.rng.nextBoolean()) {
+            samplingStatsFirstVehicle.add("A");
+            vrl.add(vrA);
+          } else {
+            vrl.add(vrB);
+            samplingStatsFirstVehicle.add("B");
+          }
+        } else {
+          if (this.rng.nextBoolean()) {
+            samplingStatsFirstVehicle.add("A");
+            vrl.add(vrA);
+            vrl.add(vrB);
+          } else {
+            samplingStatsFirstVehicle.add("B");
+            vrl.add(vrB);
+            vrl.add(vrA);
+          }
+        }
+        break;
+      }
+    }
+
+    if (vrl.isEmpty()) {
+      throw new IllegalStateException(
+          "was not able to sample to non empty vehicles after " + maxSamplingIter + " iterations");
+    }
+    return vrl;
+  }
+
+  public SampleStatistics getSamplingStatsVehicleID() {
+    return this.samplingStatsVehicleID;
+  }
+
+  public SampleStatistics getSamplingStatsNumVehicle() {
+    return this.samplingStatsNumVehicle;
+  }
+
+  public SampleStatistics getSamplingStatsFirstVehicle() {
+    return this.samplingStatsFirstVehicle;
   }
 
 }

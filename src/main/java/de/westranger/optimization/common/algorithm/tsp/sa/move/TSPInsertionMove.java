@@ -3,14 +3,24 @@ package de.westranger.optimization.common.algorithm.tsp.sa.move;
 import de.westranger.optimization.common.algorithm.tsp.common.Order;
 import de.westranger.optimization.common.algorithm.tsp.sa.route.RouteEvaluator;
 import de.westranger.optimization.common.algorithm.tsp.sa.route.VehicleRoute;
+import de.westranger.optimization.common.util.SampleStatistics;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 public final class TSPInsertionMove extends TSPMove {
 
-  public TSPInsertionMove(final Random rng, final RouteEvaluator re) {
-    super(rng, re);
+  private SampleStatistics<Integer> statsRemoveIdx;
+  private SampleStatistics<Integer> statsInsertIdx;
+  private SampleStatistics<Boolean> statsSwitchVehicle;
+
+  public TSPInsertionMove(final Random rng, final RouteEvaluator re,
+                          final boolean collectStatistics) {
+    super(rng, re, collectStatistics);
+    this.statsRemoveIdx = new SampleStatistics<>(collectStatistics);
+    this.statsInsertIdx = new SampleStatistics<>(collectStatistics);
+    this.statsSwitchVehicle = new SampleStatistics<>(collectStatistics);
   }
 
   @Override
@@ -24,13 +34,14 @@ public final class TSPInsertionMove extends TSPMove {
     return !(ordersA.isEmpty() && ordersB.isEmpty());
   }
 
-  private double removeAndInsertEmptyList(final List<Order> lstA, final List<Order> lstB,
-                                          final List<Double> distanceScoreA,
-                                          final List<Double> distanceScoreB, double score,
-                                          final List<Integer> idxToUpdateA,
-                                          final List<Integer> idxToUpdateB,
-                                          final boolean isRoundtrip) {
+  private double removeAndInsertList(final List<Order> lstA, final List<Order> lstB,
+                                     final List<Double> distanceScoreA,
+                                     final List<Double> distanceScoreB, double score,
+                                     final List<Integer> idxToUpdateA,
+                                     final List<Integer> idxToUpdateB,
+                                     final boolean isRoundtrip) {
     final int removeIdx = rng.nextInt(lstA.size());
+    statsRemoveIdx.add(removeIdx);
     final Order order = lstA.remove(removeIdx);
     final double oldRemoveScore = distanceScoreA.remove(removeIdx);
 
@@ -42,6 +53,7 @@ public final class TSPInsertionMove extends TSPMove {
     }
 
     final int insertIdx = this.rng.nextInt(lstB.size() + 1);
+    statsInsertIdx.add(insertIdx);
     if (insertIdx == lstB.size()) {
       lstB.add(order);
       distanceScoreB.add(0.0);
@@ -59,13 +71,14 @@ public final class TSPInsertionMove extends TSPMove {
     return score;
   }
 
-  private double removeAndInsertList(final List<Order> lstA, final List<Order> lstB,
-                                     final List<Double> distanceScoreA,
-                                     final List<Double> distanceScoreB, double score,
-                                     final List<Integer> idxToUpdateA,
-                                     final List<Integer> idxToUpdateB,
-                                     final boolean isRoundtrip) {
+  private double removeAndInsertEmptyList(final List<Order> lstA, final List<Order> lstB,
+                                          final List<Double> distanceScoreA,
+                                          final List<Double> distanceScoreB, double score,
+                                          final List<Integer> idxToUpdateA,
+                                          final List<Integer> idxToUpdateB,
+                                          final boolean isRoundtrip) {
     final int removeIdx = rng.nextInt(lstB.size());
+    statsRemoveIdx.add(removeIdx);
     lstA.add(lstB.remove(removeIdx));
     final double oldRemoveScore = distanceScoreB.remove(removeIdx);
 
@@ -91,9 +104,13 @@ public final class TSPInsertionMove extends TSPMove {
                                             final List<Integer> idxToUpdate,
                                             final boolean isRoundtrip) {
     final int removeIdx = this.rng.nextInt(lstA.size());
+    final int insertIdx = computeInsertIdxSingleVehicle(lstA, removeIdx);
+
+    statsRemoveIdx.add(removeIdx);
+    statsInsertIdx.add(insertIdx);
+
     final Order order = lstA.remove(removeIdx);
     final double oldRemoveScore = distanceScoreA.remove(removeIdx);
-    final int insertIdx = computeInsertIdxSingleVehicle(lstA, removeIdx);
 
     if (removeIdx != lstA.size() || isRoundtrip) {
       idxToUpdate.add(removeIdx);
@@ -125,18 +142,11 @@ public final class TSPInsertionMove extends TSPMove {
 
 
   private int computeInsertIdxSingleVehicle(final List<Order> lstA, final int removeIdx) {
-    if (removeIdx != 0 && removeIdx != lstA.size()) {
-      final boolean firstHalf = rng.nextBoolean();
-      if (firstHalf) {
-        return this.rng.nextInt(removeIdx);
-      } else {
-        return removeIdx + this.rng.nextInt(lstA.size() - removeIdx) + 1;
-      }
-    } else if (removeIdx == lstA.size()) {
-      return this.rng.nextInt(removeIdx);
-    } else {
-      return removeIdx + this.rng.nextInt(lstA.size() - removeIdx) + 1;
+    int insertIdx = rng.nextInt(lstA.size() - 1);
+    if (removeIdx <= insertIdx) {
+      insertIdx += 1;
     }
+    return insertIdx;
   }
 
   @Override
@@ -168,24 +178,25 @@ public final class TSPInsertionMove extends TSPMove {
     final List<Integer> idxToUpdateB = new ArrayList<>(2);
 
     if (lstA.isEmpty() && !lstB.isEmpty()) {
-      scoreB = removeAndInsertList(lstA, lstB, distanceScoreA, distanceScoreB,
+      scoreB = removeAndInsertEmptyList(lstA, lstB, distanceScoreA, distanceScoreB,
           scoreB, idxToUpdateA, idxToUpdateB,
           vrA.isRoundtrip());
     } else if (!lstA.isEmpty() && lstB.isEmpty()) {
-      scoreA = removeAndInsertList(lstB, lstA, distanceScoreB, distanceScoreA,
+      scoreA = removeAndInsertEmptyList(lstB, lstA, distanceScoreB, distanceScoreA,
           scoreA, idxToUpdateB, idxToUpdateA,
           vrB.isRoundtrip());
     } else {
       boolean removeFromA = rng.nextBoolean();
+      statsSwitchVehicle.add(removeFromA);
 
       if (removeFromA) {
         scoreA =
-            removeAndInsertEmptyList(lstA, lstB, distanceScoreA, distanceScoreB,
+            removeAndInsertList(lstA, lstB, distanceScoreA, distanceScoreB,
                 scoreA, idxToUpdateA, idxToUpdateB,
                 vrA.isRoundtrip());
       } else {
         scoreB =
-            removeAndInsertEmptyList(lstB, lstA, distanceScoreB, distanceScoreA,
+            removeAndInsertList(lstB, lstA, distanceScoreB, distanceScoreA,
                 scoreB, idxToUpdateB, idxToUpdateA,
                 vrB.isRoundtrip());
       }
@@ -209,11 +220,13 @@ public final class TSPInsertionMove extends TSPMove {
     routeEvaluator.scoreRoutePartial(vrANew, idxToUpdateA);
     routeEvaluator.scoreRoutePartial(vrBNew, idxToUpdateB);
 
-    if ((vrANew.getScore() < 0 && !lstA.isEmpty()) || (vrBNew.getScore() < 0 && !lstB.isEmpty())) {
-      System.out.println("WTF");
-    }
-
     return List.of(vrANew, vrBNew);
+  }
+
+  @Override
+  public Map<String, SampleStatistics> getSamplingStatistics() {
+    return Map.of("move_insert_iidx", this.statsInsertIdx, "move_insert_ridx", this.statsRemoveIdx,
+        "move_insert_switch_vehicle", this.statsSwitchVehicle);
   }
 
 }

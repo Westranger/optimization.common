@@ -3,8 +3,10 @@ package de.westranger.optimization.common.algorithm.tsp.sa.move;
 import de.westranger.optimization.common.algorithm.tsp.common.Order;
 import de.westranger.optimization.common.algorithm.tsp.sa.route.RouteEvaluator;
 import de.westranger.optimization.common.algorithm.tsp.sa.route.VehicleRoute;
+import de.westranger.optimization.common.util.SampleStatistics;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 public final class TSPInsertSubrouteMove extends TSPMove {
@@ -14,7 +16,7 @@ public final class TSPInsertSubrouteMove extends TSPMove {
 
   public TSPInsertSubrouteMove(final Random rng, final RouteEvaluator routeEvaluator,
                                final boolean reverseSubroute, final boolean makeTwoOpt) {
-    super(rng, routeEvaluator);
+    super(rng, routeEvaluator, false);
     this.makeTwoOpt = makeTwoOpt;
     this.reverseSubroute = makeTwoOpt ? true : reverseSubroute;
   }
@@ -110,6 +112,11 @@ public final class TSPInsertSubrouteMove extends TSPMove {
     routeEvaluator.scoreRoutePartial(vrBNew, idxToUpdateB);
 
     return List.of(vrANew, vrBNew);
+  }
+
+  @Override
+  public Map<String, SampleStatistics> getSamplingStatistics() {
+    return null;
   }
 
   private double extractSubrouteAndAdd(int min, int max, int insertIdx, List<Order> srcRoute,

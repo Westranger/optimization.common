@@ -25,19 +25,19 @@ public final class SimulatedAnnealing<T extends Score> {
   private long totalIterationCounter;
 
   public SimulatedAnnealing(final SearchSpaceState<T> initialSolution, final NeighbourSelector ns,
-                            final Random rng, final SimulatedAnnealingParameter sap,
+                            final long seed, final SimulatedAnnealingParameter sap,
                             final File telemetryFolder) {
     this.initialSolution = initialSolution;
     this.ns = ns;
-    this.rng = rng;
+    this.rng = new Random(seed);
     this.totalIterationCounter = 0L;
     this.sap = sap;
     this.telemetryFolder = telemetryFolder;
   }
 
   public SimulatedAnnealing(final SearchSpaceState<T> initialSolution, final NeighbourSelector ns,
-                            final Random rng, final SimulatedAnnealingParameter sap) {
-    this(initialSolution, ns, rng, sap, null);
+                            final long seed, final SimulatedAnnealingParameter sap) {
+    this(initialSolution, ns, seed, sap, null);
   }
 
   public SearchSpaceState optimize(final boolean loggingEnabled) {

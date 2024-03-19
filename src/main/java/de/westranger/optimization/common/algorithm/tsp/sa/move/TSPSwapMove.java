@@ -3,15 +3,17 @@ package de.westranger.optimization.common.algorithm.tsp.sa.move;
 import de.westranger.optimization.common.algorithm.tsp.common.Order;
 import de.westranger.optimization.common.algorithm.tsp.sa.route.RouteEvaluator;
 import de.westranger.optimization.common.algorithm.tsp.sa.route.VehicleRoute;
+import de.westranger.optimization.common.util.SampleStatistics;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 
 public final class TSPSwapMove extends TSPMove {
 
   public TSPSwapMove(final Random rng, final RouteEvaluator routeEvaluator) {
-    super(rng, routeEvaluator);
+    super(rng, routeEvaluator, false);
   }
 
   @Override
@@ -90,6 +92,11 @@ public final class TSPSwapMove extends TSPMove {
     routeEvaluator.scoreRoutePartial(vrANew, idxToUpdateA);
     routeEvaluator.scoreRoutePartial(vrBNew, idxToUpdateB);
     return List.of(vrANew, vrBNew);
+  }
+
+  @Override
+  public Map<String, SampleStatistics> getSamplingStatistics() {
+    return null;
   }
 
   private void computeUpdateIndices(List<Order> orderLst, List<Integer> updateEdgeIdxLst,

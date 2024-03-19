@@ -22,24 +22,25 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.TreeMap;
 import org.junit.jupiter.api.Assertions;
 
 public class Benchmark {
   public static void main(String[] args) {
     final InputStreamReader reader = new InputStreamReader(
         //SimulatedAnnealingTest.class.getResourceAsStream("/tmp/vrp_problem_50_650_PDE.json"));
-        SimulatedAnnealingTest.class.getResourceAsStream("/tmp/vrp_problem_5_25_PDE.json"));
+        SimulatedAnnealingTest.class.getResourceAsStream("/tmp/vrp_problem_50_650_PDE.json"));
     final Gson gson = new Gson();
     final ProblemFormulation problem = gson.fromJson(reader, ProblemFormulation.class);
+    final long seed = 47110815L;
 
-    Random rng = new Random(47110815L);
+    Random rng = new Random(seed);
 
     List<Order> orders = new LinkedList<>(problem.getOrders());
     Collections.shuffle(orders, rng);
 
     boolean isRoundtrip = problem.getVehicleStartPositions().size() == 1;
-    List<VehicleRoute> emptyVehicle = new ArrayList<>();
-    List<VehicleRoute> nonEmptyVehicle = new ArrayList<>();
+    Map<Integer, VehicleRoute> vehicles = new TreeMap<>();
 
     for (Map.Entry<Integer, Point2D> entry : problem.getVehicleStartPositions()
         .entrySet()) {
@@ -47,17 +48,17 @@ public class Benchmark {
       if (entry.getKey() == 1) {
         final VehicleRoute vr =
             new VehicleRoute(entry.getKey(), entry.getValue(), orders, isRoundtrip);
-        nonEmptyVehicle.add(vr);
+        vehicles.put(vr.getId(), vr);
       } else {
         final VehicleRoute vr =
             new VehicleRoute(entry.getKey(), entry.getValue(), new ArrayList<>(), isRoundtrip);
-        emptyVehicle.add(vr);
+        vehicles.put(vr.getId(), vr);
       }
     }
 
     final RouteEvaluator re = new RouteEvaluator();
     State initialState =
-        new State(new ArrayList<>(), emptyVehicle, nonEmptyVehicle, re);
+        new State(new ArrayList<>(), vehicles, re);
 
     // {avg_score=25.79546699610685, gamma=0.2, initialAcceptanceRatio=0.95, iter=886.0, maxImprovementPerTemperature=2.0, omegaMax=250.0, param_id#0_1_1_4_1=0.0, score=25.79546699610685, tMin=0.1} t:22.34237203105739 false
 
@@ -65,24 +66,21 @@ public class Benchmark {
 
 
     SimulatedAnnealingParameter sap =
-        new SimulatedAnnealingParameter(0, 0.0001, 0.95, 25000, 10000, 0.8);
+        new SimulatedAnnealingParameter(0, 1.0E-5, 0.9, 10000, 250, 0.4);
     //{avg_score=92.87750632113925, gamma=0.96, initialAcceptanceRatio=0.95, iter=9453434.0, maxImprovementPerTemperature=2.0, omegaMax=25000.0, score=92.87750632113925, tMax=0.0, tMin=0.001}//
-    TSPNeighbourSelector ns = new TSPNeighbourSelector(sap.tMax(), sap.tMin(), rng);
+    TSPNeighbourSelector ns = new TSPNeighbourSelector(sap.tMax(), sap.tMin(), seed, true);
 
-    SimulatedAnnealing sa = new SimulatedAnnealing(initialState, ns, rng, sap);
+    SimulatedAnnealing sa = new SimulatedAnnealing(initialState, ns, seed, sap);
 
+    System.out.println("");
+    long start = System.currentTimeMillis();
     State optimizedState = (State) sa.optimize(true);
+    long end = System.currentTimeMillis();
 
-    double sum = 0.0;
-    for (VehicleRoute vr : optimizedState.getNonEmptyVehicles()) {
-      System.out.print(vr.getScore() + " ");
-      re.scoreRouteFull(vr);
-      System.out.println(vr.getScore());
-      sum += vr.getScore();
-    }
-    System.out.println(sum);
-
-    System.out.println("ns stats " + ns.getStats());
+    System.out.println("time needed " + ((end - start) / 1000.0) + " sec");
+    System.out.println("vehicle id sampling stats " + ns.getSamplingStatsVehicleID());
+    System.out.println("num vehicle sampling stats " + ns.getSamplingStatsNumVehicle());
+    System.out.println("first vehicle sampling stats " + ns.getSamplingStatsFirstVehicle());
 
     try (BufferedWriter writer = new BufferedWriter(
         new FileWriter("opt_result.svg"))) {
@@ -90,7 +88,6 @@ public class Benchmark {
     } catch (IOException e) {
       e.printStackTrace();
     }
-
 
     TSPScore expectedScore = new TSPScore(9353.678079851821);
     for (int i = 0; i < expectedScore.getDimensions(); i++) {

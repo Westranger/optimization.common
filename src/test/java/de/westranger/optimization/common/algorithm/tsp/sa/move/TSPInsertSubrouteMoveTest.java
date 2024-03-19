@@ -30,7 +30,7 @@ public class TSPInsertSubrouteMoveTest {
 
   @BeforeEach
   public void setup() {
-    rng = new Random(47110815);
+    rng = new Random(47110815L);
     this.re = new RouteEvaluator();
     this.homeA = new Point2D(0.5, 0.5);
     this.homeB = new Point2D(2.0, 0.5);

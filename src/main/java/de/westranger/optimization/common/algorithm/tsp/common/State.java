@@ -4,9 +4,9 @@ import de.westranger.geometry.common.simple.BoundingBox;
 import de.westranger.geometry.common.simple.Point2D;
 import de.westranger.optimization.common.algorithm.action.planning.Action;
 import de.westranger.optimization.common.algorithm.action.planning.SearchSpaceState;
-import de.westranger.optimization.common.algorithm.action.planning.solver.Score;
 import de.westranger.optimization.common.algorithm.tsp.sa.route.RouteEvaluator;
 import de.westranger.optimization.common.algorithm.tsp.sa.route.VehicleRoute;
+import de.westranger.optimization.common.util.RandomMapSampler;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -14,13 +14,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.TreeMap;
 
 public class State extends SearchSpaceState<TSPScore> {
 
   private final List<Order> orderList;
 
-  private final List<VehicleRoute> emptyVehicles;
-  private final List<VehicleRoute> nonEmptyVehicles;
+  private final Map<Integer, VehicleRoute> vehicles;
 
   private final RouteEvaluator routeEval;
 
@@ -28,31 +28,15 @@ public class State extends SearchSpaceState<TSPScore> {
 
   private Optional<Action> lastPerformedAction;
 
-  public State(final List<Order> orderList, final List<VehicleRoute> emptyVehicles,
-               final List<VehicleRoute> nonEmptyVehicles, final RouteEvaluator routeEval) {
+  public State(final List<Order> orderList, final Map<Integer, VehicleRoute> vehicles,
+               final RouteEvaluator routeEval) {
     this.orderList = new LinkedList<>(orderList);
     this.routeEval = routeEval;
     this.lastPerformedAction = Optional.empty();
-
-    this.emptyVehicles = emptyVehicles;
-    this.nonEmptyVehicles = nonEmptyVehicles;
-
-    for (VehicleRoute vr : emptyVehicles) {
-      if (!vr.getRoute().isEmpty()) {
-        throw new IllegalArgumentException(
-            "the route of the provided vehicle " + vr.getId() + " is not empty");
-      }
-    }
-
-    for (VehicleRoute vr : nonEmptyVehicles) {
-      if (vr.getRoute().isEmpty()) {
-        throw new IllegalArgumentException(
-            "the route of the provided vehicle " + vr.getId() + " is empty");
-      }
-    }
+    this.vehicles = vehicles;
 
     double score = 0.0;
-    for (VehicleRoute vr : nonEmptyVehicles) {
+    for (VehicleRoute vr : vehicles.values()) {
       routeEval.scoreRouteFull(vr);
       double tmp = vr.getScore();
       score += !Double.isNaN(tmp) ? tmp : 0.0;
@@ -61,28 +45,26 @@ public class State extends SearchSpaceState<TSPScore> {
     this.score = new TSPScore(score);
   }
 
-  public State(final List<Order> orderList, final List<VehicleRoute> emptyVehicles,
-               final List<VehicleRoute> nonEmptyVehicles, final RouteEvaluator routeEval,
-               final double score) {
+  public State(final List<Order> orderList, final Map<Integer, VehicleRoute> vehicles,
+               final RouteEvaluator routeEval, final double score) {
     this.orderList = new LinkedList<>(orderList);
-    this.emptyVehicles = emptyVehicles;
-    this.nonEmptyVehicles = nonEmptyVehicles;
+    this.vehicles = vehicles;
     this.routeEval = routeEval;
     this.lastPerformedAction = Optional.empty();
     this.score = new TSPScore(score);
   }
 
-  private State(final List<Order> orderList, final List<VehicleRoute> emptyVehicles,
-                final List<VehicleRoute> nonEmptyVehicles, final RouteEvaluator routeEval,
+  private State(final List<Order> orderList, final Map<Integer, VehicleRoute> vehicles,
+                final RouteEvaluator routeEval,
                 final TSPScore score) {
-    this(orderList, emptyVehicles, nonEmptyVehicles, routeEval);
+    this(orderList, vehicles, routeEval);
     this.score = score;
   }
 
   @Override
   public List<Action> getPossibleActions() {
     final List<Action> result = new LinkedList<>();
-    for (VehicleRoute vr : this.emptyVehicles) {
+    for (VehicleRoute vr : this.vehicles.values()) {
       for (Order order : this.orderList) {
         result.add(new TSPAction(vr.getId(), order));
       }
@@ -112,18 +94,12 @@ public class State extends SearchSpaceState<TSPScore> {
   @Override
   public State clone() {
     final List<Order> orderList = new ArrayList<>(this.orderList);
-    final List<VehicleRoute> emptyVehicles = new ArrayList<>(this.emptyVehicles.size());
-    final List<VehicleRoute> nonEmptyVehicles = new ArrayList<>(this.nonEmptyVehicles.size());
+    final Map<Integer, VehicleRoute> vehicles = new TreeMap<>();
 
-    for (VehicleRoute vr : this.emptyVehicles) {
-      emptyVehicles.add(vr.clone());
+    for (Map.Entry<Integer, VehicleRoute> entry : this.vehicles.entrySet()) {
+      vehicles.put(entry.getKey(), entry.getValue().clone());
     }
-
-    for (VehicleRoute vr : this.nonEmptyVehicles) {
-      nonEmptyVehicles.add(vr.clone());
-    }
-
-    return new State(orderList, emptyVehicles, nonEmptyVehicles, this.routeEval, this.score);
+    return new State(orderList, vehicles, this.routeEval, this.score);
   }
 
   @Override
@@ -140,17 +116,13 @@ public class State extends SearchSpaceState<TSPScore> {
     return orderList;
   }
 
-  public List<VehicleRoute> getEmptyVehicles() {
-    return Collections.unmodifiableList(emptyVehicles);
-  }
-
-  public List<VehicleRoute> getNonEmptyVehicles() {
-    return Collections.unmodifiableList(nonEmptyVehicles);
+  public Map<Integer, VehicleRoute> getVehicles() {
+    return Collections.unmodifiableMap(vehicles);
   }
 
   private double computeFullScore() {
     double score = 0.0;
-    for (VehicleRoute vr : this.getNonEmptyVehicles()) {
+    for (VehicleRoute vr : this.vehicles.values()) {
       this.routeEval.scoreRouteFull(vr);
       if (!Double.isNaN(vr.getScore())) {
         score += vr.getScore();
@@ -201,13 +173,14 @@ public class State extends SearchSpaceState<TSPScore> {
     }
 
     Point2D previousPoint = null;
-    for (VehicleRoute vr : this.nonEmptyVehicles) {
+    for (VehicleRoute vr : this.vehicles.values()) {
       String vehicleColor = colors.get(vr.getId());
       for (Order order : vr.getRoute()) {
         if (previousPoint != null) {
           svgBuilder.append('\t');
           svgBuilder.append(String.format(Locale.ENGLISH,
-              "<line x1=\"%f\" y1=\"%f\" x2=\"%f\" y2=\"%f\" stroke-width=\"0.1\" stroke=\"%s\"/>", previousPoint.getY(),
+              "<line x1=\"%f\" y1=\"%f\" x2=\"%f\" y2=\"%f\" stroke-width=\"0.1\" stroke=\"%s\"/>",
+              previousPoint.getY(),
               previousPoint.getX(), order.getTo().getY(), order.getTo().getX(), vehicleColor));
           svgBuilder.append('\n');
         }
@@ -222,7 +195,7 @@ public class State extends SearchSpaceState<TSPScore> {
       previousPoint = null;
     }
 
-    for (VehicleRoute vr : this.nonEmptyVehicles) {
+    for (VehicleRoute vr : this.vehicles.values()) {
       String vehicleColor = colors.get(vr.getId());
       svgBuilder.append('\t');
       svgBuilder.append(String.format(Locale.ENGLISH,
@@ -259,7 +232,7 @@ public class State extends SearchSpaceState<TSPScore> {
       maxY = Math.max(maxY, order.getTo().getY());
     }
 
-    for (VehicleRoute vr : this.nonEmptyVehicles) {
+    for (VehicleRoute vr : this.vehicles.values()) {
       final Point2D src = vr.getHomePosition();
 
       minX = Math.min(minX, src.getX());
@@ -280,12 +253,14 @@ public class State extends SearchSpaceState<TSPScore> {
 
   public static List<String> getDistinctColors() {
     return List.of(
-        "#e6194b", "#3cb44b", "#ffe119", "#0082c8", "#f58231",
-        "#911eb4", "#46f0f0", "#f032e6", "#d2f53c", "#fabebe",
-        "#008080", "#e6beff", "#aa6e28", "#fffac8", "#800000",
-        "#aaffc3", "#808000", "#ffd8b1", "#000080", "#808080",
-        "#000000", "#0a74da", "#f095e1", "#6c8e7e", "#9c7043",
-        "#4287f5", "#f24236", "#f4e542", "#82f542", "#4211a5"
+        "#e6194b", "#3cb44b", "#ffe119", "#0082c8", "#f58231", "#911eb4", "#46f0f0", "#f032e6",
+        "#d2f53c", "#fabebe", "#008080", "#e6beff", "#aa6e28", "#fffac8", "#800000", "#aaffc3",
+        "#808000", "#ffd8b1", "#000080", "#808080", "#000000", "#0a74da", "#f095e1", "#6c8e7e",
+        "#9c7043", "#4287f5", "#f24236", "#f4e542", "#82f542", "#4211a5", "#e6194b", "#3cb44b",
+        "#ffe119", "#0082c8", "#f58231", "#911eb4", "#46f0f0", "#f032e6", "#d2f53c", "#fabebe",
+        "#008080", "#e6beff", "#aa6e28", "#fffac8", "#800000", "#aaffc3", "#808000", "#ffd8b1",
+        "#000080", "#808080", "#000000", "#0a74da", "#f095e1", "#6c8e7e", "#9c7043", "#4287f5",
+        "#f24236", "#f4e542", "#82f542", "#4211a5"
     );
   }
 

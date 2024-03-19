@@ -34,14 +34,14 @@ class DepthFirstSearchSolverTest {
     orderList.add(new Order(5, new Point2D(1.0, 3.0), null));
     orderList.add(new Order(6, new Point2D(1.0, 4.0), null));
 
-    List<VehicleRoute> vrl = new ArrayList<>();
-    vrl.add(new VehicleRoute(1, new Point2D(1.0, 1.0), new ArrayList<>(), false));
-    vrl.add(new VehicleRoute(2, new Point2D(3.0, 1.0), new ArrayList<>(), false));
-    vrl.add(new VehicleRoute(3, new Point2D(5.0, 1.0), new ArrayList<>(), false));
+    Map<Integer, VehicleRoute> vrl = new TreeMap<>();
+    vrl.put(1, new VehicleRoute(1, new Point2D(1.0, 1.0), new ArrayList<>(), false));
+    vrl.put(2, new VehicleRoute(2, new Point2D(3.0, 1.0), new ArrayList<>(), false));
+    vrl.put(3, new VehicleRoute(3, new Point2D(5.0, 1.0), new ArrayList<>(), false));
 
     final RouteEvaluator re = new RouteEvaluator();
 
-    State initialState = new State(orderList, new ArrayList<>(), vrl, re);
+    State initialState = new State(orderList, vrl, re);
     ActionPlanningSolver aps = new DepthFirstSearchSolver(true);
     aps.setInitialState(initialState);
 
@@ -100,7 +100,6 @@ class DepthFirstSearchSolverTest {
     orderMapping.put(1, List.of(o1, o2, o3));
     orderMapping.put(2, new ArrayList<>());
     orderMapping.put(3, List.of(o4, o5, o6));
-
 
     // Konvertieren Sie die Person-Instanz in JSON
     String json =

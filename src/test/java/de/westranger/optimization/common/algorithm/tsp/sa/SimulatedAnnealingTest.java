@@ -29,7 +29,8 @@ public class SimulatedAnnealingTest {
     final Gson gson = new Gson();
     final ProblemFormulation problem = gson.fromJson(reader, ProblemFormulation.class);
 
-    Random rng = new Random(47110815L);
+    final long seed = 47110815L;
+    Random rng = new Random(seed);
 
     List<Order> orders = new LinkedList<>(problem.getOrders());
     Collections.shuffle(orders, rng);
@@ -39,13 +40,13 @@ public class SimulatedAnnealingTest {
     final RouteEvaluator re = new RouteEvaluator();
 
     State initialState =
-        new State(new ArrayList<>(), new ArrayList<>(), List.of(vr), re);
+        new State(new ArrayList<>(), Map.of(1, vr), re);
     SimulatedAnnealingParameter sap =
         new SimulatedAnnealingParameter(0, 1.0, 0.96, 250000, 100, 0.9);
 
-    TSPNeighbourSelector ns = new TSPNeighbourSelector(sap.tMax(), sap.tMin(), rng);
+    TSPNeighbourSelector ns = new TSPNeighbourSelector(sap.tMax(), sap.tMin(), seed, true);
 
-    SimulatedAnnealing sa = new SimulatedAnnealing(initialState, ns, rng, sap);
+    SimulatedAnnealing sa = new SimulatedAnnealing(initialState, ns, seed, sap);
 
     SearchSpaceState optimizedState = sa.optimize(false);
     // {avg_score=9358.20705989015, gamma=0.9, initialAcceptanceRatio=0.9, iter=2.0250528E7, maxImprovementPerTemperature=100.0, omegaMax=250000.0, score=9358.20705989015, tMax=0.0, tMin=1.0}
@@ -61,7 +62,8 @@ public class SimulatedAnnealingTest {
     final Gson gson = new Gson();
     final ProblemFormulation problem = gson.fromJson(reader, ProblemFormulation.class);
 
-    Random rng = new Random(47110815L);
+    final long seed = 47110815L;
+    Random rng = new Random(seed);
 
     List<Order> orders = new LinkedList<>(problem.getOrders());
 
@@ -72,18 +74,18 @@ public class SimulatedAnnealingTest {
     final RouteEvaluator re = new RouteEvaluator();
 
     State initialState =
-        new State(new ArrayList<>(), new ArrayList<>(), List.of(vr), re);
+        new State(new ArrayList<>(), Map.of(1, vr), re);
 
     SimulatedAnnealingParameter sap =
-        new SimulatedAnnealingParameter(0, 1.0E-5, 0.4, 100, 2, 0.95);
+        new SimulatedAnnealingParameter(0, 1.0E-5, 0.1, 250, 5, 0.95);
 
-    TSPNeighbourSelector ns = new TSPNeighbourSelector(sap.tMax(), sap.tMin(), rng);
+    TSPNeighbourSelector ns = new TSPNeighbourSelector(sap.tMax(), sap.tMin(), seed, true);
 
-    SimulatedAnnealing sa = new SimulatedAnnealing(initialState, ns, rng, sap);
+    SimulatedAnnealing sa = new SimulatedAnnealing(initialState, ns, seed, sap);
 
     SearchSpaceState optimizedState = sa.optimize(false);
 
     Assertions.assertEquals(27601.173774493753, optimizedState.getScore().getValue(0), 1e-6);
-    Assertions.assertEquals(1440, sa.getTotalIterationCounter());
+    Assertions.assertEquals(1421, sa.getTotalIterationCounter());
   }
 }
