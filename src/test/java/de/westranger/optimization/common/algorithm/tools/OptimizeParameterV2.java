@@ -37,8 +37,8 @@ public final class OptimizeParameterV2 {
 
     input.put("initialAcceptanceRatio", Arrays.asList(0.99, 0.95, 0.90, 0.8, 0.7, 0.6, 0.5, 0.4));
     input.put("gamma",
-        Arrays.asList(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.96, 0.97, 0.98, 0.999));
-    //Arrays.asList(0.999, 0.99, 0.98, 0.97, 0.96, 0.95, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1));
+        //Arrays.asList(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.96, 0.97, 0.98, 0.999));
+    Arrays.asList(0.99, 0.98, 0.97, 0.96, 0.95, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1));
     input.put("tMin",
         Arrays.asList(1.0e-5, 1.0e-4, 1.0e-3, 1.0e-2, 1.0e-1, 1.0, 10.0, 100.0, 1000.0));
     input.put("omegaMax",
@@ -48,8 +48,9 @@ public final class OptimizeParameterV2 {
         Arrays.asList(2.0, 5.0, 10.0, 25.0, 50.0, 100.0, 250.0, 500.0));
 
     final InputStreamReader reader = new InputStreamReader(
-        //SimulatedAnnealingTest.class.getResourceAsStream("/tsp/1_vehicle_194_orders.json"));
-    SimulatedAnnealingTest.class.getResourceAsStream("/tmp/vrp_problem_50_650_PDE.json"));
+
+        SimulatedAnnealingTest.class.getResourceAsStream("/tsp/1_vehicle_194_orders.json"));
+    //SimulatedAnnealingTest.class.getResourceAsStream("/tmp/vrp_problem_50_650_PDE.json"));
     final Gson gson = new Gson();
     final ProblemFormulation problem = gson.fromJson(reader, ProblemFormulation.class);
 
@@ -88,7 +89,7 @@ public final class OptimizeParameterV2 {
         for (Map.Entry<String, Map<String, Double>> entry : tasks.entrySet()) {
           final Map<String, Double> combination = entry.getValue();
           final Callable<Map<String, Double>> task =
-              new TSPCallable(problem, combination, numTries, false, entry.getKey());
+              new TSPCallable(problem, combination, numTries, true, entry.getKey());
           completionService.submit(task);
           totalTasksSubmitted++;
           activeTaskCounter++;

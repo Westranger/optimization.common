@@ -40,11 +40,14 @@ public final class TSPNeighbourSelector implements NeighbourSelector {
     this.minTemperature = minTemperature;
     this.rng = new Random(seed);
     final RouteEvaluator re = new RouteEvaluator();
-    this.moveSwap = new TSPSwapMove(new Random(seed), re);
+    this.moveSwap = new TSPSwapMove(new Random(seed), re, collectStatistics);
     this.moveInsert = new TSPInsertionMove(new Random(seed), re, collectStatistics);
-    this.moveInsertSubroute = new TSPInsertSubrouteMove(new Random(seed), re, false, false);
-    this.moveInsertSubrouteReverse = new TSPInsertSubrouteMove(new Random(seed), re, true, false);
-    this.moveTwoOpt = new TSPInsertSubrouteMove(new Random(seed), re, true, true);
+    this.moveInsertSubroute =
+        new TSPInsertSubrouteMove(new Random(seed), re, false, false, collectStatistics);
+    this.moveInsertSubrouteReverse =
+        new TSPInsertSubrouteMove(new Random(seed), re, true, false, collectStatistics);
+    this.moveTwoOpt =
+        new TSPInsertSubrouteMove(new Random(seed), re, true, true, collectStatistics);
     this.samplingStatsVehicleID = new SampleStatistics<>(collectStatistics);
     this.samplingStatsNumVehicle = new SampleStatistics<>(collectStatistics);
     this.samplingStatsFirstVehicle = new SampleStatistics<>(collectStatistics);

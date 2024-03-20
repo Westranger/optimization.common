@@ -7,13 +7,18 @@ import de.westranger.optimization.common.util.SampleStatistics;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Random;
 
 public final class TSPSwapMove extends TSPMove {
 
-  public TSPSwapMove(final Random rng, final RouteEvaluator routeEvaluator) {
-    super(rng, routeEvaluator, false);
+  private SampleStatistics<Integer> statsRemoveIdxA;
+  private SampleStatistics<Integer> statsRemoveIdxB;
+
+  public TSPSwapMove(final Random rng, final RouteEvaluator routeEvaluator,
+                     boolean collectStatistics) {
+    super(rng, routeEvaluator, collectStatistics);
+    this.statsRemoveIdxA = new SampleStatistics<>(collectStatistics);
+    this.statsRemoveIdxB = new SampleStatistics<>(collectStatistics);
   }
 
   @Override
@@ -36,10 +41,8 @@ public final class TSPSwapMove extends TSPMove {
     int removeIdxB = this.rng.nextInt(lstA.size());
     final Order orderB = lstA.remove(removeIdxB);
 
-    if (vr.getScore() < 0) {
-      System.out.println("blubb");
-    }
-
+    statsRemoveIdxA.add(removeIdxA);
+    statsRemoveIdxB.add(removeIdxB);
 
     lstA.add(removeIdxB, orderA);
     lstA.add(removeIdxA, orderB);
@@ -73,6 +76,9 @@ public final class TSPSwapMove extends TSPMove {
     final int removeIdxB = this.rng.nextInt(vrB.getRoute().size());
     final Order orderB = lstB.remove(removeIdxB);
 
+    statsRemoveIdxA.add(removeIdxA);
+    statsRemoveIdxB.add(removeIdxB);
+
     lstA.add(removeIdxA, orderB);
     lstB.add(removeIdxB, orderA);
 
@@ -96,7 +102,7 @@ public final class TSPSwapMove extends TSPMove {
 
   @Override
   public Map<String, SampleStatistics> getSamplingStatistics() {
-    return null;
+    return Map.of("move_swap_ridxa", this.statsRemoveIdxA, "move_swap_ridxb", this.statsRemoveIdxB);
   }
 
   private void computeUpdateIndices(List<Order> orderLst, List<Integer> updateEdgeIdxLst,

@@ -14,11 +14,18 @@ public final class TSPInsertSubrouteMove extends TSPMove {
   private final boolean reverseSubroute;
   private final boolean makeTwoOpt;
 
+  private SampleStatistics<Integer> statsStartIdx;
+  private SampleStatistics<Integer> statsEndIdx;
+
   public TSPInsertSubrouteMove(final Random rng, final RouteEvaluator routeEvaluator,
-                               final boolean reverseSubroute, final boolean makeTwoOpt) {
-    super(rng, routeEvaluator, false);
+                               final boolean reverseSubroute, final boolean makeTwoOpt,
+                               boolean collectStatistics) {
+    super(rng, routeEvaluator, collectStatistics);
     this.makeTwoOpt = makeTwoOpt;
     this.reverseSubroute = makeTwoOpt ? true : reverseSubroute;
+
+    this.statsStartIdx = new SampleStatistics<>(collectStatistics);
+    this.statsEndIdx = new SampleStatistics<>(collectStatistics);
   }
 
   @Override
@@ -35,10 +42,16 @@ public final class TSPInsertSubrouteMove extends TSPMove {
 
   @Override
   protected VehicleRoute performMoveSingleVehicle(VehicleRoute vr) {
-    final int startIdx = rng.nextInt(vr.getRoute().size() - 1);
-    final int endIdx = startIdx + rng.nextInt(vr.getRoute().size() - startIdx - 1) + 1;
+    final int firstIdx = rng.nextInt(vr.getRoute().size());
+    final int secondIdx = computeSecondIdxSingleVehicle(vr.getRoute(), firstIdx);
+    final int startIdx = Math.min(firstIdx, secondIdx);
+    final int endIdx = Math.max(firstIdx, secondIdx);
     final int insertIdx = this.makeTwoOpt ? startIdx :
         this.rng.nextInt(vr.getRoute().size() - (endIdx - startIdx + 1) + 1);
+
+    statsStartIdx.add(firstIdx);
+    statsEndIdx.add(secondIdx);
+
     List<Order> lstA = new ArrayList<>(vr.getRoute());
     List<Double> distanceScoreA = new ArrayList<>(vr.getDistanceScore());
     List<Integer> idxToUpdate = new ArrayList<>(2);
@@ -116,7 +129,8 @@ public final class TSPInsertSubrouteMove extends TSPMove {
 
   @Override
   public Map<String, SampleStatistics> getSamplingStatistics() {
-    return null;
+    return Map.of("move_subroute_start_idx", this.statsStartIdx, "move_swap_end_idx",
+        this.statsEndIdx);
   }
 
   private double extractSubrouteAndAdd(int min, int max, int insertIdx, List<Order> srcRoute,
@@ -178,5 +192,13 @@ public final class TSPInsertSubrouteMove extends TSPMove {
     }
 
     return updatedSrcScore;
+  }
+
+  private int computeSecondIdxSingleVehicle(final List<Order> lstA, final int firstIdx) {
+    int secondIdx = rng.nextInt(lstA.size() - 1);
+    if (firstIdx <= secondIdx) {
+      secondIdx += 1;
+    }
+    return secondIdx;
   }
 }
