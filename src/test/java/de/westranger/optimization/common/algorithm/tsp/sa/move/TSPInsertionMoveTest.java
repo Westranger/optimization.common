@@ -294,7 +294,7 @@ class TSPInsertionMoveTest extends MoveTestBase {
       move.performMove(List.of(vrA));
     }
 
-    Map<String, SampleStatistics> stats = move.getSamplingStatistics();
+    Map<String, SampleStatistics> stats = move.getSamplingStatistics().get();
     assertEquals("Stats(num_keys=8 num_obs=10.000.000 avg_perc=12,5% std_dev_perc=0,38%)",
         stats.get("move_insert_iidx").toString());
     assertEquals("Stats(num_keys=8 num_obs=10.000.000 avg_perc=12,5% std_dev_perc=0,38%)",
@@ -318,7 +318,7 @@ class TSPInsertionMoveTest extends MoveTestBase {
       move.performMove(List.of(vrA, vrB));
     }
 
-    Map<String, SampleStatistics> stats = move.getSamplingStatistics();
+    Map<String, SampleStatistics> stats = move.getSamplingStatistics().get();
     assertEquals("Stats(num_keys=9 num_obs=10.000.000 avg_perc=11,11% std_dev_perc=0,35%)",
         stats.get("move_insert_iidx").toString());
     assertEquals("Stats(num_keys=8 num_obs=10.000.000 avg_perc=12,5% std_dev_perc=0,38%)",

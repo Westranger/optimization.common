@@ -14,7 +14,7 @@ public abstract class TSPMove {
 
   protected final Random rng;
   protected final RouteEvaluator routeEvaluator;
-  private boolean collectStatistics;
+  protected boolean collectStatistics;
 
   public TSPMove(final Random rng, final RouteEvaluator routeEvaluator,
                  final boolean collectStatistics) {
@@ -68,6 +68,6 @@ public abstract class TSPMove {
   protected abstract List<VehicleRoute> performMoveTwoVehicles(final VehicleRoute vrA,
                                                                final VehicleRoute vrB);
 
-  public abstract Map<String, SampleStatistics> getSamplingStatistics();
+  public abstract Optional<Map<String, SampleStatistics>> getSamplingStatistics();
 
 }

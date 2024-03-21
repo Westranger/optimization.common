@@ -6,6 +6,9 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -94,8 +97,7 @@ public final class SimulatedAnnealing<T extends Score> {
       double minAcceptanceProbability = Double.POSITIVE_INFINITY;
       double maxAcceptanceProbability = Double.NEGATIVE_INFINITY;
 
-      boolean improvedHit = false;
-
+      List<Double> costValues = new LinkedList<>();
       while (iterAtTemperature < sap.omegaMax()
           && improved <= sap.maxImprovementPerTemperature()) {
         this.totalIterationCounter++;
@@ -103,6 +105,8 @@ public final class SimulatedAnnealing<T extends Score> {
             this.ns.select(currentSolution,
                 currentTemps[0]); // TODO hier wird immer eine nachbar selectirt anhand der temperatur der 1. dimension, ist das gut oder schlecht ?
         final T candidateScore = solutionCandidate.getScore();
+
+        costValues.add(candidateScore.getValue(0));
 
         if (candidateScore.compareTo(bestScore) == 1) {
           bestScore = candidateScore;
@@ -162,8 +166,28 @@ public final class SimulatedAnnealing<T extends Score> {
           }
         }
         iterAtTemperature++;
-        improvedHit = improved > sap.maxImprovementPerTemperature();
       }
+
+      // compute maximum heat
+      double sum = 0.0;
+      double count = 0.0;
+      for (double value : costValues) {
+        if (!Double.isNaN(value)) {
+          sum += value;
+          count++;
+        }
+      }
+      double costMean = sum / count;
+      double costVariance = 0.0;
+
+      for (double value : costValues) {
+        if (!Double.isNaN(value)) {
+          costVariance += (value - costMean) * (value - costMean);
+        }
+      }
+
+      costVariance /= count - 1;
+      double maximumHeat = costVariance / currentTemps[0];
 
       if (loggingEnabled) {
         final StringBuilder sb = new StringBuilder();
@@ -184,21 +208,25 @@ public final class SimulatedAnnealing<T extends Score> {
         sb.append(minAcceptanceProbability);
         sb.append(';');
         sb.append(maxAcceptanceProbability);
+        sb.append(';');
+        sb.append(costVariance);
+        sb.append(';');
+        sb.append(maximumHeat);
 
         System.out.println(sb.toString());
       }
 
-      if (!improvedHit) {
-        for (int j = 0; j < currentTemps.length; j++) {
-          currentTemps[j] = computeTemperature(mainloopIterationCounter, initialTemperature,
-              TemperatureSchedule.geometric);
-          currentTemps[j] = Math.max(this.sap.tMin(), currentTemps[j]);
+      for (int j = 0; j < currentTemps.length; j++) {
+        double gamma = maximumHeat > currentTemps[j] ? this.sap.beta() : this.sap.gamma();
+        currentTemps[j] = computeTemperature(mainloopIterationCounter, initialTemperature,
+            TemperatureSchedule.geometric, gamma);
+        currentTemps[j] = Math.max(this.sap.tMin(), currentTemps[j]);
 
-          if (Double.isInfinite(currentTemps[j])) {
-            throw new IllegalStateException("the temperature is infinity");
-          }
+        if (Double.isInfinite(currentTemps[j])) {
+          throw new IllegalStateException("the temperature is infinity");
         }
       }
+
 
       if (bestScore.isInfinite()) {
         throw new IllegalStateException("the score is infinity");
@@ -223,20 +251,20 @@ public final class SimulatedAnnealing<T extends Score> {
 
   private double computeTemperature(int currentIteration,
                                     double initialTemperature,
-                                    TemperatureSchedule schedule) {
+                                    TemperatureSchedule schedule, double gamma) {
     switch (schedule) {
       case linear -> {
-        return initialTemperature - currentIteration * this.sap.gamma();
+        return initialTemperature - currentIteration * gamma;
       }
       case exponential -> {
-        return initialTemperature * Math.exp(-this.sap.gamma() * currentIteration);
+        return initialTemperature * Math.exp(-gamma * currentIteration);
       }
       case logarithmic -> {
-        return initialTemperature / (1.0 + this.sap.gamma() * Math.log(1.0 + currentIteration));
+        return initialTemperature / (1.0 + gamma * Math.log(1.0 + currentIteration));
       }
     }
     // geometric is default
-    return initialTemperature * Math.pow(this.sap.gamma(), currentIteration);
+    return initialTemperature * Math.pow(gamma, currentIteration);
   }
 
   public enum TemperatureSchedule {

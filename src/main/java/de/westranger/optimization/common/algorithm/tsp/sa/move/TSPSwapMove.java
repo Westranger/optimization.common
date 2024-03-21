@@ -7,6 +7,7 @@ import de.westranger.optimization.common.util.SampleStatistics;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 
 public final class TSPSwapMove extends TSPMove {
@@ -101,8 +102,12 @@ public final class TSPSwapMove extends TSPMove {
   }
 
   @Override
-  public Map<String, SampleStatistics> getSamplingStatistics() {
-    return Map.of("move_swap_ridxa", this.statsRemoveIdxA, "move_swap_ridxb", this.statsRemoveIdxB);
+  public Optional<Map<String, SampleStatistics>> getSamplingStatistics() {
+    if (collectStatistics) {
+      return Optional.of(
+          Map.of("move_swap_ridxa", this.statsRemoveIdxA, "move_swap_ridxb", this.statsRemoveIdxB));
+    }
+    return Optional.empty();
   }
 
   private void computeUpdateIndices(List<Order> orderLst, List<Integer> updateEdgeIdxLst,

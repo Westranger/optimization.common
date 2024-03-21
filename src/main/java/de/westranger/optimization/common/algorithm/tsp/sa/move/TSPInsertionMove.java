@@ -7,6 +7,7 @@ import de.westranger.optimization.common.util.SampleStatistics;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 
 public final class TSPInsertionMove extends TSPMove {
@@ -224,9 +225,15 @@ public final class TSPInsertionMove extends TSPMove {
   }
 
   @Override
-  public Map<String, SampleStatistics> getSamplingStatistics() {
-    return Map.of("move_insert_iidx", this.statsInsertIdx, "move_insert_ridx", this.statsRemoveIdx,
-        "move_insert_switch_vehicle", this.statsSwitchVehicle);
+  public Optional<Map<String, SampleStatistics>>getSamplingStatistics()
+
+  {
+    if (this.collectStatistics) {
+      return Optional.of(
+          Map.of("move_insert_iidx", this.statsInsertIdx, "move_insert_ridx", this.statsRemoveIdx,
+              "move_insert_switch_vehicle", this.statsSwitchVehicle));
+    }
+    return Optional.empty();
   }
 
 }

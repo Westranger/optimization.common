@@ -12,6 +12,7 @@ import de.westranger.optimization.common.algorithm.tsp.sa.route.RouteEvaluator;
 import de.westranger.optimization.common.algorithm.tsp.sa.route.VehicleRoute;
 import de.westranger.optimization.common.util.SampleStatistics;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -142,11 +143,15 @@ public final class TSPNeighbourSelector implements NeighbourSelector {
   }
 
   private List<VehicleRoute> sampleVehicles(Map<Integer, VehicleRoute> vehicles) {
-    List<Integer> keys = new ArrayList<>(vehicles.size());
-    List<VehicleRoute> vrl = new ArrayList<>(1);
+    List<Integer> keys = new LinkedList<>();
+    List<VehicleRoute> vrl = new LinkedList<>();
 
     for (int key : vehicles.keySet()) {
       keys.add(key);
+    }
+
+    if (keys.size() == 1) {
+      return List.of(vehicles.get(keys.get(0)));
     }
 
     final int maxSamplingIter = 10000;

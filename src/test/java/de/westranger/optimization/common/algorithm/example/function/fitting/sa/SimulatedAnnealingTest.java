@@ -31,7 +31,7 @@ class SimulatedAnnealingTest {
 
     final long seed = 47110815L;
     final SimulatedAnnealingParameter sap =
-        new SimulatedAnnealingParameter(10000, 0.001, 0.9, 100, 20000, 0.9);
+        new SimulatedAnnealingParameter(10000, 0.001, 0.9, 100, 20000, 0.9, 0.9);
     final Random rng = new Random(seed);
     final CubicFunktion tbf = new CubicFunktion(10000.0, 10000.0, 10000.0, 10000.0);
     final CubicFunktionFitter initial = new CubicFunktionFitter(tbf, data);

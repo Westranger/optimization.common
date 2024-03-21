@@ -5,8 +5,11 @@ import de.westranger.optimization.common.algorithm.tsp.sa.route.RouteEvaluator;
 import de.westranger.optimization.common.algorithm.tsp.sa.route.VehicleRoute;
 import de.westranger.optimization.common.util.SampleStatistics;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 
 public final class TSPInsertSubrouteMove extends TSPMove {
@@ -136,9 +139,12 @@ public final class TSPInsertSubrouteMove extends TSPMove {
   }
 
   @Override
-  public Map<String, SampleStatistics> getSamplingStatistics() {
-    return Map.of("move_subroute_start_idx", this.statsStartIdx, "move_swap_end_idx",
-        this.statsEndIdx);
+  public Optional<Map<String, SampleStatistics>> getSamplingStatistics() {
+    if (collectStatistics) {
+      return Optional.of(Map.of("move_subroute_start_idx", this.statsStartIdx, "move_swap_end_idx",
+          this.statsEndIdx));
+    }
+    return Optional.empty();
   }
 
   private double extractSubrouteAndAdd(int min, int max, int insertIdx, List<Order> srcRoute,
@@ -147,35 +153,25 @@ public final class TSPInsertSubrouteMove extends TSPMove {
                                        List<Integer> idxToUpdateSrc, List<Integer> idxToUpdateDst,
                                        double srcScore,
                                        boolean isSrcRoundtrip, boolean isDstRoundtrip) {
-    final int initialCapacity = max - min + 1;
-    final List<Order> subRoute = new ArrayList<>(initialCapacity);
-    final List<Double> subScore = new ArrayList<>(initialCapacity);
+    List<Order> subRoute = new LinkedList<>(srcRoute.subList(min, max + 1));
+    LinkedList<Double> subScore = new LinkedList<>(srcScoreLst.subList(min, max + 1));
 
-    double scoreSum = 0.0;
-    double updatedSrcScore = srcScore;
+    srcRoute.subList(min, max + 1).clear();
+    srcScoreLst.subList(min, max + 1).clear();
+
     double reverseScoreParry = 0.0;
+    double updatedSrcScore = srcScore;
 
     if (reverseSubroute) {
-      for (int i = max; i >= min; i--) {
-        subRoute.add(srcRoute.remove(i));
-        double tmp = srcScoreLst.remove(i);
+      Collections.reverse(subRoute);
+      Collections.reverse(subScore);
+      reverseScoreParry = subScore.removeLast();
+      subScore.addFirst(0.0);
+    }
 
-        if (i > min) {
-          scoreSum += tmp;
-          subScore.add(tmp);
-        } else {
-          reverseScoreParry = tmp;
-          subScore.add(0, 0.0);
-        }
-      }
-    } else {
-      for (int i = min; i <= max; i++) {
-        subRoute.add(srcRoute.remove(min));
-
-        double tmp = srcScoreLst.remove(min);
-        scoreSum += tmp;
-        subScore.add(tmp);
-      }
+    double scoreSum = 0.0;
+    for (double value : subScore) {
+      scoreSum += value;
     }
 
     if (min == srcRoute.size() && !isSrcRoundtrip) {

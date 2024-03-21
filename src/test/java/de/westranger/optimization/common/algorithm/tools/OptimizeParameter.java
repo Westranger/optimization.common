@@ -40,6 +40,8 @@ public final class OptimizeParameter {
     input.put("gamma",
         Arrays.asList(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.96, 0.97, 0.98, 0.999));
     //Arrays.asList(/*0.999, 0.99, 0.99, 0.98, 0.97, */0.96, 0.95, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2));
+    input.put("beta",
+        Arrays.asList(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.96, 0.97, 0.98, 0.999));
     input.put("tMin",
         Arrays.asList(1.0e-5, 1.0e-4, 1.0e-3, 1.0e-2, 1.0e-1, 1.0, 10.0, 100.0, 1000.0));
     input.put("omegaMax",
@@ -49,8 +51,8 @@ public final class OptimizeParameter {
         Arrays.asList(2.0, 5.0, 10.0, 25.0, 50.0, 100.0, 250.0, 500.0));
 
     final InputStreamReader reader = new InputStreamReader(
-        //SimulatedAnnealingTest.class.getResourceAsStream("/tsp/1_vehicle_29_orders.json"));
-    SimulatedAnnealingTest.class.getResourceAsStream("/tmp/vrp_problem_50_650_PDE.json"));
+        SimulatedAnnealingTest.class.getResourceAsStream("/tsp/1_vehicle_29_orders.json"));
+        //SimulatedAnnealingTest.class.getResourceAsStream("/tmp/vrp_problem_50_650_PDE.json"));
     final Gson gson = new Gson();
     final ProblemFormulation problem = gson.fromJson(reader, ProblemFormulation.class);
 
@@ -80,7 +82,7 @@ public final class OptimizeParameter {
 //      for (int i = 0; i < batchSize && combinationIterator.hasNext(); i++) {
         final Map<String, Double> combination = combinationIterator.next();
         final Callable<Map<String, Double>> task =
-            new TSPCallable(problem, combination, numTries, false);
+            new TSPCallable(problem, combination, numTries, true);
         completionService.submit(task);
         totalTasksSubmitted++;
         activeTaskCounter++;

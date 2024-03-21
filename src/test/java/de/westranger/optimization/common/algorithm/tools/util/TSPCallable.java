@@ -48,15 +48,20 @@ public final class TSPCallable implements Callable<Map<String, Double>> {
 
     double iter = 0.0;
     double sum = 0.0;
+    long time = 0;
+
     for (long i = 0; i < this.numTries; i++) {
       final long seed = 47110815L + i * 10000L;
       final SimulatedAnnealingParameter sap =
           new SimulatedAnnealingParameter(0.0, this.param.get("tMin"),
               this.param.get("gamma"), this.param.get("omegaMax"),
               this.param.get("maxImprovementPerTemperature"),
-              this.param.get("initialAcceptanceRatio"));
+              this.param.get("initialAcceptanceRatio"), this.param.get("beta"));
       final SimulatedAnnealing sa = initializeSA(sap, seed);
+      long start = System.currentTimeMillis();
       final SearchSpaceState optimizedResult = sa.optimize(false);
+      long end = System.currentTimeMillis();
+      time += end - start;
 
       iter += sa.getTotalIterationCounter();
       sum += optimizedResult.getScore().getValue(0);
@@ -64,34 +69,46 @@ public final class TSPCallable implements Callable<Map<String, Double>> {
 
     sum /= this.numTries;
     iter /= this.numTries;
+    time /= this.numTries;
 
     Map<String, Double> result = new TreeMap<>(this.param);
     result.put("score", sum);
     result.put("iter", iter);
     result.put("avg_score", sum);
+    result.put("time", (double) time);
     result.put("param_id#" + this.paramId, 0.0);
+
     return result;
   }
 
   private SimulatedAnnealing initializeSA(final SimulatedAnnealingParameter sap,
                                           final long seed) {
     List<Order> orders = new LinkedList<>(this.pf.getOrders());
-    Collections.shuffle(orders, new Random(seed));
+    Random rng = new Random(seed);
+    Collections.shuffle(orders, rng);
+
+    List<Integer> keys = new LinkedList<>();
 
     Map<Integer, VehicleRoute> vehicles = new TreeMap<>();
+    Map<Integer, List<Order>> orderMap = new TreeMap<>();
 
     for (Map.Entry<Integer, Point2D> entry : this.pf.getVehicleStartPositions()
         .entrySet()) {
+      orderMap.put(entry.getKey(), new LinkedList<>());
+      keys.add(entry.getKey());
+    }
 
-      if (entry.getKey() == 1) {
-        final VehicleRoute vr =
-            new VehicleRoute(entry.getKey(), entry.getValue(), orders, this.idRoundtrip);
-        vehicles.put(vr.getId(), vr);
-      } else {
-        final VehicleRoute vr =
-            new VehicleRoute(entry.getKey(), entry.getValue(), new ArrayList<>(), this.idRoundtrip);
-        vehicles.put(vr.getId(), vr);
-      }
+    while (!orders.isEmpty()) {
+      int key = keys.get(rng.nextInt(keys.size()));
+      Order order = orders.remove(rng.nextInt(orders.size()));
+      orderMap.get(key).add(order);
+    }
+
+    for (Map.Entry<Integer, Point2D> entry : this.pf.getVehicleStartPositions().entrySet()) {
+      final VehicleRoute vr =
+          new VehicleRoute(entry.getKey(), entry.getValue(), orderMap.get(entry.getKey()),
+              this.idRoundtrip);
+      vehicles.put(vr.getId(), vr);
     }
 
     RouteEvaluator re = new RouteEvaluator();

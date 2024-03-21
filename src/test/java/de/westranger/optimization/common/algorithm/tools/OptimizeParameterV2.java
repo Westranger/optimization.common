@@ -33,37 +33,39 @@ public final class OptimizeParameterV2 {
 
     final LinkedHashMap<String, List<Double>> input = new LinkedHashMap<>();
 
-    final int numTries = 1;
+    final int numTries = 5;
 
     input.put("initialAcceptanceRatio", Arrays.asList(0.99, 0.95, 0.90, 0.8, 0.7, 0.6, 0.5, 0.4));
     input.put("gamma",
+        Arrays.asList(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.96, 0.97, 0.98, 0.999));
+    input.put("beta",
         Arrays.asList(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.96, 0.97, 0.98, 0.999));
     //Arrays.asList(0.99, 0.98, 0.97, 0.96, 0.95, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1));
     input.put("tMin",
         Arrays.asList(1.0e-5, 1.0e-4, 1.0e-3, 1.0e-2, 1.0e-1, 1.0, 10.0, 100.0, 1000.0));
     input.put("omegaMax",
         Arrays.asList(100.0, 250.0, 500.0, 1000.0, 2500.0, 5000.0, 10000.0, 25000.0, 50000.0
-            /*, 100000.0, 250000.0, 500000.0*/));
+            , 100000.0, 250000.0, 500000.0));
     input.put("maxImprovementPerTemperature",
         Arrays.asList(2.0, 5.0, 10.0, 25.0, 50.0, 100.0, 250.0, 500.0));
 
     final InputStreamReader reader = new InputStreamReader(
 
-        SimulatedAnnealingTest.class.getResourceAsStream("/tsp/1_vehicle_29_orders.json"));
-    //SimulatedAnnealingTest.class.getResourceAsStream("/tmp/vrp_problem_50_650_PDE.json"));
+        //SimulatedAnnealingTest.class.getResourceAsStream("/tsp/1_vehicle_129_orders.json"));
+        SimulatedAnnealingTest.class.getResourceAsStream("/vrp/50/vrp_problem_50_750____.json"));
     final Gson gson = new Gson();
     final ProblemFormulation problem = gson.fromJson(reader, ProblemFormulation.class);
 
-    final double goalTolerance = 0.00001; // percentile
+    final double goalTolerance = 0.001; // percentile
     final double goalScoreThreshold = problem.getExpectedScore() * (1.0 + goalTolerance);
     boolean thresholdPassed = false;
 
-    final int threadPoolSize = 15;
+    final int threadPoolSize = 10;
     final int batchSize = 100;
 
     final Map<String, Integer> initIdx =
         Map.of("initialAcceptanceRatio", 0, "gamma", 0, "tMin", 0, "omegaMax", 0,
-            "maxImprovementPerTemperature", 0);
+            "maxImprovementPerTemperature", 0, "beta", 0);
     final CombinationSearcher combinationSearcher =
         new CombinationSearcher(input, initIdx, Double.POSITIVE_INFINITY, Integer.MAX_VALUE,
             threadPoolSize);
@@ -89,7 +91,7 @@ public final class OptimizeParameterV2 {
         for (Map.Entry<String, Map<String, Double>> entry : tasks.entrySet()) {
           final Map<String, Double> combination = entry.getValue();
           final Callable<Map<String, Double>> task =
-              new TSPCallable(problem, combination, numTries, true, entry.getKey());
+              new TSPCallable(problem, combination, numTries, false, entry.getKey());
           completionService.submit(task);
           totalTasksSubmitted++;
           activeTaskCounter++;
@@ -137,18 +139,20 @@ public final class OptimizeParameterV2 {
           }
 
           if ((bestScore - result.get("score") >= 1e-3 && !thresholdPassed) ||
-              (Math.abs(bestScore - result.get("score")) < 1e-3 &&
-                  minIter > result.get("iter") &&
-                  !thresholdPassed)) {
-            if (result.get("score") < goalScoreThreshold) {
-              thresholdPassed = true;
-            }
+              (bestScore - (result.get("score")) >= 1e-3 && thresholdPassed &&
+                  minIter > result.get("iter"))) {
 
             System.out.println(
                 '\t' + result.toString() + " t:" + goalScoreThreshold + " " + thresholdPassed);
-            bestScore = result.get("score");
+            if (!thresholdPassed) {
+              bestScore = result.get("score");
+            }
+
             minIter = result.get("iter");
 
+            if (result.get("score") < goalScoreThreshold) {
+              thresholdPassed = true;
+            }
 
           }
         } catch (InterruptedException | ExecutionException e) {

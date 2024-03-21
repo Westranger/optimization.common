@@ -14,9 +14,15 @@ public final class SampleStatistics<T> {
 
   public SampleStatistics(boolean doCollect) {
     this.doCollect = doCollect;
-    this.hist = new TreeMap<>();
-    this.dfFloat = new DecimalFormat("#.##");
-    this.dfInt = new DecimalFormat("#,###");
+    if (doCollect) {
+      this.hist = new TreeMap<>();
+      this.dfFloat = new DecimalFormat("#.##");
+      this.dfInt = new DecimalFormat("#,###");
+    } else {
+      this.hist = null;
+      this.dfFloat = null;
+      this.dfInt = null;
+    }
   }
 
   public void add(T key) {
