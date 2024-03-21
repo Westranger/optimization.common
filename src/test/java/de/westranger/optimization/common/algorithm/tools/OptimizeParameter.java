@@ -49,12 +49,12 @@ public final class OptimizeParameter {
         Arrays.asList(2.0, 5.0, 10.0, 25.0, 50.0, 100.0, 250.0, 500.0));
 
     final InputStreamReader reader = new InputStreamReader(
-        SimulatedAnnealingTest.class.getResourceAsStream("/tsp/1_vehicle_29_orders.json"));
-    //SimulatedAnnealingTest.class.getResourceAsStream("/tmp/vrp_problem_10_130_PDE.json"));
+        //SimulatedAnnealingTest.class.getResourceAsStream("/tsp/1_vehicle_29_orders.json"));
+    SimulatedAnnealingTest.class.getResourceAsStream("/tmp/vrp_problem_50_650_PDE.json"));
     final Gson gson = new Gson();
     final ProblemFormulation problem = gson.fromJson(reader, ProblemFormulation.class);
 
-    final double goalTolerance = 0.05; // percentile
+    final double goalTolerance = 0.0001; // percentile
     final double goalScoreThreshold = problem.getExpectedScore() * (1.0 + goalTolerance);
     boolean thresholdPassed = false;
 

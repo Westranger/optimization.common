@@ -154,7 +154,7 @@ public class CombinationSearcher {
       }
     }
 
-    System.out.println("generated new  set of params " + openIdxCandidates.size());
+    //System.out.println("generated new set of parameter combination : " + openIdxCandidates.size());
 
     return created;
   }

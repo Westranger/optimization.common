@@ -83,11 +83,18 @@ public final class SimulatedAnnealing<T extends Score> {
       currentTemps[j] = -sums[j] / Math.log(sap.initialAcceptanceRatio());
     }
 
+    double initialTemperature = currentTemps[0];
+    int mainloopIterationCounter = 1;
     // main loop
     while (currentTemps[0] >
         this.sap.tMin()) { // TODO das main loop wird über die temperatur der 1. dimension der score gestuert ... sollte man das ändern ?
       int improved = 0;
       int iterAtTemperature = 0;
+
+      double minAcceptanceProbability = Double.POSITIVE_INFINITY;
+      double maxAcceptanceProbability = Double.NEGATIVE_INFINITY;
+
+      boolean improvedHit = false;
 
       while (iterAtTemperature < sap.omegaMax()
           && improved <= sap.maxImprovementPerTemperature()) {
@@ -126,6 +133,9 @@ public final class SimulatedAnnealing<T extends Score> {
               - currentScore.getValue(dim)) / currentTemps[dim]);
           final double probability = Math.exp(ex);
 
+          minAcceptanceProbability = Math.min(minAcceptanceProbability, probability);
+          maxAcceptanceProbability = Math.max(maxAcceptanceProbability, probability);
+
           if (probability <= 1.0 && probability
               > this.rng.nextDouble()) {
             currentScore = candidateScore;
@@ -152,6 +162,7 @@ public final class SimulatedAnnealing<T extends Score> {
           }
         }
         iterAtTemperature++;
+        improvedHit = improved > sap.maxImprovementPerTemperature();
       }
 
       if (loggingEnabled) {
@@ -169,21 +180,30 @@ public final class SimulatedAnnealing<T extends Score> {
         sb.append(sap.gamma());
         sb.append(';');
         sb.append(improved);
+        sb.append(';');
+        sb.append(minAcceptanceProbability);
+        sb.append(';');
+        sb.append(maxAcceptanceProbability);
+
         System.out.println(sb.toString());
       }
 
-      for (int j = 0; j < currentTemps.length; j++) {
-        currentTemps[j] = computeTemperature(currentTemps[j]);
-        currentTemps[j] = Math.max(this.sap.tMin(), currentTemps[j]);
+      if (!improvedHit) {
+        for (int j = 0; j < currentTemps.length; j++) {
+          currentTemps[j] = computeTemperature(mainloopIterationCounter, initialTemperature,
+              TemperatureSchedule.geometric);
+          currentTemps[j] = Math.max(this.sap.tMin(), currentTemps[j]);
 
-        if (Double.isInfinite(currentTemps[j])) {
-          throw new IllegalStateException("the temperature is infinity");
+          if (Double.isInfinite(currentTemps[j])) {
+            throw new IllegalStateException("the temperature is infinity");
+          }
         }
       }
 
       if (bestScore.isInfinite()) {
         throw new IllegalStateException("the score is infinity");
       }
+      mainloopIterationCounter++;
     }
 
     if (this.telemetryFolder != null) {
@@ -201,8 +221,25 @@ public final class SimulatedAnnealing<T extends Score> {
     return totalIterationCounter;
   }
 
-  private double computeTemperature(double currentTemperature) {
-    return this.sap.gamma() * currentTemperature;
+  private double computeTemperature(int currentIteration,
+                                    double initialTemperature,
+                                    TemperatureSchedule schedule) {
+    switch (schedule) {
+      case linear -> {
+        return initialTemperature - currentIteration * this.sap.gamma();
+      }
+      case exponential -> {
+        return initialTemperature * Math.exp(-this.sap.gamma() * currentIteration);
+      }
+      case logarithmic -> {
+        return initialTemperature / (1.0 + this.sap.gamma() * Math.log(1.0 + currentIteration));
+      }
+    }
+    // geometric is default
+    return initialTemperature * Math.pow(this.sap.gamma(), currentIteration);
   }
 
+  public enum TemperatureSchedule {
+    linear, exponential, geometric, logarithmic
+  }
 }

@@ -44,6 +44,14 @@ public final class TSPInsertSubrouteMove extends TSPMove {
   protected VehicleRoute performMoveSingleVehicle(VehicleRoute vr) {
     final int firstIdx = rng.nextInt(vr.getRoute().size());
     final int secondIdx = computeSecondIdxSingleVehicle(vr.getRoute(), firstIdx);
+
+    /*
+    int subRouteLength = rng.nextInt(4) + 1;
+    int secondIdx = firstIdx + subRouteLength;
+    if (secondIdx >= vr.getRoute().size()) {
+      secondIdx = vr.getRoute().size() - 1;
+    }
+     */
     final int startIdx = Math.min(firstIdx, secondIdx);
     final int endIdx = Math.max(firstIdx, secondIdx);
     final int insertIdx = this.makeTwoOpt ? startIdx :
