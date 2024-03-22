@@ -121,20 +121,19 @@ public final class TSPNeighbourSelector implements NeighbourSelector {
       }
     }
 
-    if (vrl.get(0).getId() == 2 && vrl.size() == 2 && vrl.get(1).getId() == 3 //&&
-      /*vrl.get(0).getRoute().size() == 1*/) {
-      //System.out.println("got it");
-    }
-
     if (finalResult.isPresent()) {
       for (VehicleRoute vr : finalResult.get().vehicles()) {
         vehicles.put(vr.getId(), vr);
-        score += vr.getScore();
+        if (!vr.getRoute().isEmpty()) {
+          score += vr.getScore();
+        }
       }
     } else {
       for (VehicleRoute vr : vrl) {
         vehicles.put(vr.getId(), vr);
-        score += vr.getScore();
+        if (!vr.getRoute().isEmpty()) {
+          score += vr.getScore();
+        }
       }
     }
 

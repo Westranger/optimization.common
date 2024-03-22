@@ -33,7 +33,7 @@ public final class OptimizeParameterV2 {
 
     final LinkedHashMap<String, List<Double>> input = new LinkedHashMap<>();
 
-    final int numTries = 5;
+    final int numTries = 1;
 
     input.put("initialAcceptanceRatio", Arrays.asList(0.99, 0.95, 0.90, 0.8, 0.7, 0.6, 0.5, 0.4));
     input.put("gamma",
@@ -51,16 +51,16 @@ public final class OptimizeParameterV2 {
 
     final InputStreamReader reader = new InputStreamReader(
 
-        //SimulatedAnnealingTest.class.getResourceAsStream("/tsp/1_vehicle_129_orders.json"));
-        SimulatedAnnealingTest.class.getResourceAsStream("/vrp/50/vrp_problem_50_750____.json"));
+        SimulatedAnnealingTest.class.getResourceAsStream("/tsp/1_vehicle_194_orders.json"));
+        //SimulatedAnnealingTest.class.getResourceAsStream("/vrp/50/vrp_problem_50_750____.json"));
     final Gson gson = new Gson();
     final ProblemFormulation problem = gson.fromJson(reader, ProblemFormulation.class);
 
-    final double goalTolerance = 0.001; // percentile
+    final double goalTolerance = 0.000001; // percentile
     final double goalScoreThreshold = problem.getExpectedScore() * (1.0 + goalTolerance);
     boolean thresholdPassed = false;
 
-    final int threadPoolSize = 10;
+    final int threadPoolSize = 15;
     final int batchSize = 100;
 
     final Map<String, Integer> initIdx =
@@ -91,7 +91,7 @@ public final class OptimizeParameterV2 {
         for (Map.Entry<String, Map<String, Double>> entry : tasks.entrySet()) {
           final Map<String, Double> combination = entry.getValue();
           final Callable<Map<String, Double>> task =
-              new TSPCallable(problem, combination, numTries, false, entry.getKey());
+              new TSPCallable(problem, combination, numTries, true, entry.getKey());
           completionService.submit(task);
           totalTasksSubmitted++;
           activeTaskCounter++;
@@ -142,17 +142,20 @@ public final class OptimizeParameterV2 {
               (bestScore - (result.get("score")) >= 1e-3 && thresholdPassed &&
                   minIter > result.get("iter"))) {
 
-            System.out.println(
-                '\t' + result.toString() + " t:" + goalScoreThreshold + " " + thresholdPassed);
             if (!thresholdPassed) {
               bestScore = result.get("score");
             }
 
-            minIter = result.get("iter");
-
             if (result.get("score") < goalScoreThreshold) {
               thresholdPassed = true;
             }
+
+            System.out.println(
+                '\t' + result.toString() + " t:" + goalScoreThreshold + " " + thresholdPassed);
+
+            minIter = result.get("iter");
+
+
 
           }
         } catch (InterruptedException | ExecutionException e) {

@@ -6,7 +6,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -60,7 +59,7 @@ public final class SimulatedAnnealing<T extends Score> {
       }
     }
 
-    final int numDeltaValues = 500;
+    final int numDeltaValues = 100;
     // estimate initial temperature
     double[] sums = new double[bestScore.getDimensions()];
     for (int i = 0; i < numDeltaValues; i++) {
@@ -68,13 +67,13 @@ public final class SimulatedAnnealing<T extends Score> {
       final Score score = currentScore.difference(solution.getScore());
 
       for (int j = 0; j < sums.length; j++) {
-        sums[j] += Math.abs(currentScore.getValue(j) - score.getValue(j));
+        sums[j] += Math.abs(score.getValue(j));
       }
 
-      if (bestScore.compareTo(score) == -1) {
-        bestSolution = solution;
-        bestScore = solution.getScore();
-      }
+      //if (bestScore.compareTo(score) == -1) {
+      //  bestSolution = solution;
+      //  bestScore = solution.getScore();
+      //}
     }
 
     for (int j = 0; j < sums.length; j++) {
@@ -94,10 +93,8 @@ public final class SimulatedAnnealing<T extends Score> {
       int improved = 0;
       int iterAtTemperature = 0;
 
-      double minAcceptanceProbability = Double.POSITIVE_INFINITY;
-      double maxAcceptanceProbability = Double.NEGATIVE_INFINITY;
-
       List<Double> costValues = new LinkedList<>();
+      List<Double> probValues = new LinkedList<>();
       while (iterAtTemperature < sap.omegaMax()
           && improved <= sap.maxImprovementPerTemperature()) {
         this.totalIterationCounter++;
@@ -137,8 +134,11 @@ public final class SimulatedAnnealing<T extends Score> {
               - currentScore.getValue(dim)) / currentTemps[dim]);
           final double probability = Math.exp(ex);
 
-          minAcceptanceProbability = Math.min(minAcceptanceProbability, probability);
-          maxAcceptanceProbability = Math.max(maxAcceptanceProbability, probability);
+          probValues.add(probability);
+
+          if (Double.isNaN(ex)) {
+            System.out.println("WTF SCORE im SA loop NaN");
+          }
 
           if (probability <= 1.0 && probability
               > this.rng.nextDouble()) {
@@ -189,6 +189,19 @@ public final class SimulatedAnnealing<T extends Score> {
       costVariance /= count - 1;
       double maximumHeat = costVariance / currentTemps[0];
 
+      double probMean = 0.0;
+      for (double value : probValues) {
+        if (!Double.isNaN(value)) {
+          probMean += value;
+        }
+      }
+      probMean /= probValues.size();
+
+      double probVar = 0.0;
+      for (double value : probValues) {
+        probVar += (value - probMean) * (value - probMean);
+      }
+
       if (loggingEnabled) {
         final StringBuilder sb = new StringBuilder();
         sb.append(this.totalIterationCounter);
@@ -205,13 +218,13 @@ public final class SimulatedAnnealing<T extends Score> {
         sb.append(';');
         sb.append(improved);
         sb.append(';');
-        sb.append(minAcceptanceProbability);
-        sb.append(';');
-        sb.append(maxAcceptanceProbability);
-        sb.append(';');
         sb.append(costVariance);
         sb.append(';');
         sb.append(maximumHeat);
+        sb.append(';');
+        sb.append(probMean);
+        sb.append(';');
+        sb.append(probVar);
 
         System.out.println(sb.toString());
       }

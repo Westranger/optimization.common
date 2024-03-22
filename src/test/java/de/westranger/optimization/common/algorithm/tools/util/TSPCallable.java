@@ -7,8 +7,8 @@ import de.westranger.optimization.common.algorithm.action.planning.solver.stocha
 import de.westranger.optimization.common.algorithm.tsp.common.Order;
 import de.westranger.optimization.common.algorithm.tsp.common.ProblemFormulation;
 import de.westranger.optimization.common.algorithm.tsp.common.State;
-import de.westranger.optimization.common.algorithm.tsp.sa.route.RouteEvaluator;
 import de.westranger.optimization.common.algorithm.tsp.sa.TSPNeighbourSelector;
+import de.westranger.optimization.common.algorithm.tsp.sa.route.RouteEvaluator;
 import de.westranger.optimization.common.algorithm.tsp.sa.route.VehicleRoute;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -59,12 +59,18 @@ public final class TSPCallable implements Callable<Map<String, Double>> {
               this.param.get("initialAcceptanceRatio"), this.param.get("beta"));
       final SimulatedAnnealing sa = initializeSA(sap, seed);
       long start = System.currentTimeMillis();
-      final SearchSpaceState optimizedResult = sa.optimize(false);
-      long end = System.currentTimeMillis();
-      time += end - start;
+      try {
+        final SearchSpaceState optimizedResult = sa.optimize(false);
 
-      iter += sa.getTotalIterationCounter();
-      sum += optimizedResult.getScore().getValue(0);
+        long end = System.currentTimeMillis();
+        time += end - start;
+
+        iter += sa.getTotalIterationCounter();
+        sum += optimizedResult.getScore().getValue(0);
+
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
     }
 
     sum /= this.numTries;
@@ -98,10 +104,15 @@ public final class TSPCallable implements Callable<Map<String, Double>> {
       keys.add(entry.getKey());
     }
 
-    while (!orders.isEmpty()) {
-      int key = keys.get(rng.nextInt(keys.size()));
-      Order order = orders.remove(rng.nextInt(orders.size()));
-      orderMap.get(key).add(order);
+    if (keys.size() == 1) {
+      int key = keys.get(0);
+      orderMap.get(key).addAll(orders);
+    } else {
+      while (!orders.isEmpty()) {
+        int key = keys.get(rng.nextInt(keys.size()));
+        Order order = orders.remove(rng.nextInt(orders.size()));
+        orderMap.get(key).add(order);
+      }
     }
 
     for (Map.Entry<Integer, Point2D> entry : this.pf.getVehicleStartPositions().entrySet()) {

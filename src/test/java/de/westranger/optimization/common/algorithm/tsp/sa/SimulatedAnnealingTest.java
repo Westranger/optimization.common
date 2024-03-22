@@ -16,7 +16,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.stream.DoubleStream;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -43,7 +42,10 @@ public class SimulatedAnnealingTest {
     State initialState =
         new State(new ArrayList<>(), Map.of(1, vr), re);
     SimulatedAnnealingParameter sap =
-        new SimulatedAnnealingParameter(0, 0.01, 0.5, 100000, 100, 0.8, 0.8);
+        new SimulatedAnnealingParameter(0, 0.1, 0.5, 25000, 500, 0.7, 0.97);
+
+    // {avg_score=9353.517538525306, beta=0.97, gamma=0.5, initialAcceptanceRatio=0.7, iter=9725000.0, maxImprovementPerTemperature=500.0, omegaMax=25000.0, param_id#4_3_11_7_4_7=0.0, score=9353.517538525306, tMin=0.01, time=390936.0} t:9353.6874335299 true
+
 
     TSPNeighbourSelector ns = new TSPNeighbourSelector(sap.tMax(), sap.tMin(), seed, true);
 
@@ -51,8 +53,9 @@ public class SimulatedAnnealingTest {
 
     SearchSpaceState optimizedState = sa.optimize(true);
 
-    Assertions.assertEquals(9353.678079851821*1.00029882, optimizedState.getScore().getValue(0), 1e-4);
-    Assertions.assertEquals(7443568, sa.getTotalIterationCounter());
+    Assertions.assertEquals(9353.517538504946,
+        optimizedState.getScore().getValue(0), 1e-4);
+    Assertions.assertEquals(7825000, sa.getTotalIterationCounter());
   }
 
   /*
@@ -83,7 +86,7 @@ public class SimulatedAnnealingTest {
         new State(new ArrayList<>(), Map.of(1, vr), re);
 
     SimulatedAnnealingParameter sap =
-        new SimulatedAnnealingParameter(0, 1.0E-5, 0.2, 500, 2, 0.95, 0.2);
+        new SimulatedAnnealingParameter(0, 1.0E-5, 0.2, 100, 5, 0.99, 0.2);
 
     TSPNeighbourSelector ns = new TSPNeighbourSelector(sap.tMax(), sap.tMin(), seed, true);
 
@@ -92,7 +95,7 @@ public class SimulatedAnnealingTest {
     SearchSpaceState optimizedState = sa.optimize(true);
 
     Assertions.assertEquals(27601.173774493753, optimizedState.getScore().getValue(0), 1e-3);
-    Assertions.assertEquals(1318, sa.getTotalIterationCounter());
+    Assertions.assertEquals(1122, sa.getTotalIterationCounter());
   }
 
 }

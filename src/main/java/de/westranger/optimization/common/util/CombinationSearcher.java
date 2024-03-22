@@ -39,15 +39,12 @@ public class CombinationSearcher {
       final double diffScore = this.score - o.getScore();
       if (diffScore > 1e-6) {
         return 1;
-      } else if (Math.abs(diffScore) <= 1e-6) {
-        final int diffIter = this.iter - o.getIter();
-        if (diffIter > 0) {
-          return 1;
-        } else if (diffIter == 0) {
-          return 0;
-        }
+      } else if (diffScore < -1e-6) {
+        return -1;
       }
-      return -1;
+
+      // Wenn die Scores gleich sind, vergleiche die iter-Werte
+      return Integer.compare(this.iter, o.getIter());
     }
 
     @Override

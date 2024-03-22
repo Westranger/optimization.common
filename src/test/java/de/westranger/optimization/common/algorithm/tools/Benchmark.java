@@ -28,8 +28,8 @@ import org.junit.jupiter.api.Assertions;
 public class Benchmark {
   public static void main(String[] args) {
     final InputStreamReader reader = new InputStreamReader(
-        //SimulatedAnnealingTest.class.getResourceAsStream("/tsp/1_vehicle_194_orders.json"));
-        SimulatedAnnealingTest.class.getResourceAsStream("/vrp/25/vrp_problem_25_375____.json"));
+        SimulatedAnnealingTest.class.getResourceAsStream("/tsp/1_vehicle_194_orders.json"));
+        //SimulatedAnnealingTest.class.getResourceAsStream("/vrp/50/vrp_problem_50_150____.json"));
     final Gson gson = new Gson();
     final ProblemFormulation problem = gson.fromJson(reader, ProblemFormulation.class);
     final long seed = 47110815L;
@@ -66,7 +66,7 @@ public class Benchmark {
 
 
     SimulatedAnnealingParameter sap =
-        new SimulatedAnnealingParameter(0, 1.0E-4, 0.3, 10000, 500, 0.7, 0.7);
+        new SimulatedAnnealingParameter(0, 1.0, 0.6, 250000, 250, 0.6, 0.8);
     //{avg_score=92.87750632113925, gamma=0.96, initialAcceptanceRatio=0.95, iter=9453434.0, maxImprovementPerTemperature=2.0, omegaMax=25000.0, score=92.87750632113925, tMax=0.0, tMin=0.001}//
     TSPNeighbourSelector ns = new TSPNeighbourSelector(sap.tMax(), sap.tMin(), seed, false);
 
